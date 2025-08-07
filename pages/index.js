@@ -152,7 +152,7 @@ export default function Home() {
 
     {/* Right Image - Circular */}
 <div className="flex justify-center lg:justify-end">
-  <div className="overflow-hidden w-[450px] h-[550px]">
+  <div className="overflow-hidden w-full max-w-[450px] h-[300px] sm:h-[400px] lg:h-[550px]">
     <Image 
       src="/images/img2.png"
       alt="Happy couple embracing"
