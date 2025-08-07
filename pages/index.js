@@ -1,115 +1,306 @@
-import Image from "next/image";
-import { Geist, Geist_Mono } from "next/font/google";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+'use client';
+import { useState, useEffect } from 'react';
+import { ChevronRight } from 'lucide-react';
+import Navbar from '../components/Navbar';
+import Footer from '@/components/Footer';
+import Image from 'next/image';
 
 export default function Home() {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
+
   return (
-    <div
-      className={`${geistSans.className} ${geistMono.className} font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20`}
-    >
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              pages/index.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="min-h-screen bg-white">
+    
+       {/* Top notification bar */}
+      <div className="bg-gray-800 text-white text-center py-2 text-sm">
+        <span>Check the live streaming! Wednesday July 15th / 7:30 PM EST | </span>
+        <span className="text-blue-300 cursor-pointer">YouTube ➤</span>
+      </div>
+      
+      {/* Hero Section */}
+      <section className="relative h-screen flex items-center justify-center overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+         
+          <Image 
+            src="/images/img.png"
+            alt="People in conversation"
+            className="w-full h-full object-cover"
+            style={{ filter: 'blur(8px)' }}
+            fill
+          />
+          {/* Overlay Image with More Blur and Darkness */}
+          <Image
+            src="/images/f.png"
+            alt="Overlay"
+            className="w-full h-full object-cover absolute inset-0 pointer-events-none"
+            style={{
+              zIndex: 1,
+              filter: 'blur(16px) brightness(0.7)', 
+            }}
+            fill
+          />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        
+        {/* Hero Content */}
+        <div className={`relative z-10 text-center text-white px-4 max-w-4xl mx-auto transform transition-all duration-1000 ${
+          isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
+        }`}>
+          <h1 className="text-xl md:text-3xl lg:text-4xl font-bold mb-6 leading-tight">
+            Your Gateway to Wellness and Discovery
+          </h1>
+          <p className="text-sm md:text-lg lg:text-xl mb-8 font-light max-w-3xl mx-auto">
+            Explore personalized resources, evidence-based content,<br />
+            and a trusted community of like-minded people.
+          </p>
+          <button className="bg-[#8EAFF633] hover:bg-[#8EAFF633] text-white px-8 py-4 rounded-4xl text-lg  font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2 mx-auto">
+            <span>Get Started</span>
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
+      </section>
+
+      {/* Content Section */}
+      <section className="py-6 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Ginger Image */}
+<div className="flex items-center overflow-hidden lg:overflow-visible">
+  <Image 
+    src="/images/ginger.png"
+    alt="Natural ginger root"
+    className="h-[300px] sm:h-[400px] lg:h-[600px] w-full lg:w-[120vw] lg:max-w-none object-cover lg:-ml-[10vw] lg:transform lg:-translate-x-12"
+    style={{ objectPosition: 'left' }}
+    width={800}
+    height={600}
+  />
+</div>
+
+            {/* Content Card */}
+            <div className="relative">
+              <div
+                className="rounded-3xl p-8 lg:p-12 shadow-2xl border border-[#8EAFF680] transform transition-all duration-500 hover:shadow-3xl hover:-translate-y-2"
+                style={{
+                  background: 'linear-gradient(180deg, #ffffff 0%, #ffffff 10%, #8CABFF 100%)',
+                 
+                }}
+              >
+                <div className="relative">
+                  {/* Cursor Animation */}
+                  {/* <div className="absolute -top-4 -right-4 w-12 h-12 opacity-70">
+                    <div className="w-6 h-6 bg-gray-800 rounded-full animate-pulse"></div>
+                    <div className="absolute top-0 left-6 w-4 h-8 bg-gray-800 rounded-sm animate-pulse"></div>
+                  </div> */}
+                  <div className="mb-4">
+                    <span className="inline-block text-[#2E2E2E] text-sm font-semibold px-4 py-2 rounded-full">
+                      Natural Wellness
+                    </span>
+                  </div>
+                  <h2 className="text-3xl lg:text-4xl font-bold text-[#2E2E2E] mb-6">
+                    Discover the<br />
+                    Shroom Menu
+                  </h2>
+                  <p className="text-[#2E2E2E] text-lg mb-8 leading-relaxed">
+                   Browse our full range of therapeutic products,<br /> monthly box offerings, and exclusive deals.<br /> Start your journey here.
+                   
+                  </p>
+                  <button className="bg-[#2E2E2E] hover:bg-gray-800 text-white px-8 py-3    rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2">
+                    <span>Browser Menu</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    
+      
+
+     
+    <section className="py-20 px-4 ">
+      
+        <div className="max-w-7xl mx-auto">
+          
+       <div className="relative mb-20">
+  {/* Center Background Image */}
+  <div className="absolute inset-0 z-0 flex justify-center items-center pointer-events-none">
+    <div className="w-full h-full bg-[url('/images/over.png')] bg-no-repeat bg-center bg-contain"></div>
+  </div>
+
+  {/* Main Grid Content */}
+  <div className="relative z-10 grid lg:grid-cols-2 gap-12 items-center">
+    
+    {/* Left Content */}
+    <div>
+      <h2 className="text-3xl lg:text-4xl font-bold text-[#2E2E2E] mb-6 leading-tight">
+        Explore Resources to Support<br />
+        Your Wellness
+      </h2>
+      <p className="text-lg text-[#2E2E2E] mb-8 leading-relaxed">
+        Dive into audios, guides, videos, and more— <br /> curated to help you learn, grow, and thrive.
+      </p>
+      <button className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2">
+        <span>Access The Resource Centre</span>
+        <ChevronRight className="w-5 h-5" />
+      </button>
+    </div>
+
+    {/* Right Image - Circular */}
+<div className="flex justify-center lg:justify-end">
+  <div className="overflow-hidden w-[450px] h-[550px]">
+    <Image 
+      src="/images/img2.png"
+      alt="Happy couple embracing"
+      className="w-full h-full object-contain"
+      width={1200}
+      height={1500}
+    />
+  </div>
+</div>
+
+
+
+  </div>
+</div>
+
+
+          {/* Second Row */}
+          <div className="grid lg:grid-cols-2 gap-12 items-center mb-20">
+            {/* Left Image - Rounded Rectangle */}
+            <div className="order-2 lg:order-1">
+              <div className="relative">
+                <Image 
+                  src="/images/img3.png"
+                  alt="Wellness products and tools"
+                  className="w-full object-cover transform transition-all duration-500 hover:scale-105"
+                  width={600}
+                  height={400}
+                />
+              </div>
+            </div>
+
+            {/* Right Content */}
+            <div className="order-1 lg:order-2">
+              <div
+                className="bg-blue-50 rounded-4xl p-8 lg:p-10 relative"
+                style={{
+                  background: 'linear-gradient(180deg, #ffffff 0%, #ffffff 10%, #8CABFF 100%)',
+                }}
+              >
+                {/* Badge */}
+                <div className="absolute -top-10 -right-1">
+                <Image src='/images/offer.png' alt="Special offer badge" width={150} height={150} />
+                </div>
+                
+                <div className="mb-4">
+                  <span className="text-sm text-gray-600 font-medium">Elevate Your Membership</span>
+                </div>
+                
+                <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
+                  Enhance Your<br />
+                  Membership
+                </h3>
+                
+                <p className="text-gray-600 text-lg mb-8 leading-relaxed">
+                  Unlock premium features, exclusive content,<br />
+                  advanced search, unlimited rewards, and more.
+                </p>
+                
+                <button className="bg-[#2E2E2E] hover:bg-[#2E2E2E] text-white px-8 py-4 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105">
+                  Upgrade My Membership 
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Third Row */}
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left Content */}
+            <div>
+              <div className="mb-4">
+                <span className="text-sm text-gray-600 font-medium">Earn $15 For Each Stamp and Save up to $135 </span>
+              </div>
+              
+              <h3 className="text-3xl lg:text-4xl font-extrabold text-gray-900 mb-6">
+                Earn And Track Rewards<br />
+                As You Grow
+              </h3>
+              
+              <p className="text-gray-600 text-lg mb-8 leading-relaxed">
+                Collect points through engagement, participation,<br />
+                sharing content, or contributing to our community.<br />
+                Track your rewards and redeem points.
+              </p>
+              
+              <button className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2">
+                <span>Get Rewards</span>
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Right Image - Rewards Grid */}
+            <div className="flex justify-center lg:justify-end">
+             <Image src='/images/star.png' alt="Rewards star graphic" width={400} height={400} />
+            </div>
+          </div>
+        </div>
+      </section>
+
+       <section className="py-20 px-4 ">
+        <div className="max-w-7xl mx-auto">
+          {/* Feedback Card */}
+          <div
+  className="rounded-3xl p-12 mb-16 border-[#8EAFF6] border-1 relative overflow-hidden"
+  style={{
+                  background: 'linear-gradient(180deg, #ffffff 0%, #ffffff 10%, #8CABFF 100%)',
+                }}
+>
+  {/* Decorative Chat Bubbles */}
+  <Image src='/images/feed.png' alt="Feedback decoration" className="absolute top-4 left-10 w-32 h-40 opacity-50" width={128} height={160} />
+            {/* <div className="absolute top-12 right-12 w-10 h-6 bg-blue-300 rounded-lg opacity-40"></div> */}
+            <Image src='/images/feed.png' alt="Feedback decoration" style={{ transform: 'scaleX(-1)' }} className="absolute bottom-12 left-32 w-20 h-20 rounded-lg opacity-50" width={80} height={80} />
+            <Image src='/images/feed.png' alt="Feedback decoration" className="absolute bottom-8 right-8 w-32 h-40 opacity-60" width={128} height={160} />
+            <Image src='/images/feed.png' alt="Feedback decoration" className="absolute top-6 right-14 w-20 h-20 rounded opacity-30" style={{ transform: 'scaleX(-1)' }} width={80} height={80} />
+            <div className="absolute bottom-20 left-32 w-10 h-6  rounded-lg opacity-40"></div>
+            
+            <div className="text-center relative z-10">
+              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
+                Your Feedback Fuels The Community
+              </h2>
+              <p className="text-gray-600 text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
+                Tell us about your experience with the products you&apos;ve tried.<br />
+                Your insights help others make better choices—and you&apos;ll earn rewards for every shared experience.
+              </p>
+              <button className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2 mx-auto">
+                <span>Share Your Product Experience</span>
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Community Story Section */}
+          <div className="text-center">
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
+              Inspire The Community With Your Story
+            </h2>
+            <p className="text-gray-600 text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
+              Your journey matters. Share how mushrooms and wellness products have transformed your life, and<br />
+              inspire others to explore their own path. Earn rewards for contributing to our shared journey.
+            </p>
+            <button className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2 mx-auto">
+              <span>Share Your Wellness Journey</span>
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      </section>
+
+
     </div>
   );
 }
