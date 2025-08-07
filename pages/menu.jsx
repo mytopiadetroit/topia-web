@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { useRouter } from 'next/router';
 
 const Menu = () => {
+  const router = useRouter();
   const [categoryOpen, setCategoryOpen] = useState(true);
   const [primaryUseOpen, setPrimaryUseOpen] = useState(true);
   
@@ -180,8 +182,9 @@ const Menu = () => {
               {products.map((product) => (
                 <div
                   key={product.id}
-                  className="relative rounded-4xl border border-gray-200 hover:shadow-md transition-shadow"
+                  className="relative rounded-4xl border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
                   style={{ backgroundColor: '#8EAFF633' }}
+                  onClick={() => product.hasStock && router.push(`/productdetails?id=${product.id}`)}
                 >
                   {/* Product Image with Coming Soon overlay inside */}
                   <div className="w-full h-64 bg-gray-100 rounded-t-4xl overflow-hidden relative">
@@ -232,7 +235,8 @@ const Menu = () => {
                               : 'bg-slate-400 text-white cursor-not-allowed'
                           }`}
                           disabled={!product.hasStock}
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent card click event
                             if (product.hasStock) {
                               alert(`Added ${product.name} to cart!`);
                             }

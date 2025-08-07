@@ -1,12 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Heart } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 
 export default function ProductDetails() {
   const [quantity, setQuantity] = useState(1);
+  const router = useRouter();
+  const { id } = router.query;
 
-  // Product data
-  const product = {
+  // This would typically come from an API call using the ID
+  // For now, we'll use static data but in a real app you would fetch based on ID
+  const [product, setProduct] = useState({
     id: 1,
     name: "Lion's Mane Capsules",
     price: 50.00,
@@ -16,7 +20,19 @@ export default function ProductDetails() {
       details: "Each capsule delivers a potent dual extract for maximum bioavailability—no fillers, no fluff, just pure mushroom power. Whether you're studying, working, or simply staying sharp, Lion's Mane helps you stay mentally agile and balanced throughout the day."
     },
     tags: ['Connection', 'Insight', 'Euphoric', 'Creative']
-  };
+  });
+  
+  useEffect(() => {
+    // In a real application, you would fetch product data based on the ID
+    // For example: fetchProductById(id).then(data => setProduct(data));
+    
+    // For this demo, we're just using static data
+    // You could add more products and select based on ID
+    if (id) {
+      console.log(`Fetching product with ID: ${id}`);
+      // This is where you would make an API call in a real app
+    }
+  }, [id]);
 
   // User ratings data
   const ratings = {
