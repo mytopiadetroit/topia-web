@@ -74,13 +74,13 @@ export default function Navbar() {
               </a>
               <div className="relative" ref={profileRef}>
                 <div 
-                  className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center cursor-pointer"
+                  className="flex items-center space-x-1 cursor-pointer"
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
                 >
-                  <div className="flex items-center">
+                  <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
                     <User className="w-5 h-5 text-gray-600" />
-                    <ChevronDown className="w-3 h-3 text-gray-600 ml-1" />
                   </div>
+                  <ChevronDown className="w-3 h-3 text-gray-600" />
                 </div>
                 
                 {/* Profile Dropdown */}
