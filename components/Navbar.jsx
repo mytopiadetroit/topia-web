@@ -25,7 +25,7 @@ export default function Navbar() {
             {/* Desktop Navigation */}
          <div className="hidden md:block rounded-4xl bg-[url('/images/navbar.png')] bg-cover bg-center">
               <div className="ml-10 flex items-baseline space-x-8">
-                <a href="#" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium">Menu</a>
+                <a href="/menu" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium">Menu</a>
                 <a href="#" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium">Resource Centre</a>
                 <a href="#" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium">Join GAG</a>
                 <a href="#" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium">My Experiences</a>
@@ -59,7 +59,7 @@ export default function Navbar() {
           {isMenuOpen && (
             <div className="md:hidden">
               <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
-                <a href="#" className="text-gray-900 hover:text-blue-600 block px-3 py-2 text-base font-medium">Menu</a>
+                <a href="/menu" className="text-gray-900 hover:text-blue-600 block px-3 py-2 text-base font-medium">Menu</a>
                 <a href="#" className="text-gray-900 hover:text-blue-600 block px-3 py-2 text-base font-medium">Resource Centre</a>
                 <a href="#" className="text-gray-900 hover:text-blue-600 block px-3 py-2 text-base font-medium">Join GAG</a>
                 <a href="#" className="text-gray-900 hover:text-blue-600 block px-3 py-2 text-base font-medium">My Experiences</a>
