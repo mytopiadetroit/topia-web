@@ -68,9 +68,9 @@ function App() {
                 <span>Copyright</span>
               </div>
               <div className="flex flex-wrap items-center space-x-6 text-sm">
-                <a href="#" className="hover:text-gray-200 transition-colors opacity-80">Terms of Use</a>
+                <a href="/terms" className="hover:text-gray-200 transition-colors opacity-80">Terms of Use</a>
                 <span className="opacity-60">|</span>
-                <a href="#" className="hover:text-gray-200 transition-colors opacity-80">Privacy Policy</a>
+                <a href="/privacypolicy" className="hover:text-gray-200 transition-colors opacity-80">Privacy Policy</a>
                 <span className="opacity-60">|</span>
                 <a href="#" className="hover:text-gray-200 transition-colors opacity-80">Cookie Policy</a>
               </div>

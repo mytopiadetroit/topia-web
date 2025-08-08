@@ -1,4 +1,4 @@
-import { Check } from 'lucide-react';
+import { Check, ChevronLeft } from 'lucide-react';
 
 export default function OrderConfirm() {
   // Order data
@@ -48,6 +48,12 @@ export default function OrderConfirm() {
           {/* Sub-text */}
           <p className="text-lg text-gray-700">Thank you for your order!</p>
         </div>
+  <div className="flex justify-end mt-4 mb-8">
+  <button onClick={() => window.location.href = '/menu'} className="flex items-center gap-1 text-gray-600 hover:text-gray-800 transition-colors">
+    <ChevronLeft className="w-4 h-4" />
+    <span>Back to Menu</span>
+  </button>
+</div>
 
         {/* Order Details Card */}
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">

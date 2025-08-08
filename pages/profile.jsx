@@ -1,7 +1,66 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Edit, FileText } from 'lucide-react';
+import { Api } from '../services/service';
+import { useRouter } from 'next/router';
 
 const Profile = () => {
+  const router = useRouter();
+  const [profile, setProfile] = useState({
+    fullName: '',
+    phone: '',
+    email: '',
+    birthday: { day: '', month: '', year: '' },
+    documentStatus: 'Processing'
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        // Get token from localStorage
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          setError('You need to login first');
+          setLoading(false);
+          return;
+        }
+
+        // Using Api helper function from service.js
+        const response = await Api('get', 'auth/profile', null, router);
+
+        if (response.success) {
+          setProfile({
+            fullName: response.user.fullName || '',
+            phone: response.user.phone || '',
+            email: response.user.email || '',
+            birthday: response.user.birthday || { day: '', month: '', year: '' },
+            documentStatus: 'Processing' // This is static as per requirements
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching profile:', err);
+        setError('Failed to load profile data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  // Format birthday for display
+  const formatBirthday = () => {
+    if (!profile.birthday) return '';
+    const { day, month, year } = profile.birthday;
+    if (!day || !month || !year) return '';
+    return `${day}-${month}-${year}`;
+  };
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  if (error) return <div className="min-h-screen flex items-center justify-center text-red-500">{error}</div>;
+
   return (
     <div className="min-h-screen p-4 md:p-6 lg:p-8 bg-gradient-to-b from-white to-blue-100">
       <div className="max-w-7xl mx-auto">
@@ -37,19 +96,19 @@ const Profile = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1">Name</label>
-                  <p className="text-gray-900">Amy</p>
+                  <p className="text-gray-900">{profile.fullName}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1">Phone Number</label>
-                  <p className="text-gray-900">(+1) 555 5555</p>
+                  <p className="text-gray-900">{profile.phone}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1">Email</label>
-                  <p className="text-gray-900">example@email.com</p>
+                  <p className="text-gray-900">{profile.email}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1">Date of Birth</label>
-                  <p className="text-gray-900">01-01-1990</p>
+                  <p className="text-gray-900">{formatBirthday()}</p>
                 </div>
               </div>
             </div>

@@ -1,11 +1,18 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { Menu, X, User, ChevronDown, ShoppingCart } from 'lucide-react';
+import { Menu, X, User, ChevronDown, ShoppingCart, LogOut } from 'lucide-react';
+import { useRouter } from 'next/router';
+import { useUser } from '../context/UserContext';
+import { useApp } from '../context/AppContext';
 
 export default function Navbar() {
+  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [cartItemCount, setCartItemCount] = useState(0);
+  
+  // Use context hooks
+  const { user, isLoggedIn, logout } = useUser();
+  const { cartCount } = useApp();
   
   // Create a ref for the profile dropdown
   const profileRef = useRef(null);
@@ -22,13 +29,6 @@ export default function Navbar() {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
-  
-  // Simulate cart items count - in a real app, this would come from a cart context or API
-  useEffect(() => {
-    // This is just a placeholder. In a real application, you would fetch the cart data
-    // from an API or use a state management solution like Redux or Context API
-    setCartItemCount(3); // Example: 3 items in cart
   }, []);
 
   return (
@@ -66,25 +66,29 @@ export default function Navbar() {
                 <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center cursor-pointer">
                   <ShoppingCart className="w-5 h-5 text-gray-600" />
                 </div>
-                {cartItemCount > 0 && (
+                {cartCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                    {cartItemCount}
+                    {cartCount}
                   </span>
                 )}
               </a>
               <div className="relative" ref={profileRef}>
                 <div 
                   className="flex items-center space-x-1 cursor-pointer"
-                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  onClick={() => isLoggedIn ? setIsProfileOpen(!isProfileOpen) : router.push('/auth/login')}
                 >
-                  <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                    <User className="w-5 h-5 text-gray-600" />
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
+                    {isLoggedIn ? (
+                      <img src={user?.avatar || "/images/avatar.png"} alt="Profile" className="w-full h-full object-cover" />
+                    ) : (
+                      <User className="w-5 h-5 text-gray-600" />
+                    )}
                   </div>
-                  <ChevronDown className="w-3 h-3 text-gray-600" />
+                  {isLoggedIn && <ChevronDown className="w-3 h-3 text-gray-600" />}
                 </div>
                 
                 {/* Profile Dropdown */}
-                {isProfileOpen && (
+                {isLoggedIn && isProfileOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
                     <a href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                       My Profile
@@ -92,6 +96,18 @@ export default function Navbar() {
                     <a href="/myorders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                       My Orders
                     </a>
+                    <button 
+                      onClick={() => {
+                        logout();
+                        setIsProfileOpen(false);
+                      }} 
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      <div className="flex items-center">
+                        <LogOut className="w-4 h-4 mr-2" />
+                        Logout
+                      </div>
+                    </button>
                   </div>
                 )}
               </div>
@@ -120,9 +136,9 @@ export default function Navbar() {
                 <a href="/cart" className="text-gray-900 hover:text-blue-600 block px-3 py-2 text-base font-medium flex items-center">
                   <ShoppingCart className="w-5 h-5 mr-2" />
                   Cart
-                  {cartItemCount > 0 && (
+                  {cartCount > 0 && (
                     <span className="ml-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                      {cartItemCount}
+                      {cartCount}
                     </span>
                   )}
                 </a>
@@ -131,13 +147,35 @@ export default function Navbar() {
                 <a href="#" className="text-gray-900 hover:text-blue-600 block px-3 py-2 text-base font-medium">My Experiences</a>
                 <a href="#" className="text-gray-900 hover:text-blue-600 block px-3 py-2 text-base font-medium">My Rewards</a>
                 <div className="border-t border-gray-200 mt-2 pt-2">
-                  <a href="/profile" className="text-gray-900 hover:text-blue-600 block px-3 py-2 text-base font-medium flex items-center">
-                    <User className="w-5 h-5 mr-2" />
-                    My Profile
-                  </a>
-                  <a href="/myorders" className="text-gray-900 hover:text-blue-600 block px-3 py-2 text-base font-medium">
-                    My Orders
-                  </a>
+                  {isLoggedIn ? (
+                    <>
+                      <a href="/profile" className="text-gray-900 hover:text-blue-600 block px-3 py-2 text-base font-medium flex items-center">
+                        <User className="w-5 h-5 mr-2" />
+                        My Profile
+                      </a>
+                      <a href="/myorders" className="text-gray-900 hover:text-blue-600 block px-3 py-2 text-base font-medium">
+                        My Orders
+                      </a>
+                      <button 
+                        onClick={() => {
+                          logout();
+                          setIsMenuOpen(false);
+                        }} 
+                        className="text-gray-900 hover:text-blue-600 block w-full text-left px-3 py-2 text-base font-medium flex items-center"
+                      >
+                        <LogOut className="w-5 h-5 mr-2" />
+                        Logout
+                      </button>
+                    </>
+                  ) : (
+                    <a 
+                      href="/auth/login" 
+                      className="text-gray-900 hover:text-blue-600 block px-3 py-2 text-base font-medium flex items-center"
+                    >
+                      <User className="w-5 h-5 mr-2" />
+                      Login
+                    </a>
+                  )}
                 </div>
               </div>
             </div>

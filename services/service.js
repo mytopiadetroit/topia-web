@@ -1,6 +1,6 @@
 import axios from "axios";
-      // const ConstantsUrl = "http://localhost:5000/api/";
-      const ConstantsUrl = "https://api.mypsyguide.io/";
+      //  const ConstantsUrl = "http://localhost:5000/api/";
+       const ConstantsUrl = "https://api.mypsyguide.io/";
 
 // export const ConstantsUrl = "";
  
@@ -22,10 +22,10 @@ axios.interceptors.response.use(
         window.dispatchEvent(new Event('storage'));
         document.dispatchEvent(new Event('auth-state-changed'));
         
-        if (window.router && !window.router.pathname.includes("signIn")) {
-          window.router.push("/auth/signIn");
+        if (window.router && !window.router.pathname.includes("login")) {
+          window.router.push("/auth/login");
         } else {
-          window.location.href = "/auth/signIn";
+          window.location.href = "/auth/login";
         }
         
         setTimeout(() => {
@@ -65,8 +65,8 @@ const handleTokenExpiration = (router) => {
     notifyAuthChange();
     
     // Navigate to login page if not already there
-    if (router && !router.pathname.includes("signIn")) {
-      router.push("/auth/signIn");
+    if (router && !router.pathname.includes("login")) {
+      router.push("/auth/login");
     }
     
     setTimeout(() => {

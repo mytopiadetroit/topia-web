@@ -3,6 +3,8 @@ import { ChevronDown } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { Api } from '../../services/service';
 import Link from 'next/link';
+import { toast } from 'react-toastify';
+import { useUser } from '../../context/UserContext';
 
 const Login = () => {
   const router = useRouter();
@@ -11,6 +13,9 @@ const Login = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  // Use the user context
+  const { login } = useUser();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -32,22 +37,41 @@ const Login = () => {
       setLoading(true);
       setError('');
       
+      // Format phone number to ensure it has +91 prefix
+      const formattedPhone = formData.phone.startsWith('+91') ? formData.phone : `+91${formData.phone}`;
+      
       const response = await Api('post', 'auth/login', {
-        phone: formData.phone.startsWith('+91') ? formData.phone : `+91${formData.phone}`
+        phone: formattedPhone
       }, router);
       
       if (response.success) {
-        // Store user data and token in localStorage
-        localStorage.setItem('userDetail', JSON.stringify(response.user));
-        localStorage.setItem('token', response.token);
+        // Store user data and token in localStorage only (not using UserContext login yet)
+        if (response.user && response.token) {
+          localStorage.setItem('userDetail', JSON.stringify(response.user));
+          localStorage.setItem('token', response.token);
+        }
         
-        // Redirect to OTP verification page or dashboard based on your flow
+        // Show success toast message
+        toast.success('OTP has been sent! Please enter your OTP.', {
+          className: 'toast-success-container',
+          bodyClassName: 'toast-success-body'
+        });
+        
+        // Redirect to OTP verification page
         router.push('/auth/otp');
       } else {
+        toast.error(response.message || 'Login failed. Please try again.', {
+          className: 'toast-error-container',
+          bodyClassName: 'toast-error-body'
+        });
         setError(response.message || 'Login failed. Please try again.');
       }
     } catch (err) {
       console.error('Login error:', err);
+      toast.error('An error occurred during login. Please try again.', {
+        className: 'toast-error-container',
+        bodyClassName: 'toast-error-body'
+      });
       setError(err.message || 'Something went wrong. Please try again.');
     } finally {
       setLoading(false);

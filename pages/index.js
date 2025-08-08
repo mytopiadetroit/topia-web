@@ -4,9 +4,15 @@ import { ChevronRight } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '@/components/Footer';
 import Image from 'next/image';
+import { useUser } from '../context/UserContext';
+import { useApp } from '../context/AppContext';
+import { useRouter } from 'next/router';
 
 export default function Home() {
   const [isVisible, setIsVisible] = useState(false);
+  const { isLoggedIn, user } = useUser();
+  const { darkMode, toggleDarkMode } = useApp();
+  const router = useRouter();
 
   useEffect(() => {
     setIsVisible(true);
@@ -67,7 +73,10 @@ export default function Home() {
       {/* Content Section */}
       <section className="py-6 px-4">
         <div className="max-w-6xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid relative lg:grid-cols-2 gap-12 items-center">
+             <div className="absolute inset-0 z-0 flex justify-center items-center pointer-events-none">
+    <div className="w-full h-full bg-[url('/images/over.png')] bg-no-repeat bg-center bg-contain"></div>
+  </div>
             {/* Ginger Image */}
 <div className="flex items-center overflow-hidden lg:overflow-visible">
   <Image 
@@ -83,9 +92,9 @@ export default function Home() {
             {/* Content Card */}
             <div className="relative">
               <div
-                className="rounded-3xl p-8 lg:p-12 shadow-2xl border border-[#8EAFF680] transform transition-all duration-500 hover:shadow-3xl hover:-translate-y-2"
+                className="rounded-3xl p-8 lg:p-12   transform transition-all duration-500 hover:-translate-y-2"
                 style={{
-                  background: 'linear-gradient(180deg, #ffffff 0%, #ffffff 10%, #8CABFF 100%)',
+                 
                  
                 }}
               >
@@ -170,10 +179,15 @@ export default function Home() {
 
 
           {/* Second Row */}
-          <div className="grid lg:grid-cols-2 gap-12 items-center mb-20">
+          <div className="grid relative lg:grid-cols-2 gap-12 items-center mb-20">
+              <div className="absolute inset-0 z-0 flex justify-center items-center pointer-events-none">
+    <div className="w-full h-full bg-[url('/images/over.png')] bg-no-repeat bg-center bg-contain"></div>
+  </div>
             {/* Left Image - Rounded Rectangle */}
-            <div className="order-2 lg:order-1">
+            <div className="order-2  lg:order-1">
+              
               <div className="relative">
+                
                 <Image 
                   src="/images/img3.png"
                   alt="Wellness products and tools"
@@ -182,16 +196,20 @@ export default function Home() {
                   height={400}
                 />
               </div>
+                     
             </div>
+   
 
             {/* Right Content */}
-            <div className="order-1 lg:order-2">
+            <div className="order-1  lg:order-2">
+                          
               <div
-                className="bg-blue-50 rounded-4xl p-8 lg:p-10 relative"
+                className=" rounded-4xl p-8 lg:p-10 relative"
                 style={{
-                  background: 'linear-gradient(180deg, #ffffff 0%, #ffffff 10%, #8CABFF 100%)',
+                 
                 }}
               >
+                
                 {/* Badge */}
                 <div className="absolute -top-10 -right-1">
                 <Image src='/images/offer.png' alt="Special offer badge" width={150} height={150} />
@@ -219,19 +237,22 @@ export default function Home() {
           </div>
 
           {/* Third Row */}
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid relative lg:grid-cols-2 gap-12 items-center">
+              <div className="absolute inset-0 z-0 flex justify-center items-center pointer-events-none">
+    <div className="w-full h-full bg-[url('/images/over.png')] bg-no-repeat bg-center bg-contain"></div>
+  </div>
             {/* Left Content */}
-            <div>
+            <div className='relative'>
               <div className="mb-4">
                 <span className="text-sm text-gray-600 font-medium">Earn $15 For Each Stamp and Save up to $135 </span>
               </div>
               
-              <h3 className="text-3xl lg:text-4xl font-extrabold text-gray-900 mb-6">
+              <h3 className="text-3xl lg:text-4xl relative font-extrabold text-gray-900 mb-6">
                 Earn And Track Rewards<br />
                 As You Grow
               </h3>
               
-              <p className="text-gray-600 text-lg mb-8 leading-relaxed">
+              <p className="text-gray-600 relative text-lg mb-8 leading-relaxed">
                 Collect points through engagement, participation,<br />
                 sharing content, or contributing to our community.<br />
                 Track your rewards and redeem points.
@@ -244,8 +265,8 @@ export default function Home() {
             </div>
 
             {/* Right Image - Rewards Grid */}
-            <div className="flex justify-center lg:justify-end">
-             <Image src='/images/star.png' alt="Rewards star graphic" width={400} height={400} />
+            <div className="flex justify-center relative lg:justify-end">
+             <Image src='/images/star.png' alt="Rewards star graphic"  width={400} height={400} />
             </div>
           </div>
         </div>
@@ -300,6 +321,7 @@ export default function Home() {
         </div>
       </section>
 
+     
 
     </div>
   );

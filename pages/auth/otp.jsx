@@ -1,17 +1,83 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { useRouter } from 'next/router';
+import { Api } from '../../services/service';
+import { toast } from 'react-toastify';
+import { useUser } from '../../context/UserContext';
 
-const BackForMore = () => {
-  const [formData, setFormData] = useState({
-    phone: ''
-  });
+const OtpVerification = () => {
+  const router = useRouter();
+  const [otp, setOtp] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [userPhone, setUserPhone] = useState('');
+  
+  // Use the user context
+  const { login } = useUser();
+
+  useEffect(() => {
+    // Get user details from localStorage
+    const userDetail = localStorage.getItem('userDetail');
+    if (userDetail) {
+      const user = JSON.parse(userDetail);
+      if (user.phone) {
+        setUserPhone(user.phone);
+      }
+    }
+  }, []);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setOtp(e.target.value);
+    setError('');
+  };
+
+  const handleSubmit = async () => {
+    // Basic validation
+    if (!otp || otp.trim() === '') {
+      setError('Please enter OTP');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError('');
+      
+      const response = await Api('post', 'auth/verify-otp', {
+        otp,
+        phone: userPhone
+      }, router);
+      
+      if (response.success) {
+        // Use the login function from UserContext
+        if (response.token && response.user) {
+          login(response.user, response.token);
+        }
+        
+        // Show success toast message
+        toast.success('Login successful!', {
+          className: 'toast-success-container',
+          bodyClassName: 'toast-success-body'
+        });
+        
+        // Redirect to home page
+        router.push('/');
+      } else {
+        toast.error(response.message || 'OTP verification failed. Please try again.', {
+          className: 'toast-error-container',
+          bodyClassName: 'toast-error-body'
+        });
+        setError(response.message || 'OTP verification failed. Please try again.');
+      }
+    } catch (err) {
+      console.error('OTP verification error:', err);
+      toast.error('An error occurred during OTP verification. Please try again.', {
+        className: 'toast-error-container',
+        bodyClassName: 'toast-error-body'
+      });
+      setError(err.message || 'Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -36,7 +102,7 @@ const BackForMore = () => {
           <div className="space-y-4">
             {/* OTP Label */}
             <div className="mb-4">
-              <div className="block text-gray-700 text-sm font-medium mb-3">Enter the one-time password received on your registered phone number.</div>
+              <div className="block text-gray-700 text-sm font-medium mb-3">Enter the one-time password received on your registered phone number {userPhone && `(${userPhone})`}.</div>
               
               {/* OTP Input Field */}
               <div>
@@ -44,19 +110,27 @@ const BackForMore = () => {
                   type="text"
                   name="otp"
                   placeholder="One Time Password"
-                  value={formData.phone}
+                  value={otp}
                   onChange={handleInputChange}
+                  maxLength={6}
                   className="w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 placeholder-gray-500"
                 />
               </div>
             </div>
 
+            {/* Error message */}
+            {error && (
+              <div className="text-red-500 text-sm mt-2">{error}</div>
+            )}
+
             {/* Submit Button */}
             <button
               type="button"
               className=" bg-[#8EAFF6CC] hover:bg-[#8EAFF6CC] text-white font-medium py-2 px-8 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#8EAFF6CC] focus:ring-offset-2 "
+              onClick={handleSubmit}
+              disabled={loading}
             >
-              Submit
+              {loading ? 'Processing...' : 'Submit'}
             </button>
 
             {/* Footer Text */}
@@ -73,4 +147,4 @@ const BackForMore = () => {
   );
 };
 
-export default BackForMore;
+export default OtpVerification;

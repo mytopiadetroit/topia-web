@@ -3,6 +3,7 @@ import { ChevronDown } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { Api, ApiFormData } from '../../services/service';
 import Link from 'next/link';
+import { toast } from 'react-toastify';
 
 const Register = () => {
   const router = useRouter();
@@ -36,74 +37,164 @@ const Register = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  // Basic validation
+  if (!formData.email || !formData.fullName || !formData.phone) {
+    setError('Please fill in all required fields');
+    return;
+  }
+  
+  if (formData.day === 'Day' || formData.month === 'Month' || formData.year === 'Year') {
+    setError('Please select your complete date of birth');
+    return;
+  }
+  
+  if (formData.howDidYouHear === 'How did you hear about us ?') {
+    setError('Please select how you heard about us');
+    return;
+  }
+  
+  if (!formData.agreeToTerms) {
+    setError('You must agree to the terms and conditions');
+    return;
+  }
+  
+  if (!selectedFile) {
+    setError('Please upload your government ID');
+    return;
+  }
+  
+  try {
+    setLoading(true);
+    setError('');
     
-    // Basic validation
-    if (!formData.email || !formData.fullName || !formData.phone) {
-      setError('Please fill in all required fields');
-      return;
-    }
+    // Format the date of birth
+    const dob = `${formData.year}-${months.indexOf(formData.month) + 1}-${formData.day}`;
     
-    if (formData.day === 'Day' || formData.month === 'Month' || formData.year === 'Year') {
-      setError('Please select your complete date of birth');
-      return;
-    }
+    // Create form data for file upload
+    const formDataToSend = new FormData();
+    formDataToSend.append('email', formData.email);
+    formDataToSend.append('fullName', formData.fullName);
+    formDataToSend.append('phone', formData.phone.startsWith('+91') ? formData.phone : `+91${formData.phone}`);
+    formDataToSend.append('day', formData.day);
+    formDataToSend.append('month', formData.month);
+    formDataToSend.append('year', formData.year);
+    formDataToSend.append('howDidYouHear', formData.howDidYouHear);
+    formDataToSend.append('govId', selectedFile);
     
-    if (formData.howDidYouHear === 'How did you hear about us ?') {
-      setError('Please select how you heard about us');
-      return;
-    }
+    const response = await ApiFormData('post', 'auth/register', formDataToSend, router);
     
-    if (!formData.agreeToTerms) {
-      setError('You must agree to the terms and conditions');
-      return;
-    }
+    console.log('Registration response:', response); // Debug log
     
-    if (!selectedFile) {
-      setError('Please upload your government ID');
-      return;
-    }
-    
-    try {
-      setLoading(true);
-      setError('');
-      
-      // Format the date of birth
-      const dob = `${formData.year}-${months.indexOf(formData.month) + 1}-${formData.day}`;
-      
-      // Create form data for file upload
-      const formDataToSend = new FormData();
-      formDataToSend.append('email', formData.email);
-      formDataToSend.append('fullName', formData.fullName);
-      formDataToSend.append('phone', formData.phone.startsWith('+91') ? formData.phone : `+91${formData.phone}`);
-      formDataToSend.append('dob', dob);
-      formDataToSend.append('howDidYouHear', formData.howDidYouHear);
-      formDataToSend.append('govId', selectedFile);
-      
-      const response = await ApiFormData('post', 'auth/register', formDataToSend, router);
-      
-      if (response.success) {
-        // Store user data and token in localStorage if provided
-        if (response.user) {
-          localStorage.setItem('userDetail', JSON.stringify(response.user));
-        }
-        if (response.token) {
-          localStorage.setItem('token', response.token);
-        }
-        
-        // Redirect to OTP verification or login page based on your flow
-        router.push('/auth/otp');
-      } else {
-        setError(response.message || 'Registration failed. Please try again.');
+    // Check if registration was successful - improved condition
+    if (response && (response.message === "Registration successful" || response.success === true || response.user || response.status === 'success')) {
+      // Store user data (no token in this response)
+      if (response.user) {
+        localStorage.setItem('userDetail', JSON.stringify(response.user));
       }
-    } catch (err) {
-      console.error('Registration error:', err);
-      setError(err.message || 'Something went wrong. Please try again.');
-    } finally {
-      setLoading(false);
+      
+      // Show success toast message with proper styling
+      toast.success('Registration successful! ', {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        style: {
+          backgroundColor: '#4caf50',
+          color: 'white',
+          fontWeight: '500',
+          borderRadius: '8px'
+        }
+      });
+      
+      // Redirect to login page
+      setTimeout(() => {
+        router.push('/auth/login');
+      }, 2000);
+      
+      return; // Important: return early to prevent error toast
+    } else {
+      // Registration failed
+      const errorMessage = response?.message || response?.error || 'Registration failed. Please try again.';
+
+      toast.error(errorMessage, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        style: {
+          backgroundColor: '#f44336',
+          color: 'white',
+          fontWeight: '500',
+          borderRadius: '8px'
+        }
+      });
+      setError(errorMessage);
     }
-  };
+  } catch (err) {
+    console.error('Registration error:', err);
+    
+    // Check if error response has success indicators
+    if (err.response && err.response.data && 
+        (err.response.data.message === "Registration successful" || 
+         err.response.data.success === true || 
+         err.response.data.user)) {
+      
+      // It's actually success but came through catch block
+      if (err.response.data.user) {
+        localStorage.setItem('userDetail', JSON.stringify(err.response.data.user));
+      }
+      
+      toast.success('Registration successful! ', {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        style: {
+          backgroundColor: '#4caf50',
+          color: 'white',
+          fontWeight: '500',
+          borderRadius: '8px'
+        }
+      });
+      
+      setTimeout(() => {
+        router.push('/auth/login');
+      }, 2000);
+      
+      return;
+    }
+    
+    // Actual error
+    const errorMessage = err.response?.data?.message || err.message || 'registration failed. Please try again.';
+    
+    toast.error(errorMessage, {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      style: {
+        backgroundColor: '#f44336',
+        color: 'white',
+        fontWeight: '500',
+        borderRadius: '8px'
+      }
+    });
+    setError(errorMessage);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const days = Array.from({ length: 31 }, (_, i) => i + 1);
   const months = [
@@ -142,13 +233,13 @@ const Register = () => {
       </div>
 
       {/* Right Side - Registration Form */}
-      <div className="w-full lg:w-2/3 bg-white pt-10 flex items-center justify-center p-8 overflow-y-auto">
-        <div className="w-full max-w-md">
+ <div className="w-full lg:w-2/3 bg-white flex p-4 lg:p-8 overflow-y-auto">
+  <div className="w-full max-w-md mx-auto my-4 lg:my-auto">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2 break-words">Register</h1>
-            <p className="text-gray-600 text-sm break-words">Let us get to know you better</p>
-          </div>
+          <div className="mb-6 lg:mb-8 mt-4 lg:mt-0">
+  <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2 break-words">Register</h1>
+  <p className="text-gray-600 text-sm break-words">Let us get to know you better</p>
+</div>
 
           <div className="space-y-4">
             {/* Email Field */}
