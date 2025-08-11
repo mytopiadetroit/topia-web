@@ -26,15 +26,41 @@ export const UserProvider = ({ children }) => {
         if (token && userDetail) {
           setUser(JSON.parse(userDetail));
           setIsLoggedIn(true);
+        } else {
+          setUser(null);
+          setIsLoggedIn(false);
         }
       } catch (error) {
         console.error('Error checking user login status:', error);
+        setUser(null);
+        setIsLoggedIn(false);
       } finally {
         setLoading(false);
       }
     };
 
+    // Initial check
     checkUserLoggedIn();
+    
+    // Listen for storage events (when localStorage changes in other tabs)
+    const handleStorageChange = () => {
+      checkUserLoggedIn();
+    };
+    
+    // Listen for custom auth state changed event
+    const handleAuthStateChanged = () => {
+      checkUserLoggedIn();
+    };
+    
+    // Add event listeners
+    window.addEventListener('storage', handleStorageChange);
+    document.addEventListener('auth-state-changed', handleAuthStateChanged);
+    
+    // Clean up event listeners
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      document.removeEventListener('auth-state-changed', handleAuthStateChanged);
+    };
   }, []);
 
   // Login function
@@ -47,6 +73,9 @@ export const UserProvider = ({ children }) => {
       // Update state
       setUser(userData);
       setIsLoggedIn(true);
+      
+      // Dispatch auth-state-changed event
+      document.dispatchEvent(new Event('auth-state-changed'));
       
       return true;
     } catch (error) {
@@ -65,6 +94,9 @@ export const UserProvider = ({ children }) => {
       // Update state
       setUser(null);
       setIsLoggedIn(false);
+      
+      // Dispatch auth-state-changed event
+      document.dispatchEvent(new Event('auth-state-changed'));
       
       // Redirect to login page
       router.push('/auth/login');

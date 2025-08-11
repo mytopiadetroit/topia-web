@@ -22,10 +22,10 @@ export default function Home() {
     <div className="min-h-screen bg-white">
     
        {/* Top notification bar */}
-      <div className="bg-gray-800 text-white text-center py-2 text-sm">
+      {/* <div className="bg-gray-800 text-white text-center py-2 text-sm">
         <span>Check the live streaming! Wednesday July 15th / 7:30 PM EST | </span>
         <span className="text-blue-300 cursor-pointer">YouTube ➤</span>
-      </div>
+      </div> */}
       
       {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
@@ -57,11 +57,11 @@ export default function Home() {
           isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
         }`}>
           <h1 className="text-xl md:text-3xl lg:text-4xl font-bold mb-6 leading-tight">
-            Your Gateway to Wellness and Discovery
+           Unlock Your Path to Health and Knowledge
           </h1>
           <p className="text-sm md:text-lg lg:text-xl mb-8 font-light max-w-3xl mx-auto">
-            Explore personalized resources, evidence-based content,<br />
-            and a trusted community of like-minded people.
+           Access curated resources secience-backed wisdom,<br />
+            and a supportive network of wellnes enthusiasts.
           </p>
           <button className="bg-[#8EAFF633] hover:bg-[#8EAFF633] text-white px-8 py-4 rounded-4xl text-lg  font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2 mx-auto">
             <span>Get Started</span>
@@ -75,17 +75,17 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="grid relative lg:grid-cols-2 gap-12 items-center">
              <div className="absolute inset-0 z-0 flex justify-center items-center pointer-events-none">
-    <div className="w-full h-full bg-[url('/images/over.png')] bg-no-repeat bg-center bg-contain"></div>
+    <div className="w-full h-full "></div>
   </div>
             {/* Ginger Image */}
 <div className="flex items-center overflow-hidden lg:overflow-visible">
   <Image 
-    src="/images/ginger.png"
+    src="/images/ii2.png"
     alt="Natural ginger root"
-    className="h-[300px] sm:h-[400px] lg:h-[600px] w-full lg:w-[120vw] lg:max-w-none object-cover lg:-ml-[10vw] lg:transform lg:-translate-x-12"
+    className="h-[250px] sm:h-[350px] lg:h-[600px] w-full lg:w-[31.5vw]  object-cover lg:-ml-[2vw] lg:transform lg:-translate-x-12"
     style={{ objectPosition: 'left' }}
-    width={800}
-    height={600}
+    width={400}
+    height={100}
   />
 </div>
 
@@ -110,11 +110,12 @@ export default function Home() {
                     </span>
                   </div>
                   <h2 className="text-3xl lg:text-4xl font-bold text-[#2E2E2E] mb-6">
-                    Discover the<br />
-                    Shroom Menu
+                  The Mushroom Treasury
+<br />
+                  
                   </h2>
                   <p className="text-[#2E2E2E] text-lg mb-8 leading-relaxed">
-                   Browse our full range of therapeutic products,<br /> monthly box offerings, and exclusive deals.<br /> Start your journey here.
+                   An exclusive collection of nature&apos;s finest functional and,<br />therapeutic mushrooms for your well-being<br /> 
                    
                   </p>
                   <button className="bg-[#2E2E2E] hover:bg-gray-800 text-white px-8 py-3    rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2">
@@ -133,12 +134,12 @@ export default function Home() {
      
     <section className="py-20 px-4 ">
       
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto ">
           
-       <div className="relative mb-20">
+       <div className="relative mb-20   ">
   {/* Center Background Image */}
   <div className="absolute inset-0 z-0 flex justify-center items-center pointer-events-none">
-    <div className="w-full h-full bg-[url('/images/over.png')] bg-no-repeat bg-center bg-contain"></div>
+    <div className="w-screen h-[350px] bg-[url('/images/over.png')] bg-no-repeat bg-center bg-cover -mx-36"></div>
   </div>
 
   {/* Main Grid Content */}
@@ -147,11 +148,12 @@ export default function Home() {
     {/* Left Content */}
     <div>
       <h2 className="text-3xl lg:text-4xl font-bold text-[#2E2E2E] mb-6 leading-tight">
-        Explore Resources to Support<br />
+       Discover Resources to Elevate 
+<br />
         Your Wellness
       </h2>
       <p className="text-lg text-[#2E2E2E] mb-8 leading-relaxed">
-        Dive into audios, guides, videos, and more— <br /> curated to help you learn, grow, and thrive.
+       Delve into audio, guides, videos, and more <br /> curated to inspire learning, growth, and vitality..
       </p>
       <button className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2">
         <span>Access The Resource Centre</span>
@@ -163,7 +165,7 @@ export default function Home() {
 <div className="flex justify-center lg:justify-end">
   <div className="overflow-hidden w-full max-w-[450px] h-[300px] sm:h-[400px] lg:h-[550px]">
     <Image 
-      src="/images/img2.png"
+      src="/images/ii3.png"
       alt="Happy couple embracing"
       className="w-full h-full object-contain"
       width={1200}
@@ -180,16 +182,16 @@ export default function Home() {
 
           {/* Second Row */}
           <div className="grid relative lg:grid-cols-2 gap-12 items-center mb-20">
-              <div className="absolute inset-0 z-0 flex justify-center items-center pointer-events-none">
+              {/* <div className="absolute inset-0 z-0 flex justify-center items-center pointer-events-none">
     <div className="w-full h-full bg-[url('/images/over.png')] bg-no-repeat bg-center bg-contain"></div>
-  </div>
+  </div> */}
             {/* Left Image - Rounded Rectangle */}
             <div className="order-2  lg:order-1">
               
               <div className="relative">
                 
                 <Image 
-                  src="/images/img3.png"
+                  src="/images/ii4.png"
                   alt="Wellness products and tools"
                   className="w-full object-cover transform transition-all duration-500 hover:scale-105"
                   width={600}
@@ -211,35 +213,36 @@ export default function Home() {
               >
                 
                 {/* Badge */}
-                <div className="absolute -top-10 -right-1">
+                {/* <div className="absolute -top-10 -right-1">
                 <Image src='/images/offer.png' alt="Special offer badge" width={150} height={150} />
-                </div>
+                </div> */}
                 
                 <div className="mb-4">
-                  <span className="text-sm text-gray-600 font-medium">Elevate Your Membership</span>
+                  {/* <span className="text-sm text-gray-600 font-medium">Elevate Your Membership</span> */}
                 </div>
                 
                 <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
-                  Enhance Your<br />
-                  Membership
+                 The Topia 
+<br />
+                Circle  
                 </h3>
                 
                 <p className="text-gray-600 text-lg mb-8 leading-relaxed">
-                  Unlock premium features, exclusive content,<br />
-                  advanced search, unlimited rewards, and more.
+                 Step into a world of wellness, where exclusive rewards,  <br />
+                 personalized benefits, and a community of growth await.
                 </p>
                 
                 <button className="bg-[#2E2E2E] hover:bg-[#2E2E2E] text-white px-8 py-4 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105">
-                  Upgrade My Membership 
+                  Learn more 
                 </button>
               </div>
             </div>
           </div>
 
           {/* Third Row */}
-          <div className="grid relative lg:grid-cols-2 gap-12 items-center">
+          <div className="grid relative lg:grid-cols-2 gap-12  items-center">
               <div className="absolute inset-0 z-0 flex justify-center items-center pointer-events-none">
-    <div className="w-full h-full bg-[url('/images/over.png')] bg-no-repeat bg-center bg-contain"></div>
+   <div className="w-screen h-[350px] bg-[url('/images/over.png')] bg-no-repeat bg-center bg-cover -mx-36"></div>
   </div>
             {/* Left Content */}
             <div className='relative'>

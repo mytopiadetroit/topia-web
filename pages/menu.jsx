@@ -1,11 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useRouter } from 'next/router';
+import { toast } from 'react-toastify';
+import { useUser } from '../context/UserContext';
 
 const Menu = () => {
   const router = useRouter();
+  const { isLoggedIn, loading } = useUser();
   const [categoryOpen, setCategoryOpen] = useState(true);
   const [primaryUseOpen, setPrimaryUseOpen] = useState(true);
+  
+  useEffect(() => {
+    // Only check after loading is complete
+    if (!loading) {
+      // Check if user is logged in
+      if (!isLoggedIn) {
+        // Show toast notification
+        toast.error('Please login to access the menu', {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          style: {
+            backgroundColor: '#f44336',
+            color: 'white',
+            fontWeight: '500',
+            borderRadius: '8px'
+          }
+        });
+        
+        // Redirect to login page
+        router.push('/auth/login');
+      }
+    }
+  }, [isLoggedIn, loading, router]);
   
   const [categoryFilters, setCategoryFilters] = useState({
     deals: false,

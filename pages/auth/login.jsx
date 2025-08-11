@@ -5,12 +5,16 @@ import { Api } from '../../services/service';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
 import { useUser } from '../../context/UserContext';
+import PhoneInput from 'react-phone-input-2';
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
+
 
 const Login = () => {
   const router = useRouter();
   const [formData, setFormData] = useState({
     phone: ''
   });
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
@@ -26,10 +30,62 @@ const Login = () => {
     setError('');
   };
 
+  const handlePhoneChange = (value, data) => {
+    setPhoneNumber(value);
+    const phoneWithPlus = "+" + value;
+    setFormData(prev => ({
+      ...prev,
+      phone: phoneWithPlus
+    }));
+    
+    // Validate phone number using libphonenumber-js
+    const phoneNumber = parsePhoneNumberFromString(phoneWithPlus);
+    if (phoneNumber) {
+      if (!phoneNumber.isValid()) {
+        setError('Please enter a valid phone number');
+      } else {
+        setError('');
+      }
+    } else {
+      setError('Please enter a valid phone number');
+    }
+  };
+
   const handleLogin = async () => {
     // Basic validation
     if (!formData.phone || formData.phone.trim() === '') {
       setError('Please enter your phone number');
+      return;
+    }
+    
+    // Phone number validation using libphonenumber-js
+    const phoneNumber = parsePhoneNumberFromString(formData.phone);
+    if (!phoneNumber || !phoneNumber.isValid()) {
+      setError('Please enter a valid phone number');
+      toast.error('Please enter a valid phone number', {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      return;
+    }
+    
+    // Check if phone number length is valid for the country
+    if (!phoneNumber.isPossible()) {
+      setError(`The phone number length is not valid for ${phoneNumber.country}`);
+      toast.error(`The phone number length is not valid for ${phoneNumber.country}`, {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
       return;
     }
 
@@ -37,8 +93,8 @@ const Login = () => {
       setLoading(true);
       setError('');
       
-      // Format phone number to ensure it has +91 prefix
-      const formattedPhone = formData.phone.startsWith('+91') ? formData.phone : `+91${formData.phone}`;
+      // Phone number is already formatted with country code by react-phone-input-2
+      const formattedPhone = formData.phone;
       
       const response = await Api('post', 'auth/login', {
         phone: formattedPhone
@@ -94,7 +150,7 @@ const Login = () => {
         <div className="w-full max-w-md">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-6xl font-bold text-gray-900 mb-2 break-words">Back For <br/> More ?</h1>
+            <h1 className="text-5xl font-bold text-gray-900 mb-2 break-words">Welcome to your <br/> Topia </h1>
           </div>
 
           <div className="space-y-4">
@@ -102,26 +158,49 @@ const Login = () => {
             <div className="mb-4">
               <div className="block text-gray-700 text-sm font-medium mb-3">Check-in with your registered phone number</div>
               
-              {/* Phone Field with Flag */}
-              <div className="flex">
-                <div className="flex items-center px-4 py-3 border border-r-0 border-gray-300 rounded-l-full bg-white">
-                  <img 
-                    src="https://flagcdn.com/w20/in.png" 
-                    alt="India flag" 
-                    className="w-5 h-3 mr-2"
-                  />
-                  <span className="text-gray-700 text-sm">+91</span>
-                  <ChevronDown className="ml-2 w-4 h-4 text-gray-400" />
-                </div>
-                <input
-                  type="tel"
-                  name="phone"
-                  placeholder="+91 416 568 9912"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="flex-1 px-4 py-3 border border-l-0 border-gray-300 rounded-r-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 placeholder-gray-500"
-                />
-              </div>
+              {/* Phone Field with react-phone-input-2 */}
+              <PhoneInput
+                country={'us'}
+                value={phoneNumber}
+                onChange={handlePhoneChange}
+                inputProps={{
+                  name: 'phone',
+                  required: true,
+                  autoFocus: true,
+                  placeholder: 'Enter phone number',
+                  className: 'w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 placeholder-gray-500'
+                }}
+                containerClass="w-full"
+                buttonStyle={{
+                  position: 'absolute',
+                  border: 'none',
+                  background: 'transparent',
+                  left: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  zIndex: 2
+                }}
+                inputStyle={{
+                  width: '100%',
+                  paddingLeft: '50px',
+                  height: '50px'
+                }}
+                containerStyle={{
+                  position: 'relative'
+                }}
+                dropdownClass="rounded-lg shadow-md text-gray-700"
+                enableSearch={true}
+                disableSearchIcon={false}
+                disableCountryCode={false}
+                countryCodeEditable={false}
+                autoFormat={true}
+                searchPlaceholder="Search country"
+                searchNotFound="Country not found"
+                onlyCountries={[]}
+                preferredCountries={['us', 'in', 'gb', 'ca', 'au']}
+                enableClickOutside={true}
+                showDropdown={false}
+              />
             </div>
 
             {/* Error Message */}

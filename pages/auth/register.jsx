@@ -4,6 +4,8 @@ import { useRouter } from 'next/router';
 import { Api, ApiFormData } from '../../services/service';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
+import PhoneInput from 'react-phone-input-2';
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
 const Register = () => {
   const router = useRouter();
@@ -17,6 +19,7 @@ const Register = () => {
     howDidYouHear: 'How did you hear about us ?',
     agreeToTerms: false
   });
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -28,6 +31,28 @@ const Register = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+    setError('');
+  };
+
+  const handlePhoneChange = (value, data) => {
+    setPhoneNumber(value);
+    const phoneWithPlus = "+" + value;
+    setFormData(prev => ({
+      ...prev,
+      phone: phoneWithPlus
+    }));
+    
+    // Validate phone number using libphonenumber-js
+    const phoneNumber = parsePhoneNumberFromString(phoneWithPlus);
+    if (phoneNumber) {
+      if (!phoneNumber.isValid()) {
+        setError('Please enter a valid phone number');
+      } else {
+        setError('');
+      }
+    } else {
+      setError('Please enter a valid phone number');
+    }
   };
 
   const handleFileChange = (e) => {
@@ -46,8 +71,67 @@ const handleSubmit = async (e) => {
     return;
   }
   
+  // Phone number validation using libphonenumber-js
+  const phoneNumber = parsePhoneNumberFromString(formData.phone);
+  if (!phoneNumber || !phoneNumber.isValid()) {
+    setError('Please enter a valid phone number');
+    toast.error('Please enter a valid phone number', {
+      position: "top-center",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+    return;
+  }
+  
+  // Check if phone number length is valid for the country
+  const nationalNumber = phoneNumber.nationalNumber;
+  const countryCode = phoneNumber.country;
+  
+  if (!phoneNumber.isPossible()) {
+    setError(`The phone number length is not valid for ${phoneNumber.country}`);
+    toast.error(`The phone number length is not valid for ${phoneNumber.country}`, {
+      position: "top-center",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+    return;
+  }
+  
   if (formData.day === 'Day' || formData.month === 'Month' || formData.year === 'Year') {
     setError('Please select your complete date of birth');
+    return;
+  }
+  
+ 
+  const birthDate = new Date(`${formData.year}-${months.indexOf(formData.month) + 1}-${formData.day}`);
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - (months.indexOf(formData.month));
+  const dayDiff = today.getDate() - formData.day;
+  
+  if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+    age--;
+  }
+  
+  if (age < 21) {
+    setError('You must be at least 21 years old to register');
+    toast.error('You must be at least 21 years old to register', {
+      position: "top-center",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
     return;
   }
   
@@ -77,7 +161,7 @@ const handleSubmit = async (e) => {
     const formDataToSend = new FormData();
     formDataToSend.append('email', formData.email);
     formDataToSend.append('fullName', formData.fullName);
-    formDataToSend.append('phone', formData.phone.startsWith('+91') ? formData.phone : `+91${formData.phone}`);
+    formDataToSend.append('phone', formData.phone); // Phone number is already formatted with country code by react-phone-input-2
     formDataToSend.append('day', formData.day);
     formDataToSend.append('month', formData.month);
     formDataToSend.append('year', formData.year);
@@ -238,7 +322,7 @@ const handleSubmit = async (e) => {
           {/* Header */}
           <div className="mb-6 lg:mb-8 mt-4 lg:mt-0">
   <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2 break-words">Register</h1>
-  <p className="text-gray-600 text-sm break-words">Let us get to know you better</p>
+  <p className="text-gray-600 text-sm break-words">Registration must match Information on Goverment issued ID</p>
 </div>
 
           <div className="space-y-4">
@@ -266,25 +350,51 @@ const handleSubmit = async (e) => {
               />
             </div>
 
-            {/* Phone Field with Flag */}
-            <div className="flex">
-              <div className="flex items-center px-4 py-3 border border-r-0 border-gray-300 rounded-l-full bg-white">
-                <img 
-                  src="https://flagcdn.com/w20/in.png" 
-                  alt="India flag" 
-                  className="w-5 h-3 mr-2"
-                />
-                <span className="text-gray-700 text-sm">+91</span>
-              </div>
-              <input
-                type="tel"
-                name="phone"
-                placeholder="Phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                className="flex-1 px-4 py-3 border border-l-0 border-gray-300 rounded-r-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 placeholder-gray-500"
+            {/* Phone Field with react-phone-input-2 */}
+            <div>
+              <PhoneInput
+                country={'us'}
+                value={phoneNumber}
+                onChange={handlePhoneChange}
+                inputProps={{
+                  name: 'phone',
+                  placeholder: 'Phone',
+                  className: 'w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 placeholder-gray-500'
+                }}
+                containerClass="w-full"
+                buttonStyle={{
+                  position: 'absolute',
+                  border: 'none',
+                  background: 'transparent',
+                  left: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  zIndex: 2
+                }}
+                inputStyle={{
+                  width: '100%',
+                  paddingLeft: '50px',
+                  height: '50px'
+                }}
+                containerStyle={{
+                  position: 'relative'
+                }}
+                dropdownClass="rounded-lg shadow-md text-gray-700"
+                enableSearch={true}
+                disableSearchIcon={false}
+                disableCountryCode={false}
+                countryCodeEditable={false}
+                autoFormat={true}
+                searchPlaceholder="Search country"
+                searchNotFound="Country not found"
+                onlyCountries={[]}
+                preferredCountries={['us', 'in', 'gb', 'ca', 'au']}
+                enableClickOutside={true}
+                showDropdown={false}
               />
+              <p className='text-gray-700 ml-2 mt-1 text-[12px]'>*Verification code will be send for Confirmation</p>
             </div>
+
 
             {/* Birthday Label */}
             <div className="pt-2">
@@ -391,8 +501,8 @@ const handleSubmit = async (e) => {
             {/* Terms Section */}
             <div className="bg-blue-50 p-4 rounded-2xl mt-6">
               <p className="text-xs text-gray-600 mb-3">
-                *This & other your government-issued ID form, 
-                or click to upload.
+                {/* *This & other your government-issued ID form, 
+                or click to upload. */}
               </p>
               <div className="flex items-start space-x-3">
                 <input

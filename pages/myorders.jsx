@@ -1,7 +1,40 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import { toast } from 'react-toastify';
+import { useUser } from '../context/UserContext';
 
 export default function MyOrders() {
+  const router = useRouter();
+  const { isLoggedIn, loading } = useUser();
   const [activeFilter, setActiveFilter] = useState('All');
+  
+  useEffect(() => {
+    // Only check after loading is complete
+    if (!loading) {
+      // Check if user is logged in
+      if (!isLoggedIn) {
+        // Show toast notification
+        toast.error('Please login to view your orders', {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          style: {
+            backgroundColor: '#f44336',
+            color: 'white',
+            fontWeight: '500',
+            borderRadius: '8px'
+          }
+        });
+        
+        // Redirect to login page
+        router.push('/auth/login');
+      }
+    }
+  }, [isLoggedIn, loading, router]);
 
   // Orders data
   const orders = [

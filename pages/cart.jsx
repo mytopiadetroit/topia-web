@@ -1,6 +1,40 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useRouter } from 'next/router';
+import { toast } from 'react-toastify';
+import { useUser } from '../context/UserContext';
 
 const Cart = () => {
+  const router = useRouter();
+  const { isLoggedIn, loading } = useUser();
+  
+  useEffect(() => {
+    // Only check after loading is complete
+    if (!loading) {
+      // Check if user is logged in
+      if (!isLoggedIn) {
+        // Show toast notification
+        toast.error('Please login to access your cart', {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          style: {
+            backgroundColor: '#f44336',
+            color: 'white',
+            fontWeight: '500',
+            borderRadius: '8px'
+          }
+        });
+        
+        // Redirect to login page
+        router.push('/auth/login');
+      }
+    }
+  }, [isLoggedIn, loading, router]);
+  
   return (
     <div className="min-h-screen bg-gray-50 pt-20 p-4">
       <div className="max-w-6xl mx-auto">

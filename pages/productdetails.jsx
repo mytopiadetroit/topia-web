@@ -2,11 +2,42 @@ import { useState, useEffect } from 'react';
 import { Heart } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { toast } from 'react-toastify';
+import { useUser } from '../context/UserContext';
 
 export default function ProductDetails() {
   const [quantity, setQuantity] = useState(1);
   const router = useRouter();
   const { id } = router.query;
+  const { isLoggedIn, loading } = useUser();
+  
+  useEffect(() => {
+    // Only check after loading is complete
+    if (!loading) {
+      // Check if user is logged in
+      if (!isLoggedIn) {
+        // Show toast notification
+        toast.error('Please login to view product details', {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          style: {
+            backgroundColor: '#f44336',
+            color: 'white',
+            fontWeight: '500',
+            borderRadius: '8px'
+          }
+        });
+        
+        // Redirect to login page
+        router.push('/auth/login');
+      }
+    }
+  }, [isLoggedIn, loading, router]);
 
   // This would typically come from an API call using the ID
   // For now, we'll use static data but in a real app you would fetch based on ID
