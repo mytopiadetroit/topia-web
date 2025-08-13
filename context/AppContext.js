@@ -8,6 +8,9 @@ export const useApp = () => {
   return useContext(AppContext);
 };
 
+// Helper to normalize IDs across backend (_id) and frontend (id)
+const getItemId = (obj) => (obj && (obj.id || obj._id)) || undefined;
+
 // Provider component that wraps the app
 export const AppProvider = ({ children }) => {
   // Cart state
@@ -49,10 +52,12 @@ export const AppProvider = ({ children }) => {
     }
   }, []);
 
-  // Save cart to localStorage whenever it changes
+  // Persist cart and derive cartCount whenever cart changes
   useEffect(() => {
     try {
       localStorage.setItem('cart', JSON.stringify(cart));
+      const newCount = cart.reduce((total, item) => total + (item.quantity || 0), 0);
+      setCartCount(newCount);
     } catch (error) {
       console.error('Error saving cart to localStorage:', error);
     }
@@ -60,19 +65,25 @@ export const AppProvider = ({ children }) => {
 
   // Add item to cart
   const addToCart = (product, quantity = 1) => {
+    const productId = getItemId(product);
+
     setCart(prevCart => {
-      const existingItemIndex = prevCart.findIndex(item => item.id === product.id);
+      const existingItemIndex = prevCart.findIndex(item => getItemId(item) === productId);
       
       if (existingItemIndex >= 0) {
         // Item exists, update quantity
         const updatedCart = [...prevCart];
-        updatedCart[existingItemIndex].quantity += quantity;
-        setCartCount(prevCount => prevCount + quantity);
+        updatedCart[existingItemIndex].quantity = (updatedCart[existingItemIndex].quantity || 0) + quantity;
         return updatedCart;
       } else {
         // Item doesn't exist, add new item
-        setCartCount(prevCount => prevCount + quantity);
-        return [...prevCart, { ...product, quantity }];
+        const normalizedProduct = {
+          ...product,
+          // Ensure consistent id field exists for comparisons later
+          id: productId,
+          quantity
+        };
+        return [...prevCart, normalizedProduct];
       }
     });
   };
@@ -80,11 +91,7 @@ export const AppProvider = ({ children }) => {
   // Remove item from cart
   const removeFromCart = (productId) => {
     setCart(prevCart => {
-      const itemToRemove = prevCart.find(item => item.id === productId);
-      if (itemToRemove) {
-        setCartCount(prevCount => prevCount - itemToRemove.quantity);
-      }
-      return prevCart.filter(item => item.id !== productId);
+      return prevCart.filter(item => getItemId(item) !== productId);
     });
   };
 
@@ -97,9 +104,7 @@ export const AppProvider = ({ children }) => {
     
     setCart(prevCart => {
       const updatedCart = prevCart.map(item => {
-        if (item.id === productId) {
-          const quantityDiff = quantity - item.quantity;
-          setCartCount(prevCount => prevCount + quantityDiff);
+        if (getItemId(item) === productId) {
           return { ...item, quantity };
         }
         return item;

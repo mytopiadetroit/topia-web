@@ -4,16 +4,22 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import { useUser } from '../context/UserContext';
+import { useApp } from '../context/AppContext';
+import { Api } from '../services/service';
 
 export default function ProductDetails() {
   const [quantity, setQuantity] = useState(1);
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const router = useRouter();
   const { id } = router.query;
-  const { isLoggedIn, loading } = useUser();
+  const { isLoggedIn, userLoading } = useUser();
+  const { addToCart } = useApp();
   
   useEffect(() => {
     // Only check after loading is complete
-    if (!loading) {
+    if (!userLoading) {
       // Check if user is logged in
       if (!isLoggedIn) {
         // Show toast notification
@@ -37,35 +43,95 @@ export default function ProductDetails() {
         router.push('/auth/login');
       }
     }
-  }, [isLoggedIn, loading, router]);
+  }, [isLoggedIn, userLoading, router]);
 
-  // This would typically come from an API call using the ID
-  // For now, we'll use static data but in a real app you would fetch based on ID
-  const [product, setProduct] = useState({
-    id: 1,
-    name: "Lion's Mane Capsules",
-    price: 50.00,
-    image: "/images/details.png",
-    description: {
-      main: "Unlock your brain's full potential with Shroomtopia's Lion's Mane Capsules, your daily dose of cognitive clarity and natural focus. Sourced from 100% organic Lion's Mane (Hericium erinaceus), this powerful nootropic mushroom has been used for centuries to support brain health, enhance memory, and promote a calm, clear mind.",
-      details: "Each capsule delivers a potent dual extract for maximum bioavailability—no fillers, no fluff, just pure mushroom power. Whether you're studying, working, or simply staying sharp, Lion's Mane helps you stay mentally agile and balanced throughout the day."
-    },
-    tags: ['Connection', 'Insight', 'Euphoric', 'Creative']
-  });
-  
+  // Fetch product data when ID changes
   useEffect(() => {
-    // In a real application, you would fetch product data based on the ID
-    // For example: fetchProductById(id).then(data => setProduct(data));
-    
-    // For this demo, we're just using static data
-    // You could add more products and select based on ID
-    if (id) {
-      console.log(`Fetching product with ID: ${id}`);
-      // This is where you would make an API call in a real app
+    if (id && isLoggedIn) {
+      fetchProduct();
     }
-  }, [id]);
+  }, [id, isLoggedIn]);
 
-  // User ratings data
+  const fetchProduct = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await Api('GET', `products/${id}`, null, router);
+      
+      if (response.success) {
+        setProduct(response.data);
+      } else {
+        setError('Product not found');
+        toast.error('Product not found');
+      }
+    } catch (error) {
+      console.error('Error fetching product:', error);
+      setError('Failed to load product');
+      toast.error('Failed to load product');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle quantity change
+  const increaseQuantity = () => setQuantity(prev => prev + 1);
+  const decreaseQuantity = () => setQuantity(prev => prev > 1 ? prev - 1 : 1);
+
+  // Handle add to cart
+  const handleAddToCart = () => {
+    if (product && product.hasStock) {
+      addToCart(product, quantity);
+      toast.success(`${product.name} added to cart!`);
+    }
+  };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#536690] mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading product...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500 text-lg mb-4">{error}</p>
+          <button 
+            onClick={() => router.push('/menu')}
+            className="px-6 py-2 bg-[#536690] text-white rounded-full hover:bg-[#536690] transition-colors"
+          >
+            Back to Menu
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // No product state
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-500 text-lg mb-4">Product not found</p>
+          <button 
+            onClick={() => router.push('/menu')}
+            className="px-6 py-2 bg-[#536690] text-white rounded-full hover:bg-[#536690] transition-colors"
+          >
+            Back to Menu
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // User ratings data (this could also come from backend in the future)
   const ratings = {
     count: 15,
     stats: [
@@ -76,16 +142,21 @@ export default function ProductDetails() {
   };
 
   // Tag color mapping with icons
+  const tagEmojis = {
+    Joy: '😀',
+    Euphoric: '😍',
+    Creative: '🎨',
+    Focus: '🎯',
+    Connection: '🔗',
+    Insight: '👀',
+  };
+
   const tagData = [
     { name: 'Connection', color: 'bg-[#B3194275] text-gray-800', icon: '🔗' },
     { name: 'Insight', color: 'bg-[#CD45B4] text-gray-800', icon: '👀' },
     { name: 'Euphoric', color: 'bg-[#8A38F58C] text-gray-800', icon: '⭐' },
     { name: 'Creative', color: 'bg-[#53669080] text-gray-800', icon: '🌿' }
   ];
-
-  // Handle quantity change
-  const increaseQuantity = () => setQuantity(prev => prev + 1);
-  const decreaseQuantity = () => setQuantity(prev => prev > 1 ? prev - 1 : 1);
 
   return (
     <div className="min-h-screen bg-white">
@@ -96,7 +167,7 @@ export default function ProductDetails() {
           <span className="mx-2">›</span>
           <Link href="/menu" className="hover:text-gray-700">Menu</Link>
           <span className="mx-2">›</span>
-          <span className="text-gray-700">Product Page</span>
+          <span className="text-gray-700">{product.name}</span>
         </nav>
 
         {/* Product Section */}
@@ -104,9 +175,12 @@ export default function ProductDetails() {
           {/* Left Column - Images */}
           <div className="md:w-1/2">
             {/* Main Image */}
-            <div className="bg-gray-50 rounded-4xl verflow-hidden mb-4">
+            <div className="bg-gray-50 rounded-4xl overflow-hidden mb-4">
               <img 
-                src={product.image} 
+                src={product.images && product.images.length > 0 
+                  ? (product.images[0].startsWith('http') ? product.images[0] : `http://localhost:5000${product.images[0]}`)
+                  : '/images/details.png'
+                } 
                 alt={product.name}
                 className="w-full h-auto object-cover"
               />
@@ -114,11 +188,23 @@ export default function ProductDetails() {
             
             {/* Thumbnail Images */}
             <div className="grid grid-cols-3 gap-4">
-              {[1, 2, 3].map((item) => (
-                <div key={item} className="bg-gray-200 rounded-lg aspect-square flex items-center justify-center">
-                  <span className="text-gray-400 text-sm">Product Image</span>
-                </div>
-              ))}
+              {product.images && product.images.length > 1 ? (
+                product.images.slice(1, 4).map((image, index) => (
+                  <div key={index} className="bg-gray-200 rounded-lg aspect-square overflow-hidden">
+                    <img 
+                      src={image.startsWith('http') ? image : `http://localhost:5000${image}`}
+                      alt={`${product.name} ${index + 2}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))
+              ) : (
+                Array.from({ length: 3 }, (_, index) => (
+                  <div key={index} className="bg-gray-200 rounded-lg aspect-square flex items-center justify-center">
+                    <span className="text-gray-400 text-sm">Product Image</span>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
@@ -127,34 +213,69 @@ export default function ProductDetails() {
             <h1 className="text-3xl font-bold text-gray-900 mb-4">{product.name}</h1>
             
             {/* Tags */}
-            {/* <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-3">Tags</h3>
-              <div className="flex flex-wrap gap-2">
-                {tagData.map((tag) => (
-                  <span 
-                    key={tag.name} 
-                    className={`px-3 py-2 rounded-full text-sm font-medium flex items-center gap-2 ${tag.color}`}
-                  >
-                    <span className="text-xs">{tag.icon}</span>
-                    {tag.name}
-                  </span>
-                ))}
+            {product.tags && product.tags.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-3">Tags</h3>
+                <div className="flex flex-wrap gap-2">
+                  {product.tags.map((tag, index) => (
+                    <span 
+                      key={index} 
+                      className="px-3 py-2 rounded-full text-sm font-medium flex items-center gap-2 bg-[#B3194275] text-gray-800"
+                    >
+                      <span className="text-xs">{tagEmojis[tag] || '❓'}</span>
+                      {tag}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div> */}
+            )}
             
             <div className="mb-6">
               <h2 className="text-lg text-gray-700 font-semibold mb-2">Description</h2>
-              <p className="text-gray-700 mb-4">{product.description.main}</p>
-              <p className="text-gray-700">{product.description.details}</p>
+              <p className="text-gray-700 mb-4">{product.description?.main || 'No description available'}</p>
+              {product.description?.details && (
+                <p className="text-gray-700">{product.description.details}</p>
+              )}
+            </div>
+
+            {/* Price */}
+            <div className="mb-6">
+              <h2 className="text-lg text-gray-700 font-semibold mb-2">Price</h2>
+              <p className="text-3xl font-bold text-[#536690]">$ {product.price}</p>
+            </div>
+
+            {/* Quantity Selector */}
+            <div className="mb-6">
+              <h3 className="text-lg text-gray-700 font-semibold mb-3">Quantity</h3>
+              <div className="flex items-center space-x-4">
+                <button 
+                  onClick={decreaseQuantity}
+                  disabled={quantity <= 1}
+                  className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span className="text-lg">-</span>
+                </button>
+                <span className="text-xl font-semibold w-16 text-center">{quantity}</span>
+                <button 
+                  onClick={increaseQuantity}
+                  className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50"
+                >
+                  <span className="text-lg">+</span>
+                </button>
+              </div>
             </div>
 
             {/* Add to Cart Section */}
             <div className="flex items-center gap-4 mb-8">
               <button 
-                className="bg-[#536690] hover:bg-[#536690] text-white font-medium py-3 px-8 rounded-full flex items-center justify-center gap-2 flex-1 transition-colors"
+                onClick={handleAddToCart}
+                disabled={!product.hasStock}
+                className={`bg-[#536690] hover:bg-[#536690] text-white font-medium py-3 px-8 rounded-full flex items-center justify-center gap-2 flex-1 transition-colors ${
+                  !product.hasStock ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
-                <span>Add to Cart</span>
-                <span className="text-xl">+</span>
+                <span>{product.hasStock ? 'Add to Cart' : 'Out of Stock'}</span>
+                {product.hasStock && <span className="text-xl">+</span>}
               </button>
               
               <button className="border border-gray-300 bg-white text-gray-500 font-medium py-3 px-6 rounded-full hover:bg-gray-50 transition-colors flex items-center justify-center">
@@ -180,22 +301,21 @@ export default function ProductDetails() {
                   <div key={stat.effect} className="flex flex-col items-center">
                     <div className="w-32 h-32 rounded-full flex items-center justify-center mb-4 relative">
                       {stat.effect === 'Euphoric' && (
-                        <div className="absolute inset-0  flex items-center justify-center">
+                        <div className="absolute inset-0 flex items-center justify-center">
                         <img src="/images/g1.png" alt="" />
                         </div>
                       )}
                       {stat.effect === 'Joy' && (
-                        <div className="absolute inset-0  flex items-center justify-center">
+                        <div className="absolute inset-0 flex items-center justify-center">
                         <img src="/images/g2.png" alt="" />
                         </div>
                       )}
                       {stat.effect === 'Creative' && (
-                        <div className="absolute inset-0  flex items-center justify-center">
+                        <div className="absolute inset-0 flex items-center justify-center">
                          <img src="/images/g3.png" alt="" />
                         </div>
                       )}
                     </div>
-                    {/* <p className="text-gray-700 font-medium">{stat.percentage}% Users felt {stat.effect}</p> */}
                   </div>
                 ))}
               </div>
@@ -218,8 +338,6 @@ export default function ProductDetails() {
             </div>
           </div>
         </div>
-
-
       </div>
     </div>
   );

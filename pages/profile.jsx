@@ -18,6 +18,8 @@ const Profile = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
   const [documentEditMode, setDocumentEditMode] = useState(false);
   const [updatedProfile, setUpdatedProfile] = useState({});
@@ -128,6 +130,29 @@ const Profile = () => {
     };
 
     fetchProfile();
+    
+    // Fetch user's recent orders
+    const fetchOrders = async () => {
+      try {
+        setOrdersLoading(true);
+        const res = await Api('get', 'orders', null, router);
+        if (res?.success !== false && Array.isArray(res?.data || res)) {
+          // Some controllers return {data: []}, some return [] directly
+          setOrders(res.data || res);
+        } else if (Array.isArray(res)) {
+          setOrders(res);
+        } else {
+          setOrders([]);
+        }
+      } catch (e) {
+        console.error('Error fetching orders:', e);
+        setOrders([]);
+      } finally {
+        setOrdersLoading(false);
+      }
+    };
+
+    fetchOrders();
   }
   }, [router, isLoggedIn, authLoading]);
 
@@ -615,89 +640,51 @@ const Profile = () => {
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-lg font-semibold text-gray-900">My Orders</h2>
-                <button className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                <button onClick={() => router.push('/myorders')} className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
                   View All
                 </button>
               </div>
               <img src="/images/line.png" alt="edit" className='w-full h-[1px] mb-10'  />
               <div className="space-y-4">
-                {/* Order 1 */}
-                <div className="bg-[#E7E7E7] rounded-xl shadow-lg border-b h p-4">
-                  <div className="flex justify-between items-start mb-3">
-                    <span className="text-sm font-medium text-gray-700">Order ID: 12345</span>
-                    <div className="text-right">
-                      <span className="text-sm text-gray-500">Total: </span>
-                      <span className="font-semibold text-gray-900">$ 50</span>
-                    </div>
+                {ordersLoading ? (
+                  <div className="flex items-center justify-center py-10">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                   </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-[#2E2E2E40] rounded-lg"></div>
-                      <span className="text-gray-900 font-medium">Lion's Mane Capsule</span>
-                    </div>
-                    <div className="text-right">
-                      <div className="mb-1">
-                        <span className="text-sm text-gray-500">Status: </span>
-                        <span className="text-blue-600 font-medium">Ready for Pick-Up</span>
-                      </div>
-                      <div>
-                        <span className="text-sm text-gray-500">Amount: </span>
-                        <span className="font-semibold text-gray-900">$ 50</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <img src="/images/line.png" alt="edit" className='w-full h-[1px] mb-10'  />
-
-                {/* Order 2 */}
-                <div className="bg-[#E7E7E7] shadow-lg border-b  rounded-xl p-4">
-                  <div className="flex justify-between items-start mb-3">
-                    <span className="text-sm font-medium text-gray-700">Order ID: 12345</span>
-                    <div className="text-right">
-                      <span className="text-sm text-gray-500">Total: </span>
-                      <span className="font-semibold text-gray-900">$ 100</span>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    {/* Item 1 */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-[#2E2E2E40] rounded-lg"></div>
-                        <span className="text-gray-900 font-medium">Lion's Mane Capsule</span>
-                      </div>
-                      <div className="text-right">
-                        <div className="mb-1">
-                          <span className="text-sm text-gray-500">Status: </span>
-                          <span className="text-green-600 font-medium">Picked</span>
+                ) : orders.length === 0 ? (
+                  <div className="text-center text-gray-500 py-8">No orders yet</div>
+                ) : (
+                  orders.slice(0, 2).map((order, idx) => (
+                    <div key={order._id || idx} className="bg-[#E7E7E7] rounded-xl shadow-lg border p-4">
+                      <div className="flex justify-between items-start mb-3">
+                        <span className="text-sm font-medium text-gray-700">Order ID: {order.orderNumber || (order._id || '').slice(-8)}</span>
+                        <div className="text-right">
+                          <span className="text-sm text-gray-500">Total: </span>
+                          <span className="font-semibold text-gray-900">$ {Number(order.totalAmount || 0).toFixed(2)}</span>
                         </div>
-                        <div>
-                          <span className="text-sm text-gray-500">Amount: </span>
-                          <span className="font-semibold text-gray-900">$ 50</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                        {order.image ? (
+                          <img src={order.image} alt={order.name} className="w-12 h-12 object-cover" />
+                        ) : (
+                          <div className="w-10 h-10 bg-[#2E2E2E40] rounded-lg"></div>
+                        )}
+                          <span className="text-gray-900 font-medium">{(order.items && order.items[0]?.name) || 'Order Items'}</span>
+                        </div>
+                        <div className="text-right">
+                          <div className="mb-1">
+                            <span className="text-sm text-gray-500">Status: </span>
+                            <span className="text-blue-600 font-medium">{order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : 'Pending'}</span>
+                          </div>
+                          <div>
+                            <span className="text-sm text-gray-500">Items: </span>
+                            <span className="font-semibold text-gray-900">{order.items ? order.items.length : 0}</span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                    <img src="/images/line.png" alt="edit" className='w-full h-[1px] mb-10'  />
-                    {/* Item 2 */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-[#2E2E2E40] rounded-lg"></div>
-                        <span className="text-gray-900 font-medium">Shroom Chocolate</span>
-                      </div>
-                      <div className="text-right">
-                        <div className="mb-1">
-                          <span className="text-sm text-gray-500">Status: </span>
-                          <span className="text-green-600 font-medium">Picked</span>
-                        </div>
-                        <div>
-                          <span className="text-sm text-gray-500">Amount: </span>
-                          <span className="font-semibold text-gray-900">$ 50</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  ))
+                )}
               </div>
             </div>
           </div>

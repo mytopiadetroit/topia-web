@@ -2,11 +2,14 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import { useUser } from '../context/UserContext';
+import { Api } from '../services/service';
 
 export default function MyOrders() {
   const router = useRouter();
   const { isLoggedIn, loading } = useUser();
   const [activeFilter, setActiveFilter] = useState('All');
+  const [orders, setOrders] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   
   useEffect(() => {
     // Only check after loading is complete
@@ -36,73 +39,64 @@ export default function MyOrders() {
     }
   }, [isLoggedIn, loading, router]);
 
-  // Orders data
-  const orders = [
-    {
-      id: "12345",
-      total: 50,
-      products: [
-        {
-          name: "Lion's Mane Capsule",
-          status: "Ready for Pick-Up",
-          amount: 50
+  // Load user's orders from backend when logged in
+  useEffect(() => {
+    const fetchOrders = async () => {
+      if (!isLoggedIn) return;
+      try {
+        setIsLoading(true);
+        const res = await Api('get', 'orders', null, router);
+        if (res.success) {
+          // Normalize to fields we use in UI
+          const mapped = (res.data || []).map(o => ({
+            id: o._id,
+            total: o.totalAmount,
+            status: o.status, // backend statuses: pending, unfulfilled, fulfilled, incomplete
+            products: o.items.map(it => ({
+              name: it.name,
+              amount: it.price * it.quantity,
+              image: it.image || (it.product && it.product.images && it.product.images[0]) || ''
+            }))
+          }));
+          setOrders(mapped);
+        } else {
+          toast.error(res.message || 'Failed to load orders');
         }
-      ]
-    },
-    {
-      id: "12345",
-      total: 100,
-      products: [
-        {
-          name: "Lion's Mane Capsule",
-          status: "Picked",
-          amount: 50
-        },
-        {
-          name: "Shroom Chocolate",
-          status: "Picked",
-          amount: 50
-        }
-      ]
-    },
-    {
-      id: "12345",
-      total: 50,
-      products: [
-        {
-          name: "Lion's Mane Capsule",
-          status: "Picked",
-          amount: 50
-        }
-      ]
-    },
-    {
-      id: "12345",
-      total: 50,
-      products: [
-        {
-          name: "Shroom Chocolate",
-          status: "Cancelled",
-          amount: 50
-        }
-      ]
-    }
-  ];
+      } catch (err) {
+        console.error('Load my orders error:', err);
+        toast.error('Failed to load orders');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchOrders();
+  }, [isLoggedIn, router]);
 
   const filters = ['All', 'Processing', 'Ready for Pick-Up', 'Picked'];
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Ready for Pick-Up':
-        return 'text-blue-500';
-      case 'Picked':
-        return 'text-green-500';
-      case 'Cancelled':
-        return 'text-red-500';
+      case 'unfulfilled':
+        return 'text-blue-600'; // Ready for Pick-Up
+      case 'fulfilled':
+        return 'text-green-600'; // Picked
+      case 'incomplete':
+        return 'text-red-600';
+      case 'pending':
+        return 'text-yellow-600';
       default:
         return 'text-gray-500';
     }
   };
+
+  // Filter mapping: Processing -> pending; Ready for Pick-Up -> unfulfilled; Picked -> fulfilled
+  const filteredOrders = orders.filter(o => {
+    if (activeFilter === 'All') return true;
+    if (activeFilter === 'Processing') return o.status === 'pending';
+    if (activeFilter === 'Ready for Pick-Up') return o.status === 'unfulfilled';
+    if (activeFilter === 'Picked') return o.status === 'fulfilled';
+    return true;
+  });
 
   return (
     <div className="min-h-screen bg-white">
@@ -132,7 +126,13 @@ export default function MyOrders() {
 
         {/* Orders List */}
         <div className="space-y-4">
-          {orders.map((order, orderIndex) => (
+          {isLoading && (
+            <div className="text-center text-gray-600">Loading your orders...</div>
+          )}
+          {!isLoading && filteredOrders.length === 0 && (
+            <div className="text-center text-gray-500">No orders found</div>
+          )}
+          {filteredOrders.map((order, orderIndex) => (
             <div key={orderIndex} className="bg-[#E7E7E7] rounded-xl shadow-lg border-b p-4 ">
               {/* Order Header */}
               <div className="flex justify-between items-center mb-4">
@@ -146,16 +146,20 @@ export default function MyOrders() {
                   <div key={productIndex} className="flex items-center justify-between">
                     {/* Left Side - Product Info */}
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                      <div className="w-10 h-10 bg-[#2E2E2E40] rounded-lg"></div>
+                      <div className="w-12 h-12 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
+                        {product.image ? (
+                          <img src={product.image} alt={product.name} className="w-12 h-12 object-cover" />
+                        ) : (
+                          <div className="w-10 h-10 bg-[#2E2E2E40] rounded-lg"></div>
+                        )}
                       </div>
                       <span className="text-sm text-gray-900">{product.name}</span>
                     </div>
 
                     {/* Right Side - Status and Amount */}
                     <div className="flex items-center gap-4">
-                      <span className={`text-sm font-medium ${getStatusColor(product.status)}`}>
-                        Status: {product.status}
+                      <span className={`text-sm font-medium ${getStatusColor(order.status)}`}>
+                        Status: {activeFilter === 'Ready for Pick-Up' ? 'Ready for Pick-Up' : activeFilter === 'Picked' ? 'Picked' : activeFilter === 'Processing' ? 'Processing' : order.status}
                       </span>
                       <span className="text-sm text-gray-600">Amount: ${product.amount}</span>
                     </div>
