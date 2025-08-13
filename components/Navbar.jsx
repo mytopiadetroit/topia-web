@@ -52,7 +52,7 @@ export default function Navbar() {
          <div className="hidden md:block rounded-4xl bg-[url('/images/navbar.png')] bg-cover bg-center">
               <div className="ml-10 flex items-baseline space-x-8">
                 <a href="/menu" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium">Menu</a>
-                <a href="#" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium">Resource Centre</a>
+                <a href="#" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium">Resource Center</a>
                 <a href="#" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium">Join GAG</a>
                 <a href="#" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium">My Experiences</a>
                 <a href="#" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium">My Rewards</a>
