@@ -96,7 +96,7 @@ const OtpVerification = () => {
         <div className="w-full max-w-md">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-6xl font-bold text-gray-900 mb-2 break-words">Back For <br/> More ?</h1>
+            <h1 className="text-6xl font-bold text-gray-900 mb-2 break-words">Welcome to your <br/> Topia </h1>
           </div>
 
           <div className="space-y-4">
