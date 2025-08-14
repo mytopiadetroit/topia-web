@@ -12,6 +12,7 @@ export default function ProductDetails() {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [reviewAgg, setReviewAgg] = useState([]);
   const router = useRouter();
   const { id } = router.query;
   const { isLoggedIn, userLoading } = useUser();
@@ -49,6 +50,7 @@ export default function ProductDetails() {
   useEffect(() => {
     if (id && isLoggedIn) {
       fetchProduct();
+      fetchAgg();
     }
   }, [id, isLoggedIn]);
 
@@ -72,6 +74,13 @@ export default function ProductDetails() {
       setLoading(false);
     }
   };
+
+  const fetchAgg = async () => {
+    try {
+      const r = await Api('GET', `reviews/product/${id}/aggregate?limit=5`, null, router);
+      if (r.success) setReviewAgg(r.data || []);
+    } catch (e) {}
+  }
 
   // Handle quantity change
   const increaseQuantity = () => setQuantity(prev => prev + 1);
@@ -131,32 +140,24 @@ export default function ProductDetails() {
     );
   }
 
-  // User ratings data (this could also come from backend in the future)
+  // Tag color presets
+  const colors = [
+    { bg: '#B3194275', color: 'white' },
+    { bg: '#8b5cf6', color: 'white' },
+    { bg: '#CD45B480', color: 'white' },
+    { bg: '#53669080', color: 'white' },
+    { bg: '#2E2E2E40', color: 'white' },
+  ];
+
+  // Static ratings data for the 3 images section (preserved)
   const ratings = {
     count: 15,
     stats: [
-      { effect: 'Euphoric', percentage: 85 },
-      { effect: 'Joy', percentage: 75 },
-      { effect: 'Creative', percentage: 80 }
+      { effect: 'Euphoric' },
+      { effect: 'Joy' },
+      { effect: 'Creative' }
     ]
   };
-
-  // Tag color mapping with icons
-  const tagEmojis = {
-    Joy: '😀',
-    Euphoric: '😍',
-    Creative: '🎨',
-    Focus: '🎯',
-    Connection: '🔗',
-    Insight: '👀',
-  };
-
-  const tagData = [
-    { name: 'Connection', color: 'bg-[#B3194275] text-gray-800', icon: '🔗' },
-    { name: 'Insight', color: 'bg-[#CD45B4] text-gray-800', icon: '👀' },
-    { name: 'Euphoric', color: 'bg-[#8A38F58C] text-gray-800', icon: '⭐' },
-    { name: 'Creative', color: 'bg-[#53669080] text-gray-800', icon: '🌿' }
-  ];
 
   return (
     <div className="min-h-screen bg-white">
@@ -212,24 +213,7 @@ export default function ProductDetails() {
           <div className="md:w-1/2">
             <h1 className="text-3xl font-bold text-gray-900 mb-4">{product.name}</h1>
             
-            {/* Tags */}
-            {product.tags && product.tags.length > 0 && (
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-3">Tags</h3>
-                <div className="flex flex-wrap gap-2">
-                  {product.tags.map((tag, index) => (
-                    <span 
-                      key={index} 
-                      className="px-3 py-2 rounded-full text-sm font-medium flex items-center gap-2 bg-[#B3194275] text-gray-800"
-                    >
-                      <span className="text-xs">{tagEmojis[tag] || '❓'}</span>
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-            
+            {/* Description */}
             <div className="mb-6">
               <h2 className="text-lg text-gray-700 font-semibold mb-2">Description</h2>
               <p className="text-gray-700 mb-4">{product.description?.main || 'No description available'}</p>
@@ -253,12 +237,12 @@ export default function ProductDetails() {
                   disabled={quantity <= 1}
                   className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <span className="text-lg">-</span>
+                  <span className="text-gray-600  text-lg">-</span>
                 </button>
-                <span className="text-xl font-semibold w-16 text-center">{quantity}</span>
+                <span className="text-xl font-semibold text-gray-800 w-16 text-center">{quantity}</span>
                 <button 
                   onClick={increaseQuantity}
-                  className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50"
+                  className="w-10 h-10 rounded-full text-gray-600 border border-gray-300 flex items-center justify-center hover:bg-gray-50"
                 >
                   <span className="text-lg">+</span>
                 </button>
@@ -286,33 +270,32 @@ export default function ProductDetails() {
           </div>
         </div>
 
-        {/* Ratings and Tags Section */}
+        {/* Ratings and Tags Section (original position restored) */}
         <div className="mt-16">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Ratings Section - Left Side */}
+            {/* Ratings Section - Left Side (kept original 3 images) */}
             <div>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">Ratings</h2>
                 <span className="text-sm text-gray-500">{ratings.count} Ratings</span>
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {ratings.stats.map((stat) => (
-                  <div key={stat.effect} className="flex flex-col items-center">
+                {ratings.stats.map((stat, idx) => (
+                  <div key={idx} className="flex flex-col items-center">
                     <div className="w-32 h-32 rounded-full flex items-center justify-center mb-4 relative">
                       {stat.effect === 'Euphoric' && (
                         <div className="absolute inset-0 flex items-center justify-center">
-                        <img src="/images/g1.png" alt="" />
+                          <img src="/images/g1.png" alt="" />
                         </div>
                       )}
                       {stat.effect === 'Joy' && (
                         <div className="absolute inset-0 flex items-center justify-center">
-                        <img src="/images/g2.png" alt="" />
+                          <img src="/images/g2.png" alt="" />
                         </div>
                       )}
                       {stat.effect === 'Creative' && (
                         <div className="absolute inset-0 flex items-center justify-center">
-                         <img src="/images/g3.png" alt="" />
+                          <img src="/images/g3.png" alt="" />
                         </div>
                       )}
                     </div>
@@ -321,19 +304,29 @@ export default function ProductDetails() {
               </div>
             </div>
 
-            {/* Tags Section - Right Side */}
+            {/* Tags Section - Right Side (now dynamic) */}
             <div>
               <h3 className="text-2xl font-bold text-gray-900 mb-6">Tags</h3>
               <div className="flex flex-wrap gap-3">
-                {tagData.map((tag) => (
-                  <span 
-                    key={tag.name} 
-                    className={`px-4 py-3 rounded-full text-sm font-medium flex items-center gap-2 ${tag.color}`}
-                  >
-                    <span className="text-sm">{tag.icon}</span>
-                    {tag.name}
+                {reviewAgg.length > 0 ? (
+                  reviewAgg.map((agg, idx) => {
+                    const color = colors[Math.min(idx, colors.length - 1)];
+                    const label = agg.label || '';
+                    const match = label.match(/^[\p{Emoji}\p{Extended_Pictographic}]/u);
+                    const emoji = match ? match[0] + ' ' : '';
+                    const text = label.replace(/^[\p{Emoji}\p{Extended_Pictographic}]\s*/u, '');
+                    return (
+                      <span key={agg._id} className={`px-4 py-3 rounded-full text-sm font-medium flex items-center gap-2`} style={{ backgroundColor: color.bg, color: color.color }}>
+                        <span className="text-sm">{emoji}</span>
+                        {text} ({agg.count})
+                      </span>
+                    );
+                  })
+                ) : (
+                  <span className="px-4 py-3 rounded-full text-sm font-medium flex items-center gap-2" style={{ backgroundColor: '#B3194275', color: 'white' }}>
+                    No reviews yet
                   </span>
-                ))}
+                )}
               </div>
             </div>
           </div>

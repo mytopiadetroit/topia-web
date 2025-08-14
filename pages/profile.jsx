@@ -136,6 +136,7 @@ const Profile = () => {
       try {
         setOrdersLoading(true);
         const res = await Api('get', 'orders', null, router);
+        console.log('my',res)
         if (res?.success !== false && Array.isArray(res?.data || res)) {
           // Some controllers return {data: []}, some return [] directly
           setOrders(res.data || res);
@@ -399,6 +400,15 @@ const Profile = () => {
     }
   };
 
+
+  const getDisplayOrderNumber = (orderNumber) => {
+  if (orderNumber && orderNumber.startsWith('ORD')) {
+    const numbers = orderNumber.replace('ORD', '');
+    return `ORD${numbers.slice(-4)}`;
+  }
+  return orderNumber;
+};
+
   if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   if (error) return <div className="min-h-screen flex items-center justify-center text-red-500">{error}</div>;
 
@@ -653,37 +663,45 @@ const Profile = () => {
                 ) : orders.length === 0 ? (
                   <div className="text-center text-gray-500 py-8">No orders yet</div>
                 ) : (
-                  orders.slice(0, 2).map((order, idx) => (
-                    <div key={order._id || idx} className="bg-[#E7E7E7] rounded-xl shadow-lg border p-4">
-                      <div className="flex justify-between items-start mb-3">
-                        <span className="text-sm font-medium text-gray-700">Order ID: {order.orderNumber || (order._id || '').slice(-8)}</span>
-                        <div className="text-right">
-                          <span className="text-sm text-gray-500">Total: </span>
-                          <span className="font-semibold text-gray-900">$ {Number(order.totalAmount || 0).toFixed(2)}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                        {order.image ? (
-                          <img src={order.image} alt={order.name} className="w-12 h-12 object-cover" />
-                        ) : (
-                          <div className="w-10 h-10 bg-[#2E2E2E40] rounded-lg"></div>
-                        )}
-                          <span className="text-gray-900 font-medium">{(order.items && order.items[0]?.name) || 'Order Items'}</span>
-                        </div>
-                        <div className="text-right">
-                          <div className="mb-1">
-                            <span className="text-sm text-gray-500">Status: </span>
-                            <span className="text-blue-600 font-medium">{order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : 'Pending'}</span>
-                          </div>
-                          <div>
-                            <span className="text-sm text-gray-500">Items: </span>
-                            <span className="font-semibold text-gray-900">{order.items ? order.items.length : 0}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))
+                 orders.slice(0, 2).map((order, idx) => (
+  <div key={order._id || idx} className="bg-[#E7E7E7] rounded-xl shadow-lg border p-4">
+    <div className="flex justify-between items-start mb-3">
+     <span className="text-sm font-medium text-gray-700">Order ID: {getDisplayOrderNumber(order.orderNumber) || (order._id || '').slice(8)}</span>
+      <div className="text-right">
+        <span className="text-sm text-gray-500">Total: </span>
+        <span className="font-semibold text-gray-900">$ {Number(order.totalAmount || 0).toFixed(2)}</span>
+      </div>
+    </div>
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        {order.items && order.items[0]?.image ? (
+          <img 
+            src={order.items[0].image} 
+            alt={order.items[0].name || 'Product'} 
+            className="w-12 h-12 object-cover rounded-lg" 
+          />
+        ) : (
+          <div className="w-12 h-12 bg-[#2E2E2E40] rounded-lg"></div>
+        )}
+        <span className="text-gray-900 font-medium">
+          {(order.items && order.items[0]?.name) || 'Order Items'}
+        </span>
+      </div>
+      <div className="text-right">
+        <div className="mb-1">
+          <span className="text-sm text-gray-500">Status: </span>
+          <span className="text-blue-600 font-medium">
+            {order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : 'Pending'}
+          </span>
+        </div>
+        <div>
+          <span className="text-sm text-gray-500">Items: </span>
+          <span className="font-semibold text-gray-900">{order.items ? order.items.length : 0}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+))
                 )}
               </div>
             </div>

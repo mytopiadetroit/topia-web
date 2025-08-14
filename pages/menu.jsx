@@ -22,6 +22,9 @@ const Menu = () => {
   const [loadingData, setLoadingData] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState(null);
   
+  // dynamic review aggregates cache: productId -> array of { _id, count, label, emoji }
+  const [reviewAggByProduct, setReviewAggByProduct] = useState({});
+  
   // Filter states
   const [categoryFilters, setCategoryFilters] = useState({});
   const [primaryUseFilters, setPrimaryUseFilters] = useState({
@@ -89,12 +92,26 @@ const Menu = () => {
       if (response.success) {
         setProducts(response.data);
         setFilteredProducts(response.data);
+        // prefetch aggregates for initial page (best effort)
+        const ids = (response.data || []).slice(0, 30).map(p => p._id);
+        fetchAggregatesForProducts(ids);
       }
     } catch (error) {
       console.error('Error fetching products:', error);
       toast.error('Failed to load products');
     } finally {
       setLoadingData(false);
+    }
+  };
+
+  const fetchAggregatesForProducts = async (ids) => {
+    try {
+      const results = await Promise.all(ids.map(id => Api('GET', `reviews/product/${id}/aggregate?limit=5`, null, router).then(r => ({ id, r }))))
+      const map = {};
+      results.forEach(({ id, r }) => { if (r && r.success) map[id] = r.data || []; });
+      setReviewAggByProduct(prev => ({ ...prev, ...map }));
+    } catch (e) {
+      // silent fail
     }
   };
 
@@ -178,15 +195,14 @@ const Menu = () => {
     }
   };
 
-  // Tag emoji mapping (kept if needed elsewhere)
-  const tagEmojis = {
-    Joy: '😀',
-    Euphoric: '😍',
-    Creative: '🎨',
-    Focus: '🎯',
-    Connection: '🔗',
-    Insight: '👀',
-  };
+  // Color presets for badges
+  const colors = [
+    { bg: '#B3194275', color: 'white' },
+    { bg: '#8b5cf6', color: 'white' },
+    { bg: '#CD45B480', color: 'white' },
+    { bg: '#53669080', color: 'white' },
+    { bg: '#2E2E2E40', color: 'white' },
+  ];
 
   if (loadingData) {
     return (
@@ -334,17 +350,26 @@ const Menu = () => {
                           <div className="space-y-3">
                             <h3 className="font-medium text-gray-900 text-sm">{product.name}</h3>
                             <p className="text-lg font-semibold text-gray-900">$ {product.price}</p>
-                            {/* Tags (static on every card) */}
+                            {/* Tags (dynamic top-5 by review aggregate) */}
                             <div className="flex flex-wrap p-4 gap-1">
-                              <span className="px-2 py-1 text-xs rounded-full" style={{ backgroundColor: '#B3194275', color: 'white' }}>
-                                😀 Joy
-                              </span>
-                              <span className="px-2 py-1 text-xs rounded-full" style={{ backgroundColor: '#8b5cf6', color: 'white' }}>
-                                😍 Euphoric
-                              </span>
-                              <span className="px-2 py-1 text-xs rounded-full" style={{ backgroundColor: '#CD45B480', color: 'white' }}>
-                                🎨 Creative
-                              </span>
+                              {(reviewAggByProduct[product._id] || []).map((agg, idx) => {
+                                const color = colors[Math.min(idx, colors.length - 1)];
+                                const label = agg.label || '';
+                                // extract leading emoji if present for display
+                                const match = label.match(/^[\p{Emoji}\p{Extended_Pictographic}]/u);
+                                const emoji = match ? match[0] + ' ' : '';
+                                const text = label.replace(/^[\p{Emoji}\p{Extended_Pictographic}]\s*/u, '');
+                                return (
+                                  <span key={agg._id} className="px-2 py-1 text-xs rounded-full" style={{ backgroundColor: color.bg, color: color.color }}>
+                                    {emoji}{text} ({agg.count})
+                                  </span>
+                                );
+                              })}
+                              {(!reviewAggByProduct[product._id] || reviewAggByProduct[product._id].length === 0) && (
+                                <span className="px-2 py-1 text-xs rounded-full" style={{ backgroundColor: '#B3194275', color: 'white' }}>
+                                  No reviews yet
+                                </span>
+                              )}
                             </div>
                             {/* Add to Cart Button */}
                             <div className="flex justify-center mt-4">

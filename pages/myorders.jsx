@@ -10,6 +10,7 @@ export default function MyOrders() {
   const [activeFilter, setActiveFilter] = useState('All');
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [expandedByOrder, setExpandedByOrder] = useState({});
   
   useEffect(() => {
     // Only check after loading is complete
@@ -46,10 +47,11 @@ export default function MyOrders() {
       try {
         setIsLoading(true);
         const res = await Api('get', 'orders', null, router);
+        console.log("+++",res)
         if (res.success) {
           // Normalize to fields we use in UI
           const mapped = (res.data || []).map(o => ({
-            id: o._id,
+            id: o.orderNumber,
             total: o.totalAmount,
             status: o.status, // backend statuses: pending, unfulfilled, fulfilled, incomplete
             products: o.items.map(it => ({
@@ -98,6 +100,10 @@ export default function MyOrders() {
     return true;
   });
 
+  const toggleOrder = (orderId) => {
+    setExpandedByOrder(prev => ({ ...prev, [orderId]: !prev[orderId] }));
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-4xl mx-auto px-4 py-8">
@@ -132,42 +138,57 @@ export default function MyOrders() {
           {!isLoading && filteredOrders.length === 0 && (
             <div className="text-center text-gray-500">No orders found</div>
           )}
-          {filteredOrders.map((order, orderIndex) => (
-            <div key={orderIndex} className="bg-[#E7E7E7] rounded-xl shadow-lg border-b p-4 ">
-              {/* Order Header */}
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-sm text-gray-600">Order ID: {order.id}</span>
-                <span className="text-sm font-medium text-gray-900">Total: ${order.total}</span>
-              </div>
-
-              {/* Products */}
-              <div className="space-y-3">
-                {order.products.map((product, productIndex) => (
-                  <div key={productIndex} className="flex items-center justify-between">
-                    {/* Left Side - Product Info */}
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
-                        {product.image ? (
-                          <img src={product.image} alt={product.name} className="w-12 h-12 object-cover" />
-                        ) : (
-                          <div className="w-10 h-10 bg-[#2E2E2E40] rounded-lg"></div>
-                        )}
-                      </div>
-                      <span className="text-sm text-gray-900">{product.name}</span>
-                    </div>
-
-                    {/* Right Side - Status and Amount */}
-                    <div className="flex items-center gap-4">
-                      <span className={`text-sm font-medium ${getStatusColor(order.status)}`}>
-                        Status: {activeFilter === 'Ready for Pick-Up' ? 'Ready for Pick-Up' : activeFilter === 'Picked' ? 'Picked' : activeFilter === 'Processing' ? 'Processing' : order.status}
-                      </span>
-                      <span className="text-sm text-gray-600">Amount: ${product.amount}</span>
-                    </div>
+          {filteredOrders.map((order, orderIndex) => {
+            const isOpen = !!expandedByOrder[order.id];
+            const productsToShow = isOpen ? order.products : order.products.slice(0, 1);
+            return (
+              <div key={orderIndex} className="bg-[#E7E7E7] rounded-xl shadow-lg border-b p-4 ">
+                {/* Order Header */}
+                <div className="flex justify-between items-center mb-4">
+                <span className="text-sm text-gray-600">
+  Order ID: ORD{order.id.slice(-4)}
+</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-medium text-gray-900">Total: ${order.total}</span>
+                    <button
+                      onClick={() => toggleOrder(order.id)}
+                      className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                    >
+                      <span>{isOpen ? 'Hide items' : 'Show all items'}</span>
+                      <span>{isOpen ? '▲' : '▼'}</span>
+                    </button>
                   </div>
-                ))}
+                </div>
+
+                {/* Products */}
+                <div className="space-y-3">
+                  {productsToShow.map((product, productIndex) => (
+                    <div key={productIndex} className="flex items-center justify-between">
+                      {/* Left Side - Product Info */}
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
+                          {product.image ? (
+                            <img src={product.image} alt={product.name} className="w-12 h-12 object-cover" />
+                          ) : (
+                            <div className="w-10 h-10 bg-[#2E2E2E40] rounded-lg"></div>
+                          )}
+                        </div>
+                        <span className="text-sm text-gray-900">{product.name}</span>
+                      </div>
+
+                      {/* Right Side - Status and Amount */}
+                      <div className="flex items-center gap-4">
+                        <span className={`text-sm font-medium ${getStatusColor(order.status)}`}>
+                          Status: {activeFilter === 'Ready for Pick-Up' ? 'Ready for Pick-Up' : activeFilter === 'Picked' ? 'Picked' : activeFilter === 'Processing' ? 'Processing' : order.status}
+                        </span>
+                        <span className="text-sm text-gray-600">Amount: ${product.amount}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

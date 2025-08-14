@@ -69,6 +69,13 @@ export default function OrderConfirm() {
     }
   };
 
+  const getDisplayOrderNumber = (orderNumber) => {
+  if (orderNumber && orderNumber.startsWith('ORD')) {
+    const numbers = orderNumber.replace('ORD', '');
+    return `ORD${numbers.slice(-4)}`;
+  }
+  return orderNumber;
+};
   // Loading state
   if (loadingOrder) {
     return (
@@ -156,7 +163,7 @@ export default function OrderConfirm() {
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           {/* Header - Dark Blue/Gray Bar */}
           <div className="bg-[#536690] text-white px-6 py-4 flex justify-between items-center">
-            <span className="font-medium">Order ID: {orderData.orderNumber}</span>
+           <span className="font-medium">Order ID: {getDisplayOrderNumber(orderData.orderNumber)}</span>
             <span className="font-medium">Order Date: {formatDate(orderData.createdAt)}</span>
           </div>
 

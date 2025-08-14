@@ -52,7 +52,7 @@ export default function Navbar() {
          <div className="hidden md:block rounded-4xl bg-[url('/images/navbar.png')] bg-cover bg-center">
               <div className="ml-10 flex items-baseline space-x-8">
                 <a href="/menu" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium">Menu</a>
-                <a href="#" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium">Resource Center</a>
+                <a href="#" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium">Resource Centre</a>
                 <a href="#" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium">Join GAG</a>
                 <a href="#" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium">My Experiences</a>
                 <a href="#" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium">My Rewards</a>
@@ -96,6 +96,9 @@ export default function Navbar() {
                     <a href="/myorders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                       My Orders
                     </a>
+                    <a href="/myhistory" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        My History
+                      </a>
                     <button 
                       onClick={() => {
                         logout();
@@ -155,6 +158,9 @@ export default function Navbar() {
                       </a>
                       <a href="/myorders" className="text-gray-900 hover:text-blue-600 block px-3 py-2 text-base font-medium">
                         My Orders
+                      </a>
+                      <a href="/myhistory" className="text-gray-900 hover:text-blue-600 block px-3 py-2 text-base font-medium">
+                        My History
                       </a>
                       <button 
                         onClick={() => {
