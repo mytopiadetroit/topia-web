@@ -83,15 +83,22 @@ export default function ProductDetails() {
   }
 
   // Handle quantity change
-  const increaseQuantity = () => setQuantity(prev => prev + 1);
+  const increaseQuantity = () => setQuantity(prev => {
+    const max = Math.max(0, Number(product?.stock ?? 0));
+    const next = prev + 1;
+    if (max > 0 && next > max) return max;
+    return next;
+  });
   const decreaseQuantity = () => setQuantity(prev => prev > 1 ? prev - 1 : 1);
 
   // Handle add to cart
   const handleAddToCart = () => {
-    if (product && product.hasStock) {
-      addToCart(product, quantity);
-      toast.success(`${product.name} added to cart!`);
-    }
+    if (!product) return;
+    const stock = Number(product.stock || 0);
+    if (!product.hasStock || stock <= 0) return;
+    const qty = Math.min(quantity, stock);
+    addToCart(product, qty);
+    toast.success(`${product.name} added to cart!`);
   };
 
   // Loading state
@@ -228,10 +235,10 @@ export default function ProductDetails() {
               <p className="text-3xl font-bold text-[#536690]">$ {product.price}</p>
             </div>
 
-            {/* Quantity Selector */}
+            {/* Quantity Selector (respect stock limits) */}
             <div className="mb-6">
               <h3 className="text-lg text-gray-700 font-semibold mb-3">Quantity</h3>
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center ">
                 <button 
                   onClick={decreaseQuantity}
                   disabled={quantity <= 1}
@@ -242,24 +249,30 @@ export default function ProductDetails() {
                 <span className="text-xl font-semibold text-gray-800 w-16 text-center">{quantity}</span>
                 <button 
                   onClick={increaseQuantity}
-                  className="w-10 h-10 rounded-full text-gray-600 border border-gray-300 flex items-center justify-center hover:bg-gray-50"
+                  disabled={Number(product?.stock || 0) > 0 && quantity >= Number(product?.stock || 0)}
+                  className="w-10 h-10 rounded-full text-gray-600 border border-gray-300 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span className="text-lg">+</span>
                 </button>
               </div>
+              {Number(product?.stock || 0) <= 0 ? (
+                <p className="mt-2 text-sm text-red-600">Out of stock</p>
+              ) : Number(product?.stock || 0) < 5 ? (
+                <p className="mt-2 text-sm text-gray-600">Only {Number(product?.stock || 0)} left</p>
+              ) : null}
             </div>
 
             {/* Add to Cart Section */}
             <div className="flex items-center gap-4 mb-8">
               <button 
                 onClick={handleAddToCart}
-                disabled={!product.hasStock}
+                disabled={!product.hasStock || Number(product?.stock || 0) <= 0}
                 className={`bg-[#536690] hover:bg-[#536690] text-white font-medium py-3 px-8 rounded-full flex items-center justify-center gap-2 flex-1 transition-colors ${
-                  !product.hasStock ? 'opacity-50 cursor-not-allowed' : ''
+                  (!product.hasStock || Number(product?.stock || 0) <= 0) ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >
-                <span>{product.hasStock ? 'Add to Cart' : 'Out of Stock'}</span>
-                {product.hasStock && <span className="text-xl">+</span>}
+                <span>{(product.hasStock && Number(product?.stock || 0) > 0) ? 'Add to Cart' : 'Out of Stock'}</span>
+                {(product.hasStock && Number(product?.stock || 0) > 0) && <span className="text-xl">+</span>}
               </button>
               
               <button className="border border-gray-300 bg-white text-gray-500 font-medium py-3 px-6 rounded-full hover:bg-gray-50 transition-colors flex items-center justify-center">
