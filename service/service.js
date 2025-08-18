@@ -317,3 +317,12 @@ const setGlobalRouter = (routerInstance) => {
 };
 
 export { Api, timeSince, ApiFormData, setGlobalRouter, toast, setGlobalToast, fetchAllCategories, fetchProductsByCategory, createProduct, fetchAllUsers, fetchUserById, updateUser, deleteUser };
+// Newsletter subscription
+export const subscribeEmail = async (email, router) => {
+  try {
+    return await Api('post', 'subscribers', { email }, router);
+  } catch (error) {
+    console.error('Error subscribing email:', error);
+    throw error;
+  }
+};

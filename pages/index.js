@@ -118,9 +118,12 @@ export default function Home() {
                    An exclusive collection of nature&apos;s finest functional and,<br />therapeutic mushrooms for your well-being<br /> 
                    
                   </p>
-                  <button className="bg-[#2E2E2E] hover:bg-gray-800 text-white px-8 py-3    rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2">
-                    <span>Browser Menu</span>
-                  </button>
+                 <button
+  onClick={() => router.push('/menu')}
+  className="bg-[#2E2E2E] hover:bg-gray-800 text-white px-8 py-3 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2"
+>
+  <span>Browser Menu</span>
+</button>
                 </div>
               </div>
             </div>
@@ -233,7 +236,7 @@ export default function Home() {
                 </p>
                 
                 <button className="bg-[#2E2E2E] hover:bg-[#2E2E2E] text-white px-8 py-4 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105">
-                  Learn more 
+                  Comming Soon 
                 </button>
               </div>
             </div>
@@ -261,10 +264,13 @@ export default function Home() {
                 Track your rewards and redeem points.
               </p>
               
-              <button className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2">
-                <span>Get Rewards</span>
-                <ChevronRight className="w-5 h-5" />
-              </button>
+             <button
+  onClick={() => router.push('/profile')}
+  className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2"
+>
+  <span>Get Rewards</span>
+  <ChevronRight className="w-5 h-5" />
+</button>
             </div>
 
             {/* Right Image - Rewards Grid */}
@@ -294,7 +300,7 @@ export default function Home() {
             
             <div className="text-center relative z-10">
               <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
-                Your Feedback Fuels The Community
+                Your Feedback Helps Us Cater To Your Journey
               </h2>
               <p className="text-gray-600 text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
                 Tell us about your experience with the products you&apos;ve tried.<br />

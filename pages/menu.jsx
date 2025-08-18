@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Filter, X, Menu as MenuIcon } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import { useUser } from '../context/UserContext';
@@ -14,6 +14,9 @@ const Menu = () => {
   const [collapsedByCategory, setCollapsedByCategory] = useState({});
   const [categoryOpen, setCategoryOpen] = useState(true);
   const [primaryUseOpen, setPrimaryUseOpen] = useState(true);
+  
+  // Side drawer state
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   
   // State for dynamic data
   const [categories, setCategories] = useState([]);
@@ -63,6 +66,18 @@ const Menu = () => {
       }
     }
   }, [isLoggedIn, loading, router]);
+
+  // Close drawer when clicking outside on mobile
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) { // lg breakpoint
+        setIsDrawerOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Fetch categories from backend
   const fetchCategories = async () => {
@@ -195,6 +210,19 @@ const Menu = () => {
     }
   };
 
+  const clearAllFilters = () => {
+    setCategoryFilters({});
+    setPrimaryUseFilters({ therapeutic: false, functional: false });
+    setIsDrawerOpen(false); // Close drawer after clearing filters
+  };
+
+  // Calculate active filter count
+  const activeFilterCount = useMemo(() => {
+    const categoryCount = Object.values(categoryFilters).filter(Boolean).length;
+    const primaryUseCount = Object.values(primaryUseFilters).filter(Boolean).length;
+    return categoryCount + primaryUseCount;
+  }, [categoryFilters, primaryUseFilters]);
+
   // Color presets for badges
   const colors = [
     { bg: '#B3194275', color: 'white' },
@@ -203,6 +231,106 @@ const Menu = () => {
     { bg: '#53669080', color: 'white' },
     { bg: '#2E2E2E40', color: 'white' },
   ];
+
+  // Filter Sidebar Component
+  const FilterSidebar = ({ className = "" }) => (
+    <div className={`bg-white p-6 ${className}`}>
+      {/* Header for mobile drawer */}
+      <div className="flex items-center justify-between mb-6 lg:hidden">
+        <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
+        <button
+          onClick={() => setIsDrawerOpen(false)}
+          className="p-2 text-gray-500 hover:text-gray-700"
+        >
+          <X size={20} />
+        </button>
+      </div>
+
+      {/* Active filters indicator */}
+      {activeFilterCount > 0 && (
+        <div className="mb-6 p-3 bg-blue-50 rounded-lg">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-blue-700 font-medium">
+              {activeFilterCount} filter{activeFilterCount > 1 ? 's' : ''} active
+            </span>
+            <button
+              onClick={clearAllFilters}
+              className="text-xs text-blue-600 hover:text-blue-800 underline"
+            >
+              Clear all
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Category Filter */}
+      <div className="mb-8">
+        <button
+          onClick={() => setCategoryOpen(!categoryOpen)}
+          className="flex items-center justify-between w-full text-left font-medium text-gray-900 mb-4"
+        >
+          Category
+          {categoryOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </button>
+        
+        {categoryOpen && (
+          <div className="space-y-3 max-h-60 overflow-y-auto">
+            {categories.map((category) => (
+              <label key={category._id} className="flex items-center cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={categoryFilters[category._id] || false}
+                  onChange={() => handleCategoryChange(category._id)}
+                  className="w-4 h-4 text-[#536690] border-gray-300 rounded focus:ring-[#536690] focus:ring-2"
+                />
+                <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
+                  {category.category}
+                </span>
+              </label>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Primary Use Filter */}
+      <div>
+        <button
+          onClick={() => setPrimaryUseOpen(!primaryUseOpen)}
+          className="flex items-center justify-between w-full text-left font-medium text-gray-900 mb-4"
+        >
+          Primary Use
+          {primaryUseOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </button>
+        
+        {primaryUseOpen && (
+          <div className="space-y-3">
+            <label className="flex items-center cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={primaryUseFilters.therapeutic}
+                onChange={() => handlePrimaryUseChange('therapeutic')}
+                className="w-4 h-4 text-[#536690] border-gray-300 rounded focus:ring-[#536690] focus:ring-2"
+              />
+              <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
+                Therapeutic
+              </span>
+            </label>
+            <label className="flex items-center cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={primaryUseFilters.functional}
+                onChange={() => handlePrimaryUseChange('functional')}
+                className="w-4 h-4 text-[#536690] border-gray-300 rounded focus:ring-[#536690] focus:ring-2"
+              />
+              <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
+                Functional / Medicinal
+              </span>
+            </label>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 
   if (loadingData) {
     return (
@@ -219,94 +347,90 @@ const Menu = () => {
     <div className="min-h-screen lg:px-14 bg-white">
       {/* Navigation */}
       <nav className="bg-white border-b border-gray-200 px-4 py-3">
-        <div className="flex items-center space-x-4 text-sm text-gray-600">
-          <span className="hover:text-gray-900 cursor-pointer">Home</span>
-          <span className="text-gray-400">/</span>
-          <span className="text-gray-900 font-medium">Menu</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4 text-sm text-gray-600">
+            <span className="hover:text-gray-900 cursor-pointer">Home</span>
+            <span className="text-gray-400">/</span>
+            <span className="text-gray-900 font-medium">Menu</span>
+          </div>
+          
+          {/* Mobile filter button */}
+          <button
+            onClick={() => setIsDrawerOpen(true)}
+            className="lg:hidden flex items-center space-x-2 px-3 py-2 bg-[#536690] text-white rounded-lg hover:bg-[#536690]/90 transition-colors"
+          >
+            <Filter size={16} />
+            <span className="text-sm">Filters</span>
+            {activeFilterCount > 0 && (
+              <span className="bg-white text-[#536690] text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
         </div>
       </nav>
 
-      <div className="flex flex-col lg:flex-row">
-        {/* Sidebar */}
-        <div className="w-full lg:w-64 bg-white border-r border-gray-200 p-6">
-          {/* Category Filter */}
-          <div className="mb-8">
-            <button
-              onClick={() => setCategoryOpen(!categoryOpen)}
-              className="flex items-center justify-between w-full text-left font-medium text-gray-900 mb-4"
-            >
-              Category
-              {categoryOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-            </button>
-            
-            {categoryOpen && (
-              <div className="space-y-3">
-                {categories.map((category) => (
-                  <label key={category._id} className="flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={categoryFilters[category._id] || false}
-                      onChange={() => handleCategoryChange(category._id)}
-                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    />
-                    <span className="ml-3 text-sm text-gray-700">{category.category}</span>
-                  </label>
-                ))}
-              </div>
-            )}
-          </div>
+      <div className="flex flex-col lg:flex-row relative">
+        {/* Desktop Sidebar - Hidden on mobile */}
+        <div className="hidden lg:block w-64 border-r border-gray-200">
+          <FilterSidebar />
+        </div>
 
-          {/* Primary Use Filter */}
-          <div>
-            <button
-              onClick={() => setPrimaryUseOpen(!primaryUseOpen)}
-              className="flex items-center justify-between w-full text-left font-medium text-gray-900 mb-4"
-            >
-              Primary Use
-              {primaryUseOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-            </button>
-            
-            {primaryUseOpen && (
-              <div className="space-y-3">
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={primaryUseFilters.therapeutic}
-                    onChange={() => handlePrimaryUseChange('therapeutic')}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <span className="ml-3 text-sm text-gray-700">Therapeutic</span>
-                </label>
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={primaryUseFilters.functional}
-                    onChange={() => handlePrimaryUseChange('functional')}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <span className="ml-3 text-sm text-gray-700">Functional / Medicinal</span>
-                </label>
-              </div>
-            )}
-          </div>
+        {/* Mobile Drawer Overlay */}
+        {isDrawerOpen && (
+          <div 
+            className="lg:hidden fixed inset-0 bg-black/50 bg-opacity-50 z-40 transition-opacity"
+            onClick={() => setIsDrawerOpen(false)}
+          />
+        )}
+
+        {/* Mobile Drawer */}
+        <div className={`lg:hidden fixed inset-y-0 left-0 w-80 max-w-[85vw] bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out ${
+          isDrawerOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}>
+          <FilterSidebar />
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 p-6">
-          {/* Header Banner */}
-          <div className="bg-slate-400 rounded-lg h-24 mb-8"></div>
+        <div className="flex-1 p-4 lg:p-6">
+          {/* Mobile Active Filters Display */}
+          {activeFilterCount > 0 && (
+            <div className="lg:hidden mb-4 p-3 bg-gray-50 rounded-lg">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-700 font-medium">
+                  {activeFilterCount} active filter{activeFilterCount > 1 ? 's' : ''}
+                </span>
+                <button
+                  onClick={clearAllFilters}
+                  className="text-xs text-[#536690] hover:text-[#536690]/80 underline font-medium"
+                >
+                  Clear all
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Results Count */}
+          <div className="mb-6">
+            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
+              Menu
+            </h1>
+            <p className="text-gray-600 mt-1">
+              {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} available
+            </p>
+          </div>
 
           {/* Products grouped by category */}
-          <div className="mb-6 space-y-10">
+          <div className="mb-6 space-y-8 lg:space-y-10">
             {groupedByCategory.map((group) => (
               <div key={group.catId}>
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-semibold text-gray-900">
+                <div className="flex items-center justify-between mb-4 lg:mb-6">
+                  <h2 className="text-xl lg:text-2xl font-semibold text-gray-900">
                     {group.catName} ({group.items.length})
                   </h2>
                   <button
                     onClick={() => toggleCategoryCollapse(group.catId)}
-                    className="p-2 text-gray-600 hover:text-gray-800"
+                    className="p-2 text-gray-600 hover:text-gray-800 transition-colors"
                   >
                     {collapsedByCategory[group.catId] ? (
                       <ChevronUp size={20} />
@@ -345,6 +469,7 @@ const Menu = () => {
                             </div>
                           )}
                         </div>
+                        
                         {/* Card Content */}
                         <div className="p-4">
                           <div className="space-y-3">
@@ -406,16 +531,21 @@ const Menu = () => {
             {/* No products message */}
             {filteredProducts.length === 0 && !loadingData && (
               <div className="text-center py-12">
-                <p className="text-gray-500 text-lg">No products match your current filters.</p>
-                <button 
-                  onClick={() => {
-                    setCategoryFilters({});
-                    setPrimaryUseFilters({ therapeutic: false, functional: false });
-                  }}
-                  className="mt-4 px-6 py-2 bg-[#536690] text-white rounded-full hover:bg-[#536690] transition-colors"
-                >
-                  Clear Filters
-                </button>
+                <div className="max-w-md mx-auto">
+                  <div className="mb-4">
+                    <Filter size={48} className="text-gray-300 mx-auto" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
+                  <p className="text-gray-500 text-sm lg:text-base mb-6">
+                    No products match your current filters. Try adjusting your filter criteria.
+                  </p>
+                  <button 
+                    onClick={clearAllFilters}
+                    className="px-6 py-3 bg-[#536690] text-white rounded-full hover:bg-[#536690]/90 transition-colors font-medium"
+                  >
+                    Clear All Filters
+                  </button>
+                </div>
               </div>
             )}
           </div>
