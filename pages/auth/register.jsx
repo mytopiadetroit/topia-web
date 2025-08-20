@@ -3,7 +3,7 @@ import { ChevronDown } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { Api, ApiFormData } from '../../services/service';
 import Link from 'next/link';
-import { toast } from 'react-toastify';
+import { safeToast } from '../../utils/toast';
 import PhoneInput from 'react-phone-input-2';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
@@ -75,15 +75,7 @@ const handleSubmit = async (e) => {
   const phoneNumber = parsePhoneNumberFromString(formData.phone);
   if (!phoneNumber || !phoneNumber.isValid()) {
     setError('Please enter a valid phone number');
-    toast.error('Please enter a valid phone number', {
-      position: "top-center",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
+    safeToast.error('Please enter a valid phone number');
     return;
   }
   
@@ -93,15 +85,7 @@ const handleSubmit = async (e) => {
   
   if (!phoneNumber.isPossible()) {
     setError(`The phone number length is not valid for ${phoneNumber.country}`);
-    toast.error(`The phone number length is not valid for ${phoneNumber.country}`, {
-      position: "top-center",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
+    safeToast.error(`The phone number length is not valid for ${phoneNumber.country}`);
     return;
   }
   
@@ -123,15 +107,7 @@ const handleSubmit = async (e) => {
   
   if (age < 21) {
     setError('You must be at least 21 years old to register');
-    toast.error('You must be at least 21 years old to register', {
-      position: "top-center",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
+    safeToast.error('You must be at least 21 years old to register');
     return;
   }
   
@@ -180,22 +156,9 @@ const handleSubmit = async (e) => {
       }
       
       // Show success toast message with proper styling
-      toast.success('Registration successful! ', {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        style: {
-          backgroundColor: '#4caf50',
-          color: 'white',
-          fontWeight: '500',
-          borderRadius: '8px'
-        }
-      });
+      safeToast.success('Registration successful!');
       
-      // Redirect to login page
+      // Redirect to login page after a delay to ensure toast is visible
       setTimeout(() => {
         router.push('/auth/login');
       }, 2000);
@@ -205,20 +168,7 @@ const handleSubmit = async (e) => {
       // Registration failed
       const errorMessage = response?.message || response?.error || 'Registration failed. Please try again.';
 
-      toast.error(errorMessage, {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        style: {
-          backgroundColor: '#f44336',
-          color: 'white',
-          fontWeight: '500',
-          borderRadius: '8px'
-        }
-      });
+      safeToast.error(errorMessage);
       setError(errorMessage);
     }
   } catch (err) {
@@ -235,20 +185,7 @@ const handleSubmit = async (e) => {
         localStorage.setItem('userDetail', JSON.stringify(err.response.data.user));
       }
       
-      toast.success('Registration successful! ', {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        style: {
-          backgroundColor: '#4caf50',
-          color: 'white',
-          fontWeight: '500',
-          borderRadius: '8px'
-        }
-      });
+      safeToast.success('Registration successful!');
       
       setTimeout(() => {
         router.push('/auth/login');
@@ -260,20 +197,7 @@ const handleSubmit = async (e) => {
     // Actual error
     const errorMessage = err.response?.data?.message || err.message || 'registration failed. Please try again.';
     
-    toast.error(errorMessage, {
-      position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      style: {
-        backgroundColor: '#f44336',
-        color: 'white',
-        fontWeight: '500',
-        borderRadius: '8px'
-      }
-    });
+    safeToast.error(errorMessage);
     setError(errorMessage);
   } finally {
     setLoading(false);

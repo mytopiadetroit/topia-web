@@ -317,6 +317,14 @@ const setGlobalRouter = (routerInstance) => {
 };
 
 export { Api, timeSince, ApiFormData, setGlobalRouter, toast, setGlobalToast, fetchAllCategories, fetchProductsByCategory, createProduct, fetchAllUsers, fetchUserById, updateUser, deleteUser };
+export const submitContactMessage = async (data, router) => {
+  try {
+    return await Api('post', 'contacts', data, router);
+  } catch (error) {
+    console.error('Error submitting contact:', error);
+    throw error;
+  }
+};
 // Newsletter subscription
 export const subscribeEmail = async (email, router) => {
   try {

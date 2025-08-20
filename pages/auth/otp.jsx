@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { Api } from '../../services/service';
-import { toast } from 'react-toastify';
+import { safeToast } from '../../utils/toast';
 import { useUser } from '../../context/UserContext';
 
 const OtpVerification = () => {
@@ -54,26 +54,19 @@ const OtpVerification = () => {
         }
         
         // Show success toast message
-        toast.success('Login successful!', {
-          className: 'toast-success-container',
-          bodyClassName: 'toast-success-body'
-        });
+        safeToast.success('Login successful!');
         
-        // Redirect to home page
-        router.push('/');
+        // Redirect to home page after a delay to ensure toast is visible
+        setTimeout(() => {
+          router.push('/');
+        }, 1500);
       } else {
-        toast.error(response.message || 'OTP verification failed. Please try again.', {
-          className: 'toast-error-container',
-          bodyClassName: 'toast-error-body'
-        });
+        safeToast.error(response.message || 'OTP verification failed. Please try again.');
         setError(response.message || 'OTP verification failed. Please try again.');
       }
     } catch (err) {
       console.error('OTP verification error:', err);
-      toast.error('An error occurred during OTP verification. Please try again.', {
-        className: 'toast-error-container',
-        bodyClassName: 'toast-error-body'
-      });
+      safeToast.error('An error occurred during OTP verification. Please try again.');
       setError(err.message || 'Something went wrong. Please try again.');
     } finally {
       setLoading(false);

@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { subscribeEmail } from '../service/service';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
@@ -75,7 +75,7 @@ function App() {
                 <a href="#" className="block hover:text-gray-200 transition-colors">Articles</a>
                 <a href="#" className="block hover:text-gray-200 transition-colors">Events</a>
                 <a href="#" className="block hover:text-gray-200 transition-colors">Podcast</a>
-                <a href="#" className="block hover:text-gray-200 transition-colors">Contact</a>
+                <a href="/contact" className="block hover:text-gray-200 transition-colors">Contact</a>
               </div>
               <div className="space-y-4">
                 <a href="#" className="block hover:text-gray-200 transition-colors">Register</a>
@@ -107,8 +107,7 @@ function App() {
         </div>
       </footer>
 
-      {/* Toast Container */}
-      <ToastContainer position="top-right" autoClose={3000} />
+      {/* Toasts are managed globally in _app.js */}
     </div>
   );
 }

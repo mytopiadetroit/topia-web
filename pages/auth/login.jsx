@@ -3,7 +3,7 @@ import { ChevronDown } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { Api } from '../../services/service';
 import Link from 'next/link';
-import { toast } from 'react-toastify';
+import { safeToast } from '../../utils/toast';
 import { useUser } from '../../context/UserContext';
 import PhoneInput from 'react-phone-input-2';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
@@ -62,30 +62,14 @@ const Login = () => {
     const phoneNumber = parsePhoneNumberFromString(formData.phone);
     if (!phoneNumber || !phoneNumber.isValid()) {
       setError('Please enter a valid phone number');
-      toast.error('Please enter a valid phone number', {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      safeToast.error('Please enter a valid phone number');
       return;
     }
     
     // Check if phone number length is valid for the country
     if (!phoneNumber.isPossible()) {
       setError(`The phone number length is not valid for ${phoneNumber.country}`);
-      toast.error(`The phone number length is not valid for ${phoneNumber.country}`, {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      safeToast.error(`The phone number length is not valid for ${phoneNumber.country}`);
       return;
     }
 
@@ -108,26 +92,19 @@ const Login = () => {
         }
         
         // Show success toast message
-        toast.success('OTP has been sent! Please enter your OTP.', {
-          className: 'toast-success-container',
-          bodyClassName: 'toast-success-body'
-        });
+        safeToast.success('OTP has been sent! Please enter your OTP.');
         
-        // Redirect to OTP verification page
-        router.push('/auth/otp');
+        // Redirect to OTP verification page after a short delay to ensure toast is visible
+        setTimeout(() => {
+          router.push('/auth/otp');
+        }, 1000);
       } else {
-        toast.error(response.message || 'Login failed. Please try again.', {
-          className: 'toast-error-container',
-          bodyClassName: 'toast-error-body'
-        });
+        safeToast.error(response.message || 'Login failed. Please try again.');
         setError(response.message || 'Login failed. Please try again.');
       }
     } catch (err) {
       console.error('Login error:', err);
-      toast.error('An error occurred during login. Please try again.', {
-        className: 'toast-error-container',
-        bodyClassName: 'toast-error-body'
-      });
+      safeToast.error('An error occurred during login. Please try again.');
       setError(err.message || 'Something went wrong. Please try again.');
     } finally {
       setLoading(false);

@@ -90,8 +90,8 @@ export default function MyHistory() {
               <div key={orderIndex} className="bg-[#E7E7E7] rounded-xl shadow-lg border-b p-4 ">
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-sm text-gray-600">
-  Order ID: ORD{order.id.slice(-4)}
-</span>
+                    Order ID: ORD{order.id.slice(-4)}
+                  </span>
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-medium text-gray-900">Total: ${order.total}</span>
                     <button onClick={() => toggleOrder(order.id)} className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1">
@@ -102,9 +102,9 @@ export default function MyHistory() {
                 </div>
                 <div className="space-y-3">
                   {productsToShow.map((p, i) => (
-                    <div key={i} className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
+                    <div key={i} className="flex items-center">
+                      <div className="flex items-center gap-3 flex-1">
+                        <div className="w-12 h-12 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
                           {p.image ? (
                             <img src={p.image} alt={p.name} className="w-12 h-12 object-cover" />
                           ) : (
@@ -113,9 +113,11 @@ export default function MyHistory() {
                         </div>
                         <span className="text-sm text-gray-900">{p.name}</span>
                       </div>
-                      <div className="flex  items-center gap-4">
-                        <button onClick={() => openReview(p.id, order.id)} className="text-sm py-1 px-2 rounded-lg bg-[#536690] text-white hover:text-blue-800">Add Review</button>
-                        <span className="text-sm text-gray-600">Amount: ${p.amount}</span>
+                      <div className="w-32 flex justify-center">
+                        <button onClick={() => openReview(p.id, order.id)} className="text-sm py-1 px-2 rounded-lg bg-[#536690] text-white hover:bg-[#4a5a7f] whitespace-nowrap">Add Review</button>
+                      </div>
+                      <div className="w-24 flex justify-end">
+                        <span className="text-sm text-gray-600 whitespace-nowrap">Amount: ${p.amount}</span>
                       </div>
                     </div>
                   ))}
@@ -126,60 +128,58 @@ export default function MyHistory() {
         </div>
       </div>
 
-     {reviewModal.open && (
-  <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50 p-4">
-    <div className="bg-white rounded-3xl shadow-xl w-full max-w-lg p-8 relative">
-      {/* Close button */}
-      <button 
-        onClick={closeReview} 
-        className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 text-2xl"
-      >
-        ×
-      </button>
-      
-      {/* Header */}
-      <div className="text-center mb-6">
-        <h3 className="text-2xl font-bold text-gray-900 mb-2">Review Us!</h3>
-        <p className="text-gray-600 text-sm">Let us know about your experience.</p>
-      </div>
-      
-      {/* Description */}
-      <div className="mb-6">
-        <p className="text-center text-gray-700 text-sm">
-          Select from the options below what best suited your experience.
-        </p>
-      </div>
-      
-      {/* Options */}
-      <div className="flex flex-wrap gap-3 justify-center">
-        {reviewOptions.map((opt, index) => {
-          const colors = [
-            'bg-pink-300 text-pink-800',
-            'bg-purple-300 text-purple-800', 
-            'bg-blue-300 text-blue-800',
-            'bg-gray-400 text-gray-800'
-          ];
-          const bgColor = colors[index % 4];
-          
-          return (
+      {reviewModal.open && (
+        <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl shadow-xl w-full max-w-lg p-8 relative">
+            {/* Close button */}
             <button 
-              key={opt._id} 
-              onClick={() => submitReview(opt._id)} 
-              className={`px-4 py-2 rounded-full text-sm font-medium hover:opacity-80 transition-opacity ${bgColor}`}
+              onClick={closeReview} 
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 text-2xl"
             >
-              {opt.label}
+              ×
             </button>
-          );
-        })}
-        {reviewOptions.length === 0 && (
-          <div className="text-sm text-gray-500 text-center">No review options available</div>
-        )}
-      </div>
-    </div>
-  </div>
-)}
+            
+            {/* Header */}
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Review Us!</h3>
+              <p className="text-gray-600 text-sm">Let us know about your experience.</p>
+            </div>
+            
+            {/* Description */}
+            <div className="mb-6">
+              <p className="text-center text-gray-700 text-sm">
+                Select from the options below what best suited your experience.
+              </p>
+            </div>
+            
+            {/* Options */}
+            <div className="flex flex-wrap gap-3 justify-center">
+              {reviewOptions.map((opt, index) => {
+                const colors = [
+                  'bg-pink-300 text-pink-800',
+                  'bg-purple-300 text-purple-800', 
+                  'bg-blue-300 text-blue-800',
+                  'bg-gray-400 text-gray-800'
+                ];
+                const bgColor = colors[index % 4];
+                
+                return (
+                  <button 
+                    key={opt._id} 
+                    onClick={() => submitReview(opt._id)} 
+                    className={`px-4 py-2 rounded-full text-sm font-medium hover:opacity-80 transition-opacity ${bgColor}`}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+              {reviewOptions.length === 0 && (
+                <div className="text-sm text-gray-500 text-center">No review options available</div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
-

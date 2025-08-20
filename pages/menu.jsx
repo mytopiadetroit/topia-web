@@ -197,16 +197,26 @@ const Menu = () => {
 
   const handleAddToCart = (product, e) => {
     e.stopPropagation(); // Prevent card click event
-    if (product.hasStock) {
+    const stock = Number(product.stock || 0);
+    const isAvailable = product.hasStock && stock > 0;
+    
+    if (isAvailable) {
       addToCart(product, 1);
       toast.success(`${product.name} added to cart!`);
       setAddedSet(prev => ({ ...prev, [product._id]: true }));
+    } else {
+      toast.error('Product is out of stock');
     }
   };
 
   const handleProductClick = (product) => {
-    if (product.hasStock) {
+    const stock = Number(product.stock || 0);
+    const isAvailable = product.hasStock && stock > 0;
+    
+    if (isAvailable) {
       router.push(`/productdetails?id=${product._id}`);
+    } else {
+      toast.error('Product is out of stock');
     }
   };
 
@@ -460,14 +470,31 @@ const Menu = () => {
                           ) : (
                             <div className="w-full h-full bg-gray-200"></div>
                           )}
-                          {/* Coming Soon Watermark inside image */}
-                          {!product.hasStock && (
-                            <div className="absolute inset-0 flex items-center justify-center z-10">
-                              <div className="text-3xl font-bold text-gray-300 rotate-12 select-none text-center">
-                                Coming<br />Soon
-                              </div>
-                            </div>
-                          )}
+                          {/* Stock Status Overlay */}
+                          {(() => {
+                            const stock = Number(product.stock || 0);
+                            const isOutOfStock = !product.hasStock || stock <= 0;
+                            const isLowStock = stock > 0 && stock < 5;
+                            
+                            if (isOutOfStock) {
+                              return (
+                                <div className="absolute inset-0 flex items-center justify-center z-10">
+                                  <div className="text-2xl font-bold text-red-500 rotate-12 select-none text-center bg-white/90 px-4 py-2 rounded-lg">
+                                    Out of<br />Stock
+                                  </div>
+                                </div>
+                              );
+                            } else if (isLowStock) {
+                              return (
+                                <div className="absolute top-2 right-2 z-10">
+                                  <div className="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                                    Only {stock} left
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return null;
+                          })()}
                         </div>
                         
                         {/* Card Content */}
@@ -498,26 +525,40 @@ const Menu = () => {
                             </div>
                             {/* Add to Cart Button */}
                             <div className="flex justify-center mt-4">
-                              {addedSet[product._id] || cart.find((i) => (i.id || i._id) === product._id) ? (
-                                <a
-                                  href="/cart"
-                                  className="w-[40%] text-center py-2 px-4 rounded-4xl text-sm font-medium transition-colors bg-green-600 text-white hover:bg-green-700"
-                                >
-                                  Go to Cart
-                                </a>
-                              ) : (
-                                <button
-                                  className={`w-[40%] py-2 px-4 rounded-4xl text-sm font-medium transition-colors ${
-                                    product.hasStock
-                                      ? 'bg-[#536690] text-white hover:bg-[#536690]'
-                                      : 'bg-slate-400 text-white cursor-not-allowed'
-                                  }`}
-                                  disabled={!product.hasStock}
-                                  onClick={(e) => handleAddToCart(product, e)}
-                                >
-                                  Add to Cart
-                                </button>
-                              )}
+                              {(() => {
+                                const stock = Number(product.stock || 0);
+                                const isOutOfStock = !product.hasStock || stock <= 0;
+                                const isInCart = addedSet[product._id] || cart.find((i) => (i.id || i._id) === product._id);
+                                
+                                if (isInCart) {
+                                  return (
+                                    <a
+                                      href="/cart"
+                                      className="w-[40%] text-center py-2 px-4 rounded-4xl text-sm font-medium transition-colors bg-green-600 text-white hover:bg-green-700"
+                                    >
+                                      Go to Cart
+                                    </a>
+                                  );
+                                } else if (isOutOfStock) {
+                                  return (
+                                    <button
+                                      className="w-[40%] py-2 px-4 rounded-4xl text-sm font-medium bg-gray-400 text-white cursor-not-allowed"
+                                      disabled={true}
+                                    >
+                                      Out of Stock
+                                    </button>
+                                  );
+                                } else {
+                                  return (
+                                    <button
+                                      className="w-[40%] py-2 px-4 rounded-4xl text-sm font-medium transition-colors bg-[#536690] text-white hover:bg-[#536690]"
+                                      onClick={(e) => handleAddToCart(product, e)}
+                                    >
+                                      Add to Cart
+                                    </button>
+                                  );
+                                }
+                              })()}
                             </div>
                           </div>
                         </div>

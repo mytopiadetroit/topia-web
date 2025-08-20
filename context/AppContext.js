@@ -74,15 +74,28 @@ export const AppProvider = ({ children }) => {
       if (existingItemIndex >= 0) {
         // Item exists, update quantity
         const updatedCart = [...prevCart];
-        updatedCart[existingItemIndex].quantity = (updatedCart[existingItemIndex].quantity || 0) + quantity;
+        const currentQuantity = updatedCart[existingItemIndex].quantity || 0;
+        const newQuantity = currentQuantity + quantity;
+        const maxStock = Number(product.stock || 0);
+        
+        // Check if adding this quantity would exceed stock
+        if (maxStock > 0 && newQuantity > maxStock) {
+          // Limit to available stock
+          updatedCart[existingItemIndex].quantity = maxStock;
+        } else {
+          updatedCart[existingItemIndex].quantity = newQuantity;
+        }
         return updatedCart;
       } else {
         // Item doesn't exist, add new item
+        const maxStock = Number(product.stock || 0);
+        const finalQuantity = maxStock > 0 ? Math.min(quantity, maxStock) : quantity;
+        
         const normalizedProduct = {
           ...product,
           // Ensure consistent id field exists for comparisons later
           id: productId,
-          quantity
+          quantity: finalQuantity
         };
         return [...prevCart, normalizedProduct];
       }
@@ -96,7 +109,7 @@ export const AppProvider = ({ children }) => {
     });
   };
 
-  // Update item quantity
+  // Update item quantity with stock validation
   const updateCartItemQuantity = (productId, quantity) => {
     if (quantity <= 0) {
       removeFromCart(productId);
@@ -106,6 +119,11 @@ export const AppProvider = ({ children }) => {
     setCart(prevCart => {
       const updatedCart = prevCart.map(item => {
         if (getItemId(item) === productId) {
+          const maxStock = Number(item.stock || 0);
+          // If stock is available, limit quantity to stock
+          if (maxStock > 0 && quantity > maxStock) {
+            return { ...item, quantity: maxStock };
+          }
           return { ...item, quantity };
         }
         return item;
