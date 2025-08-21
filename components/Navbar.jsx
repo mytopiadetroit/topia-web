@@ -93,17 +93,17 @@ export default function Navbar() {
                 <a href="/menu" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
                   Menu
                 </a>
-                <a href="/menu" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
+                <a href="/resourcecenter" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
                   Resource Centre
                 </a>
                 <a href="/about" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
                   About
                 </a>
-                <a href="/profile" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
-                  My Experiences
+                <a href="/myhistory" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
+                  Experiences
                 </a>
                 <a href="/profile" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
-                  My Rewards
+                  Rewards
                 </a>
               </div>
             </div>
@@ -142,13 +142,13 @@ export default function Navbar() {
                 {isLoggedIn && isProfileOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
                     <a href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
-                      My Profile
+                       Profile
                     </a>
                     <a href="/myorders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
-                      My Orders
+                      Orders
                     </a>
                     <a href="/myhistory" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
-                      My History
+                     History
                     </a>
                     <button 
                       onClick={() => {
@@ -265,7 +265,7 @@ export default function Navbar() {
                   className="flex items-center space-x-3 px-2 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 group"
                 >
                   <Award className="w-5 h-5 group-hover:text-blue-600" />
-                  <span className="font-medium">My Experiences</span>
+                  <span className="font-medium"> Experiences</span>
                 </a>
                 
                 <a 
@@ -274,7 +274,7 @@ export default function Navbar() {
                   className="flex items-center space-x-3 px-2 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 group"
                 >
                   <Award className="w-5 h-5 group-hover:text-blue-600" />
-                  <span className="font-medium">My Rewards</span>
+                  <span className="font-medium"> Rewards</span>
                 </a>
               </div>
 
@@ -308,7 +308,7 @@ export default function Navbar() {
                     >
                       <div className="flex items-center space-x-3">
                         <User className="w-5 h-5 group-hover:text-blue-600" />
-                        <span className="font-medium">My Profile</span>
+                        <span className="font-medium">Profile</span>
                       </div>
                       <ChevronRight 
                         className={`w-4 h-4 transition-transform duration-200 ${
@@ -335,7 +335,7 @@ export default function Navbar() {
                           className="flex items-center space-x-3 px-2 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 group"
                         >
                           <ShoppingCart className="w-4 h-4 group-hover:text-blue-600" />
-                          <span className="text-sm font-medium">My Orders</span>
+                          <span className="text-sm font-medium">Orders</span>
                         </a>
                         
                         <a 
@@ -344,7 +344,7 @@ export default function Navbar() {
                           className="flex items-center space-x-3 px-2 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 group"
                         >
                           <BookOpen className="w-4 h-4 group-hover:text-blue-600" />
-                          <span className="text-sm font-medium">My History</span>
+                          <span className="text-sm font-medium"> History</span>
                         </a>
                       </div>
                     )}

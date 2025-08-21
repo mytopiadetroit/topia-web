@@ -79,7 +79,7 @@ export default function MyHistory() {
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">My History</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-6"> History</h1>
 
         <div className="space-y-4">
           {isLoading && <div className="text-center text-gray-600">Loading...</div>}

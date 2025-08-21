@@ -59,7 +59,7 @@ export default function ProductDetails() {
       setLoading(true);
       setError(null);
       const response = await Api('GET', `products/${id}`, null, router);
-      
+      console.log('Product response:', response);
       if (response.success) {
         setProduct(response.data);
       } else {
@@ -157,14 +157,14 @@ export default function ProductDetails() {
   ];
 
   // Static ratings data for the 3 images section (preserved)
-  const ratings = {
-    count: 15,
-    stats: [
-      { effect: 'Euphoric' },
-      { effect: 'Joy' },
-      { effect: 'Creative' }
-    ]
-  };
+  // const ratings = {
+  //   count: 15,
+  //   stats: [
+  //     { effect: 'Euphoric' },
+  //     { effect: 'Joy' },
+  //     { effect: 'Creative' }
+  //   ]
+  // };
 
   return (
     <div className="min-h-screen bg-white">
@@ -284,66 +284,75 @@ export default function ProductDetails() {
         </div>
 
         {/* Ratings and Tags Section (original position restored) */}
-        <div className="mt-16">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Ratings Section - Left Side (kept original 3 images) */}
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Ratings</h2>
-                <span className="text-sm text-gray-500">{ratings.count} Ratings</span>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {ratings.stats.map((stat, idx) => (
-                  <div key={idx} className="flex flex-col items-center">
-                    <div className="w-32 h-32 rounded-full flex items-center justify-center mb-4 relative">
-                      {stat.effect === 'Euphoric' && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <img src="/images/g1.png" alt="" />
-                        </div>
-                      )}
-                      {stat.effect === 'Joy' && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <img src="/images/g2.png" alt="" />
-                        </div>
-                      )}
-                      {stat.effect === 'Creative' && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <img src="/images/g3.png" alt="" />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Tags Section - Right Side (now dynamic) */}
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">Tags</h3>
-              <div className="flex flex-wrap gap-3">
-                {reviewAgg.length > 0 ? (
-                  reviewAgg.map((agg, idx) => {
-                    const color = colors[Math.min(idx, colors.length - 1)];
-                    const label = agg.label || '';
-                    const match = label.match(/^[\p{Emoji}\p{Extended_Pictographic}]/u);
-                    const emoji = match ? match[0] + ' ' : '';
-                    const text = label.replace(/^[\p{Emoji}\p{Extended_Pictographic}]\s*/u, '');
-                    return (
-                      <span key={agg._id} className={`px-4 py-3 rounded-full text-sm font-medium flex items-center gap-2`} style={{ backgroundColor: color.bg, color: color.color }}>
-                        <span className="text-sm">{emoji}</span>
-                        {text} ({agg.count})
-                      </span>
-                    );
-                  })
-                ) : (
-                  <span className="px-4 py-3 rounded-full text-sm font-medium flex items-center gap-2" style={{ backgroundColor: '#B3194275', color: 'white' }}>
-                    No reviews yet
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
+       <div className="mt-16">
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+    {/* Research Section - Left Side (now dynamic) */}
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-gray-900">Research</h2>
+        <span className="text-sm text-gray-500">
+          {product.reviewTags?.length || 0} Research 
+        </span>
+      </div>
+      
+      {product.reviewTags && product.reviewTags.length > 0 ? (
+        <div className="flex flex-wrap gap-3">
+          {product.reviewTags.map((tag, idx) => {
+            const color = colors[Math.min(idx, colors.length - 1)];
+            const label = tag.label || '';
+            const match = label.match(/^[\p{Emoji}\p{Extended_Pictographic}]/u);
+            const emoji = match ? match[0] + ' ' : '';
+            const text = label.replace(/^[\p{Emoji}\p{Extended_Pictographic}]\s*/u, '');
+            
+            return (
+              <span 
+                key={tag._id} 
+                className="px-4 py-3 rounded-full text-sm font-medium flex items-center gap-2" 
+                style={{ backgroundColor: color.bg, color: color.color }}
+              >
+                <span className="text-sm">{emoji}</span>
+                {text}
+              </span>
+            );
+          })}
         </div>
+      ) : (
+        <div className="text-center py-12">
+          <div className="text-gray-400 mb-4">
+            <Package className="mx-auto h-12 w-12" />
+          </div>
+          <p className="text-sm text-gray-500">No research tags available for this product</p>
+        </div>
+      )}
+    </div>
+
+    {/* Tags Section - Right Side (Customer Feedback - keep as is) */}
+    <div>
+      <h3 className="text-2xl font-bold text-gray-900 mb-6">Customer Feedback</h3>
+      <div className="flex flex-wrap gap-3">
+        {reviewAgg.length > 0 ? (
+          reviewAgg.map((agg, idx) => {
+            const color = colors[Math.min(idx, colors.length - 1)];
+            const label = agg.label || '';
+            const match = label.match(/^[\p{Emoji}\p{Extended_Pictographic}]/u);
+            const emoji = match ? match[0] + ' ' : '';
+            const text = label.replace(/^[\p{Emoji}\p{Extended_Pictographic}]\s*/u, '');
+            return (
+              <span key={agg._id} className={`px-4 py-3 rounded-full text-sm font-medium flex items-center gap-2`} style={{ backgroundColor: color.bg, color: color.color }}>
+                <span className="text-sm">{emoji}</span>
+                {text} ({agg.count})
+              </span>
+            );
+          })
+        ) : (
+          <span className="px-4 py-3 rounded-full text-sm font-medium flex items-center gap-2" style={{ backgroundColor: '#B3194275', color: 'white' }}>
+            No reviews yet
+          </span>
+        )}
+      </div>
+    </div>
+  </div>
+</div>
       </div>
     </div>
   );
