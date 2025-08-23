@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Heart } from 'lucide-react';
+import { Heart, Package } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
@@ -319,9 +319,9 @@ export default function ProductDetails() {
       ) : (
         <div className="text-center py-12">
           <div className="text-gray-400 mb-4">
-            <Package className="mx-auto h-12 w-12" />
+            
           </div>
-          <p className="text-sm text-gray-500">No research tags available for this product</p>
+          <p className="text-sm text-gray-500">No research tags available </p>
         </div>
       )}
     </div>

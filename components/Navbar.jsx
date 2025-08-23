@@ -139,31 +139,55 @@ export default function Navbar() {
                 </div>
                 
                 {/* Profile Dropdown */}
-                {isLoggedIn && isProfileOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
-                    <a href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
-                       Profile
-                    </a>
-                    <a href="/myorders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
-                      Orders
-                    </a>
-                    <a href="/myhistory" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
-                     History
-                    </a>
-                    <button 
-                      onClick={() => {
-                        logout();
-                        setIsProfileOpen(false);
-                      }} 
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200"
-                    >
-                      <div className="flex items-center">
-                        <LogOut className="w-4 h-4 mr-2" />
-                        Logout
-                      </div>
-                    </button>
-                  </div>
-                )}
+              
+{isLoggedIn && isProfileOpen && (
+  <div className="absolute right-0 mt-2 w-[220px] bg-white rounded-md shadow-2xl py-0 z-40 border border-gray-100">
+    {/* Arrow indicator */}
+    <div className="absolute -top-1 right-4 w-3 h-3 bg-white transform rotate-45 border-l border-t border-gray-100"></div>
+    
+    <div className="bg-[#80A6F7]/80 shadow-inner rounded-t-md">
+      <ul>
+        <li className="px-3 py-2 shadow-inner border-b-2 border-white">
+          <a href="/profile" className="flex items-center gap-3 text-white font-semibold text-sm">
+            <User className="text-lg" />
+            Profile Settings
+          </a>
+        </li>
+        
+        <li className="px-3 py-2 shadow-inner border-b-2 border-white">
+          <a href="/myorders" className="flex items-center gap-3 text-white font-semibold text-sm">
+            <ShoppingCart className="text-lg" />
+            My Orders
+          </a>
+        </li>
+        
+        <li className="px-3 py-2 shadow-inner border-b-2 border-white">
+          <a href="/myhistory" className="flex items-center gap-3 text-white font-semibold text-sm">
+            <BookOpen className="text-lg" />
+            My History
+          </a>
+        </li>
+        
+        <li className="px-3 py-2 shadow-inner">
+          <button 
+            onClick={() => {
+              logout();
+              setIsProfileOpen(false);
+            }}
+            className="flex items-center gap-3 text-white font-semibold text-sm w-full text-left"
+          >
+            <LogOut className="text-lg" />
+            Logout
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div>
+)}
+
+
+
+ 
               </div>
               
               {/* Mobile menu button */}
