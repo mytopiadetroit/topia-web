@@ -17,7 +17,7 @@ const OtpVerification = () => {
 
   useEffect(() => {
     // Get user details from localStorage
-    const userDetail = localStorage.getItem('userDetail');
+    const userDetail = localStorage.getItem('topiaDetail');
     if (userDetail) {
       const user = JSON.parse(userDetail);
       if (user.phone) {

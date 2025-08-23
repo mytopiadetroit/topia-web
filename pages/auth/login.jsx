@@ -87,7 +87,7 @@ const Login = () => {
       if (response.success) {
         // Store user data and token in localStorage only (not using UserContext login yet)
         if (response.user && response.token) {
-          localStorage.setItem('userDetail', JSON.stringify(response.user));
+          localStorage.setItem('topiaDetail', JSON.stringify(response.user));
           localStorage.setItem('token', response.token);
         }
         

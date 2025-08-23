@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // const ConstantsUrl = "http://localhost:5000/api/";
- const ConstantsUrl = "https://api.mypsyguide.io/api/";
+  const ConstantsUrl = "https://api.mypsyguide.io/api/";
 
 let isRedirecting = false;
 
@@ -63,8 +63,8 @@ function ApiFormData(method, url, data, router, params) {
       url: ConstantsUrl + url,
       data,
       headers: { 
-        Authorization: `jwt ${token}`,
-        'Content-Type': 'multipart/form-data'
+        Authorization: `jwt ${token}`
+        // Don't set Content-Type for FormData, let axios handle it
       },
       params
     }).then(
@@ -313,6 +313,71 @@ const setGlobalToast = (toastFunction) => {
 const setGlobalRouter = (routerInstance) => {
   if (typeof window !== "undefined") {
     window.router = routerInstance;
+  }
+};
+
+// Reward system API calls
+export const fetchRewardTasks = async (router) => {
+  try {
+    return await Api('get', 'rewards/tasks', null, router);
+  } catch (error) {
+    console.error('Error fetching reward tasks:', error);
+    throw error;
+  }
+};
+
+export const submitRewardClaim = async (router, formData) => {
+  try {
+    return await ApiFormData('post', 'rewards/claim', formData, router);
+  } catch (error) {
+    console.error('Error submitting reward claim:', error);
+    throw error;
+  }
+};
+
+export const fetchUserRewards = async (router) => {
+  try {
+    return await Api('get', 'rewards/history', null, router);
+  } catch (error) {
+    console.error('Error fetching user rewards:', error);
+    throw error;
+  }
+};
+
+export const fetchRewardRequests = async (router) => {
+  try {
+    return await Api('get', 'rewards/requests', null, router);
+  } catch (error) {
+    console.error('Error fetching reward requests:', error);
+    throw error;
+  }
+};
+
+// Admin reward API calls
+export const fetchAllRewardRequests = async (router, params = {}) => {
+  try {
+    return await Api('get', 'rewards/admin/requests', null, router, params);
+  } catch (error) {
+    console.error('Error fetching all reward requests:', error);
+    throw error;
+  }
+};
+
+export const updateRewardStatus = async (id, data, router) => {
+  try {
+    return await Api('put', `rewards/admin/requests/${id}`, data, router);
+  } catch (error) {
+    console.error('Error updating reward status:', error);
+    throw error;
+  }
+};
+
+export const fetchRewardStats = async (router) => {
+  try {
+    return await Api('get', 'rewards/admin/stats', null, router);
+  } catch (error) {
+    console.error('Error fetching reward stats:', error);
+    throw error;
   }
 };
 

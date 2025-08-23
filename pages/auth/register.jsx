@@ -146,13 +146,13 @@ const handleSubmit = async (e) => {
     
     const response = await ApiFormData('post', 'auth/register', formDataToSend, router);
     
-    console.log('Registration response:', response); // Debug log
+    
     
     // Check if registration was successful - improved condition
     if (response && (response.message === "Registration successful" || response.success === true || response.user || response.status === 'success')) {
       // Store user data (no token in this response)
       if (response.user) {
-        localStorage.setItem('userDetail', JSON.stringify(response.user));
+        localStorage.setItem('topiaDetail', JSON.stringify(response.user));
       }
       
       // Show success toast message with proper styling
@@ -182,7 +182,7 @@ const handleSubmit = async (e) => {
       
       // It's actually success but came through catch block
       if (err.response.data.user) {
-        localStorage.setItem('userDetail', JSON.stringify(err.response.data.user));
+        localStorage.setItem('topiaDetail', JSON.stringify(err.response.data.user));
       }
       
       safeToast.success('Registration successful!');

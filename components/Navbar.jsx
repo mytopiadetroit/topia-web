@@ -102,7 +102,7 @@ export default function Navbar() {
                 <a href="/myhistory" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
                   Experiences
                 </a>
-                <a href="/profile" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
+                <a href="/rewards" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
                   Rewards
                 </a>
               </div>
