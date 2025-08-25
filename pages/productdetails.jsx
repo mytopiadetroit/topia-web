@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import { useUser } from '../context/UserContext';
 import { useApp } from '../context/AppContext';
 import { Api } from '../services/service';
+import { useWishlist } from '../context/WishlistContext';
 
 export default function ProductDetails() {
   const [quantity, setQuantity] = useState(1);
@@ -17,6 +18,8 @@ export default function ProductDetails() {
   const { id } = router.query;
   const { isLoggedIn, userLoading } = useUser();
   const { addToCart } = useApp();
+  const { isInWishlist, toggle } = useWishlist();
+  const isWishlisted = product ? isInWishlist(product._id || product.id) : false;
   
   useEffect(() => {
     // Only check after loading is complete
@@ -72,6 +75,22 @@ export default function ProductDetails() {
       toast.error('Failed to load product');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleToggleWishlist = async () => {
+    if (!product) return;
+    try {
+      const res = await toggle(product);
+      if (res?.success) {
+        toast.success(isWishlisted ? 'Removed from wishlist' : 'Added to wishlist');
+      } else if (res?.redirect) {
+        // handled globally via Api
+      } else {
+        toast.error('Failed to update wishlist');
+      }
+    } catch (e) {
+      toast.error('Failed to update wishlist');
     }
   };
 
@@ -275,9 +294,9 @@ export default function ProductDetails() {
                 {(product.hasStock && Number(product?.stock || 0) > 0) && <span className="text-xl">+</span>}
               </button>
               
-              <button className="border border-gray-300 bg-white text-gray-500 font-medium py-3 px-6 rounded-full hover:bg-gray-50 transition-colors flex items-center justify-center">
-                <span className="mr-2">Wishlist</span>
-                <Heart className="w-5 h-5" />
+              <button onClick={handleToggleWishlist} className="border border-gray-300 bg-white text-gray-500 font-medium py-3 px-6 rounded-full hover:bg-gray-50 transition-colors flex items-center justify-center">
+                <span className="mr-2">{isWishlisted ? 'Wishlisted' : 'Wishlist'}</span>
+                <Heart className="w-5 h-5" style={{ color: isWishlisted ? '#80A6F7' : undefined }} fill={isWishlisted ? '#80A6F7' : 'none'} />
               </button>
             </div>
           </div>

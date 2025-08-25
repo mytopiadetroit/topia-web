@@ -5,7 +5,7 @@ export const safeToast = {
   success: (message, options = {}) => {
     try {
       return toast.success(message, {
-        position: "top-right",
+        position: "bottom-left",
         autoClose: 5000,
         hideProgressBar: false,
         closeOnClick: true,
@@ -24,7 +24,7 @@ export const safeToast = {
   error: (message, options = {}) => {
     try {
       return toast.error(message, {
-        position: "top-right",
+        position: "bottom-left",
         autoClose: 5000,
         hideProgressBar: false,
         closeOnClick: true,
@@ -43,7 +43,7 @@ export const safeToast = {
   warning: (message, options = {}) => {
     try {
       return toast.warning(message, {
-        position: "top-right",
+        position: "bottom-left",
         autoClose: 5000,
         hideProgressBar: false,
         closeOnClick: true,
@@ -62,7 +62,7 @@ export const safeToast = {
   info: (message, options = {}) => {
     try {
       return toast.info(message, {
-        position: "top-right",
+        position: "bottom-left",
         autoClose: 5000,
         hideProgressBar: false,
         closeOnClick: true,

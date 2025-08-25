@@ -1,9 +1,10 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { Menu, X, User, ChevronDown, ChevronRight, ShoppingCart, LogOut, Home, Award, BookOpen, Users } from 'lucide-react';
+import { Menu, X, User, ChevronDown, ChevronRight, ShoppingCart, LogOut, Home, Award, BookOpen, Users, Heart } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { useUser } from '../context/UserContext';
 import { useApp } from '../context/AppContext';
+import { useWishlist } from '../context/WishlistContext';
 
 export default function Navbar() {
   const router = useRouter();
@@ -14,6 +15,7 @@ export default function Navbar() {
   // Use context hooks
   const { user, isLoggedIn, logout } = useUser();
   const { cartCount } = useApp();
+  const { count: wishlistCount } = useWishlist();
   
   // Create refs for the profile dropdown and side drawer
   const profileRef = useRef(null);
@@ -110,6 +112,17 @@ export default function Navbar() {
 
             {/* Profile, Cart and Mobile menu button */}
             <div className="flex items-center space-x-4">
+              {/* Wishlist Icon */}
+              <a href="/wishlist" className="relative">
+                <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-400 transition-colors duration-200">
+                  <Heart className="w-5 h-5 text-gray-600" />
+                </div>
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
+                    {wishlistCount}
+                  </span>
+                )}
+              </a>
               {/* Cart Icon */}
               <a href="/cart" className="relative">
                 <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-400 transition-colors duration-200">

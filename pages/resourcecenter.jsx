@@ -2,13 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
+// Simple UUID generator for visitorId
+const uuid = () =>
+  'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0,
+      v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
 
-
-
-
-
-
-
+const getVisitorId = () => {
+  if (typeof window === 'undefined') return null;
+  let id = localStorage.getItem('visitorId');
+  if (!id) {
+    id = uuid();
+    localStorage.setItem('visitorId', id);
+  }
+  return id;
+};
 
 
 
@@ -45,6 +55,9 @@ const ResourceCenter = () => {
   const [categories, setCategories] = useState([]);
   const [selectedContent, setSelectedContent] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
+  const [viewsCount, setViewsCount] = useState(0);
 
   useEffect(() => {
     loadContent();
@@ -114,9 +127,38 @@ const openContentModal = async (contentId) => {
     const data = await response.json();
     
     if (data.success) {
-      setSelectedContent(data.data);
+      const detail = data.data;
+      setSelectedContent(detail);
+      setLikesCount(detail.likes || 0);
+      setViewsCount(detail.views || 0);
+      // determine liked if user is logged in and likedBy present
+      try {
+        const userDetail = JSON.parse(localStorage.getItem('userDetail') || 'null');
+        const userId = userDetail?._id || userDetail?.id;
+        const likedBy = detail.likedBy || [];
+        const hasLiked = userId ? likedBy.some((u) => String(u) === String(userId)) : false;
+        setLiked(!!hasLiked);
+      } catch {}
       setShowModal(true);
       document.body.style.overflow = 'hidden';
+
+      // Add unique view
+      const visitorId = getVisitorId();
+      if (visitorId) {
+        try {
+          const vRes = await fetch(`https://api.mypsyguide.io/api/content/public/${contentId}/view`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+            body: JSON.stringify({ visitorId })
+          });
+          const vData = await vRes.json();
+          if (vData?.success && vData?.data?.views != null) {
+            setViewsCount(vData.data.views);
+          }
+        } catch (e) {
+          console.warn('View track failed', e);
+        }
+      }
     }
   } catch (error) {
     console.error('Error loading content details:', error);
@@ -126,7 +168,50 @@ const openContentModal = async (contentId) => {
   const closeModal = () => {
     setShowModal(false);
     setSelectedContent(null);
+    setLiked(false);
+    setLikesCount(0);
+    setViewsCount(0);
     document.body.style.overflow = 'unset';
+  };
+
+  const handleToggleLike = async () => {
+    if (!selectedContent) return;
+    const isLiking = !liked;
+    try {
+      const endpoint = isLiking ? 'like' : 'unlike';
+      // "http://localhost:5000/api/";
+      const res = await fetch(`https://api.mypsyguide.io/api/content/public/${selectedContent._id}/${endpoint}` , {
+        method: 'POST',
+        headers: getAuthHeaders()
+      });
+      const j = await res.json();
+      if (j?.success) {
+        if (typeof j.data?.likes === 'number') setLikesCount(j.data.likes);
+        setLiked(isLiking);
+      } else if (res.status === 401) {
+        // redirect to login if unauthorized
+        router.push('/auth/login');
+      }
+    } catch (e) {
+      console.error('Like toggle failed', e);
+    }
+  };
+
+  const handleShare = async () => {
+    if (!selectedContent) return;
+    const shareUrl = window.location.href;
+    const title = selectedContent.title;
+    const text = selectedContent.description || 'Check this out!';
+    try {
+      if (navigator.share) {
+        await navigator.share({ title, text, url: shareUrl });
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        alert('Link copied to clipboard');
+      }
+    } catch (e) {
+      console.warn('Share failed', e);
+    }
   };
 
   const formatDate = (dateString) => {
@@ -411,8 +496,8 @@ const openContentModal = async (contentId) => {
                 <div className="flex items-center space-x-6 text-sm text-gray-500 mb-6">
                   <span>By {selectedContent.author?.name}</span>
                   <span>{formatDate(selectedContent.publishedAt || selectedContent.createdAt)}</span>
-                  <span>👁 {selectedContent.views} views</span>
-                  <span>❤️ {selectedContent.likes} likes</span>
+                  <span>👁 {viewsCount} views</span>
+                  <span>❤️ {likesCount} likes</span>
                   {selectedContent.readTime > 0 && (
                     <span>{selectedContent.readTime} min read</span>
                   )}
@@ -469,10 +554,10 @@ const openContentModal = async (contentId) => {
 
                 {/* Action Buttons */}
                 <div className="flex justify-center space-x-4 pt-6 border-t">
-                  <button className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                    ❤️ Like ({selectedContent.likes})
+                  <button onClick={handleToggleLike} className={`px-6 py-2 rounded-lg transition-colors ${liked ? 'bg-[#80A6F7] text-white hover:bg-[#6f93df]' : 'bg-green-600 text-white hover:bg-green-700'}`}>
+                    {liked ? '💙 Liked' : '❤️ Like'} ({likesCount})
                   </button>
-                  <button className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                  <button onClick={handleShare} className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
                     📤 Share
                   </button>
                 </div>

@@ -161,16 +161,19 @@ const Cart = () => {
                 return (
                   <div key={item._id || item.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 w-full">
                     <div className="flex items-center gap-4">
-                      <div className="w-32 rounded-2xl h-30 overflow-hidden flex-shrink-0">
-                        <img 
-                          src={item.images && item.images.length > 0 
-                            ? (item.images[0].startsWith('http') ? item.images[0] : `http://localhost:5000${item.images[0]}`)
-                            : "/images/cart.png"
-                          } 
-                          alt={item.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
+                    <div 
+  className="w-32 rounded-2xl h-30 overflow-hidden flex-shrink-0 cursor-pointer"
+  onClick={() => router.push(`/productdetails?id=${item._id || item.id}`)} 
+>
+  <img 
+    src={item.images && item.images.length > 0 
+      ? (item.images[0].startsWith('http') ? item.images[0] : `http://localhost:5000${item.images[0]}`)
+      : "/images/cart.png"
+    } 
+    alt={item.name}
+    className="w-full h-full object-cover"
+  />
+</div>
                       <div className="flex-1">
                         <h3 className="font-semibold text-gray-900 text-sm">{item.name}</h3>
                         <p className="text-gray-500 text-sm mt-1">Quantity: {item.quantity}</p>

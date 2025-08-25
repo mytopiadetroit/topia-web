@@ -12,6 +12,7 @@ export default function MyHistory() {
   const [expandedByOrder, setExpandedByOrder] = useState({});
   const [reviewOptions, setReviewOptions] = useState([]);
   const [reviewModal, setReviewModal] = useState({ open: false, productId: null, orderId: null });
+  const [reviewsByKey, setReviewsByKey] = useState({}); // key: `${orderId || ''}:${productId}` -> { label, option, _id }
 
   useEffect(() => {
     if (!loading && !isLoggedIn) {
@@ -44,6 +45,39 @@ export default function MyHistory() {
               }))
             }));
           setOrders(mapped);
+
+          // After orders mapped, fetch user's existing reviews for each product/order pair
+          const pairs = [];
+          mapped.forEach(ord => {
+            ord.products.forEach(p => {
+              pairs.push({ productId: p.id, orderId: ord.id });
+            });
+          });
+
+          const uniqueKeys = new Set();
+          const uniquePairs = pairs.filter(({ productId, orderId }) => {
+            const k = `${orderId}:${productId}`;
+            if (uniqueKeys.has(k)) return false;
+            uniqueKeys.add(k);
+            return true;
+          });
+
+          const results = await Promise.allSettled(
+            uniquePairs.map(({ productId, orderId }) =>
+              Api('get', `reviews/my?productId=${productId}&orderId=${orderId}`, null, router)
+            )
+          );
+
+          const nextMap = {};
+          results.forEach((res, idx) => {
+            const { productId, orderId } = uniquePairs[idx];
+            const key = `${orderId}:${productId}`;
+            if (res.status === 'fulfilled' && res.value && res.value.success && res.value.data) {
+              const doc = res.value.data;
+              nextMap[key] = { label: doc.label, option: doc.option, _id: doc._id };
+            }
+          });
+          setReviewsByKey(nextMap);
         }
         if (optionsRes.success) setReviewOptions(optionsRes.data || []);
       } catch (e) {
@@ -67,6 +101,13 @@ export default function MyHistory() {
       const res = await Api('post', 'reviews/submit', { productId: reviewModal.productId, optionId, orderId: reviewModal.orderId }, router);
       if (res.success) {
         toast.success('Review submitted');
+        // Update local cache so UI reflects Update Review and label immediately
+        const chosen = reviewOptions.find(o => o._id === optionId);
+        const key = `${reviewModal.orderId}:${reviewModal.productId}`;
+        setReviewsByKey(prev => ({
+          ...prev,
+          [key]: { label: chosen?.label || '', option: optionId, _id: res.data?._id }
+        }));
         closeReview();
       } else {
         toast.error(res.message || 'Failed to submit');
@@ -101,26 +142,35 @@ export default function MyHistory() {
                   </div>
                 </div>
                 <div className="space-y-3">
-                  {productsToShow.map((p, i) => (
-                    <div key={i} className="flex items-center">
-                      <div className="flex items-center gap-3 flex-1">
-                        <div className="w-12 h-12 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
-                          {p.image ? (
-                            <img src={p.image} alt={p.name} className="w-12 h-12 object-cover" />
-                          ) : (
-                            <div className="w-10 h-10 bg-[#2E2E2E40] rounded-lg"></div>
-                          )}
+                  {productsToShow.map((p, i) => {
+                    const key = `${order.id}:${p.id}`;
+                    const myReview = reviewsByKey[key];
+                    return (
+                      <div key={i} className="flex items-center">
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className="w-12 h-12 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
+                            {p.image ? (
+                              <img src={p.image} alt={p.name} className="w-12 h-12 object-cover" />
+                            ) : (
+                              <div className="w-10 h-10 bg-[#2E2E2E40] rounded-lg"></div>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-900">{p.name}</span>
+                            {myReview?.label && (
+                              <span className="bg-green-100 text-green-800 text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap">My review: {myReview.label}</span>
+                            )}
+                          </div>
                         </div>
-                        <span className="text-sm text-gray-900">{p.name}</span>
+                        <div className="w-32 flex justify-center">
+                        <button onClick={() => openReview(p.id, order.id)} className="text-sm py-1 px-2 rounded-lg bg-[#536690] text-white hover:bg-[#4a5a7f] whitespace-nowrap">{myReview ? 'Update Review' : 'Add Review'}</button>
+                        </div>
+                        <div className="w-24 flex justify-end">
+                          <span className="text-sm text-gray-600 whitespace-nowrap">Amount: ${p.amount}</span>
+                        </div>
                       </div>
-                      <div className="w-32 flex justify-center">
-                        <button onClick={() => openReview(p.id, order.id)} className="text-sm py-1 px-2 rounded-lg bg-[#536690] text-white hover:bg-[#4a5a7f] whitespace-nowrap">Add Review</button>
-                      </div>
-                      <div className="w-24 flex justify-end">
-                        <span className="text-sm text-gray-600 whitespace-nowrap">Amount: ${p.amount}</span>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             );

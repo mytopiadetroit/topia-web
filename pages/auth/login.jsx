@@ -80,27 +80,68 @@ const Login = () => {
       // Phone number is already formatted with country code by react-phone-input-2
       const formattedPhone = formData.phone;
       
-      const response = await Api('post', 'auth/login', {
-        phone: formattedPhone
-      }, router);
-      
-      if (response.success) {
-        // Store user data and token in localStorage only (not using UserContext login yet)
-        if (response.user && response.token) {
-          localStorage.setItem('topiaDetail', JSON.stringify(response.user));
-          localStorage.setItem('token', response.token);
+      try {
+        const response = await Api('post', 'auth/login', {
+          phone: formattedPhone
+        }, router);
+        
+        console.log('Login API Response:', response);
+        
+        if (response.success) {
+          // Check user status before proceeding
+          console.log('User status:', response.user?.status);
+          if (response.user && response.user.status === 'suspended') {
+            console.log('Suspended user detected, redirecting to /suspend');
+            safeToast.error('Your account has been suspended. Please contact support.');
+            setTimeout(() => {
+              router.push('/suspend');
+            }, 1000);
+            return;
+          }
+          
+          // Store user data and token in localStorage only (not using UserContext login yet)
+          if (response.user && response.token) {
+            localStorage.setItem('topiaDetail', JSON.stringify(response.user));
+            localStorage.setItem('token', response.token);
+          }
+          
+          // Show success toast message
+          safeToast.success('OTP has been sent! Please enter your OTP.');
+          
+          // Redirect to OTP verification page after a short delay to ensure toast is visible
+          setTimeout(() => {
+            router.push('/auth/otp');
+          }, 1000);
+        } else {
+          console.log('Login failed, checking for suspension error');
+          // Check if it's a suspension error
+          if (response.message && response.message.includes('suspended')) {
+            console.log('Suspension error in response, redirecting to /suspend');
+            safeToast.error(response.message);
+            setTimeout(() => {
+              router.push('/suspend');
+            }, 1000);
+            return;
+          }
+          
+          safeToast.error(response.message || 'Login failed. Please try again.');
+          setError(response.message || 'Login failed. Please try again.');
+        }
+      } catch (apiError) {
+        // Handle API rejection (403, 500, etc.)
+        console.log('API Error caught:', apiError);
+        
+        if (apiError.message && apiError.message.includes('suspended')) {
+          console.log('Suspension error in catch, redirecting to /suspend');
+          safeToast.error(apiError.message);
+          setTimeout(() => {
+            router.push('/suspend');
+          }, 1000);
+          return;
         }
         
-        // Show success toast message
-        safeToast.success('OTP has been sent! Please enter your OTP.');
-        
-        // Redirect to OTP verification page after a short delay to ensure toast is visible
-        setTimeout(() => {
-          router.push('/auth/otp');
-        }, 1000);
-      } else {
-        safeToast.error(response.message || 'Login failed. Please try again.');
-        setError(response.message || 'Login failed. Please try again.');
+        // Re-throw to be caught by outer catch
+        throw apiError;
       }
     } catch (err) {
       console.error('Login error:', err);

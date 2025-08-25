@@ -60,10 +60,19 @@ export default function Home() {
            Unlock Your Path to Health and Knowledge
           </h1>
           <p className="text-sm md:text-lg lg:text-xl mb-8 font-light max-w-3xl mx-auto">
-           Access curated resources secience-backed wisdom,<br />
+           Access curated resources science-backed wisdom,<br />
             and a supportive network of wellnes enthusiasts.
           </p>
-          <button className="bg-[#8EAFF633] hover:bg-[#8EAFF633] text-white px-8 py-4 rounded-4xl text-lg  font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2 mx-auto">
+         <button 
+            onClick={() => {
+              if (isLoggedIn) {
+                router.push('/menu');
+              } else {
+                router.push('/auth/login');
+              }
+            }}
+            className="bg-[#8EAFF633] hover:bg-[#8EAFF633] text-white px-8 py-4 rounded-4xl text-lg  font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2 mx-auto"
+          >
             <span>Get Started</span>
             <ChevronRight className="w-5 h-5" />
           </button>

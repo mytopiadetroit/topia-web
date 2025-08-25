@@ -33,8 +33,9 @@ export const AppProvider = ({ children }) => {
       if (savedCart) {
         const parsedCart = JSON.parse(savedCart);
         setCart(parsedCart);
-        // Count only unique items for navbar badge
-        setCartCount(parsedCart.length);
+        // Count total quantity of all items for navbar badge
+        const totalQuantity = parsedCart.reduce((total, item) => total + (item.quantity || 0), 0);
+        setCartCount(totalQuantity);
       }
       
       // Check for saved theme preference
@@ -57,8 +58,9 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     try {
       localStorage.setItem('cart', JSON.stringify(cart));
-      // Count only unique items; quantity changes won't affect badge
-      setCartCount(cart.length);
+      // Count total quantity of all items in cart
+      const totalQuantity = cart.reduce((total, item) => total + (item.quantity || 0), 0);
+      setCartCount(totalQuantity);
     } catch (error) {
       console.error('Error saving cart to localStorage:', error);
     }

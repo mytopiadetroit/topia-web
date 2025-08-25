@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { ChevronDown, ChevronUp, Filter, X, Menu as MenuIcon } from 'lucide-react';
 import { useRouter } from 'next/router';
@@ -9,7 +10,7 @@ import { Api } from '../services/service';
 const Menu = () => {
   const router = useRouter();
   const { isLoggedIn, loading } = useUser();
-  const { addToCart, cart } = useApp();
+  const { addToCart, cart, updateCartItemQuantity } = useApp();
   const [addedSet, setAddedSet] = useState({});
   const [collapsedByCategory, setCollapsedByCategory] = useState({});
   const [categoryOpen, setCategoryOpen] = useState(true);
@@ -42,7 +43,7 @@ const Menu = () => {
       if (!isLoggedIn) {
         // Show toast notification
         toast.error('Please login to access the menu', {
-          position: "top-center",
+          position: "bottom-left",
           autoClose: 5000,
           hideProgressBar: false,
           closeOnClick: true,
@@ -67,7 +68,7 @@ const Menu = () => {
     }
   }, [isLoggedIn, loading, router]);
 
-  // Close drawer when clicking outside on mobile
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1024) { // lg breakpoint
@@ -79,6 +80,9 @@ const Menu = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const handleHomeClick = () => {
+  router.push('/');
+};
   // Fetch categories from backend
   const fetchCategories = async () => {
     try {
@@ -86,12 +90,28 @@ const Menu = () => {
       const response = await Api('GET', 'categories/categories', null, router);
       if (response.success) {
         setCategories(response.data);
-        // Initialize category filters
+        
+        // Initialize category filters from URL immediately after fetching categories
+        const { category, primaryUse } = router.query;
         const initialFilters = {};
+        
         response.data.forEach(cat => {
-          initialFilters[cat._id] = false;
+          // Set from URL if available, otherwise false
+          initialFilters[cat._id] = category ? 
+            (Array.isArray(category) ? category.includes(cat._id) : category === cat._id) : 
+            false;
         });
+        
         setCategoryFilters(initialFilters);
+        
+        // Also set primary use filters if available in URL
+        if (primaryUse) {
+          const selectedPrimaryUses = Array.isArray(primaryUse) ? primaryUse : [primaryUse];
+          setPrimaryUseFilters({
+            therapeutic: selectedPrimaryUses.includes('therapeutic'),
+            functional: selectedPrimaryUses.includes('functional')
+          });
+        }
       }
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -103,12 +123,13 @@ const Menu = () => {
   const fetchProducts = async () => {
     try {
       setLoadingData(true);
-      const response = await Api('GET', 'products', null, router);
+      const response = await Api('GET', 'products?limit=21', null, router);
       if (response.success) {
-        setProducts(response.data);
-        setFilteredProducts(response.data);
+        const capped = (response.data || []).slice(0, 21);
+        setProducts(capped);
+        setFilteredProducts(capped);
         // prefetch aggregates for initial page (best effort)
-        const ids = (response.data || []).slice(0, 30).map(p => p._id);
+        const ids = capped.slice(0, 30).map(p => p._id);
         fetchAggregatesForProducts(ids);
       }
     } catch (error) {
@@ -177,22 +198,69 @@ const Menu = () => {
     return ordered;
   }, [filteredProducts, categories]);
 
+  // memo for selected categories (for deciding view-all state)
+  const selectedCategoriesMemo = useMemo(() => Object.keys(categoryFilters).filter((k) => categoryFilters[k]), [categoryFilters]);
+
+  const handleViewAllCategory = (catId) => {
+    // set only this category selected
+    const newCategoryFilters = Object.fromEntries(categories.map((c) => [c._id, c._id === catId]));
+    setCategoryFilters(newCategoryFilters);
+    updateURL(newCategoryFilters, primaryUseFilters);
+    // expand this category section and collapse others optionally
+    setCollapsedByCategory((prev) => ({ ...prev, [catId]: false }));
+    // scroll into view
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  // Function to update URL with current filters
+  const updateURL = (newCategoryFilters, newPrimaryUseFilters) => {
+    const selectedCategories = Object.keys(newCategoryFilters).filter(key => newCategoryFilters[key]);
+    const selectedPrimaryUses = Object.keys(newPrimaryUseFilters).filter(key => newPrimaryUseFilters[key]);
+    
+    const query = { ...router.query };
+    
+    // Update category in URL
+    if (selectedCategories.length > 0) {
+      query.category = selectedCategories;
+    } else {
+      delete query.category;
+    }
+    
+    // Update primary use in URL
+    if (selectedPrimaryUses.length > 0) {
+      query.primaryUse = selectedPrimaryUses;
+    } else {
+      delete query.primaryUse;
+    }
+    
+    router.push({
+      pathname: router.pathname,
+      query
+    }, undefined, { shallow: true });
+  };
+
   const toggleCategoryCollapse = (catId) => {
     setCollapsedByCategory((prev) => ({ ...prev, [catId]: !prev[catId] }));
   };
 
   const handleCategoryChange = (categoryId) => {
-    setCategoryFilters(prev => ({
-      ...prev,
-      [categoryId]: !prev[categoryId]
-    }));
+    const newCategoryFilters = {
+      ...categoryFilters,
+      [categoryId]: !categoryFilters[categoryId]
+    };
+    setCategoryFilters(newCategoryFilters);
+    updateURL(newCategoryFilters, primaryUseFilters);
   };
 
   const handlePrimaryUseChange = (useType) => {
-    setPrimaryUseFilters(prev => ({
-      ...prev,
-      [useType]: !prev[useType]
-    }));
+    const newPrimaryUseFilters = {
+      ...primaryUseFilters,
+      [useType]: !primaryUseFilters[useType]
+    };
+    setPrimaryUseFilters(newPrimaryUseFilters);
+    updateURL(categoryFilters, newPrimaryUseFilters);
   };
 
   const handleAddToCart = (product, e) => {
@@ -209,6 +277,23 @@ const Menu = () => {
     }
   };
 
+  const handleQuantityChange = (product, newQuantity, e) => {
+    e.stopPropagation(); // Prevent card click event
+    const stock = Number(product.stock || 0);
+    const productId = product._id || product.id;
+    
+    if (newQuantity <= 0) {
+      updateCartItemQuantity(productId, 0);
+      setAddedSet(prev => ({ ...prev, [productId]: false }));
+      // toast.success('Item removed from cart');
+    } else if (stock > 0 && newQuantity > stock) {
+      toast.error(`Only ${stock} items available in stock`);
+    } else {
+      updateCartItemQuantity(productId, newQuantity);
+      // toast.success('Quantity updated');
+    }
+  };
+
   const handleProductClick = (product) => {
     const stock = Number(product.stock || 0);
     const isAvailable = product.hasStock && stock > 0;
@@ -221,9 +306,22 @@ const Menu = () => {
   };
 
   const clearAllFilters = () => {
-    setCategoryFilters({});
-    setPrimaryUseFilters({ therapeutic: false, functional: false });
-    setIsDrawerOpen(false); // Close drawer after clearing filters
+    const newCategoryFilters = {};
+    const newPrimaryUseFilters = { therapeutic: false, functional: false };
+    
+    setCategoryFilters(newCategoryFilters);
+    setPrimaryUseFilters(newPrimaryUseFilters);
+    setIsDrawerOpen(false);
+    
+    // Clear URL parameters
+    const query = { ...router.query };
+    delete query.category;
+    delete query.primaryUse;
+    
+    router.push({
+      pathname: router.pathname,
+      query
+    }, undefined, { shallow: true });
   };
 
   // Calculate active filter count
@@ -359,7 +457,12 @@ const Menu = () => {
       <nav className="bg-white border-b border-gray-200 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4 text-sm text-gray-600">
-            <span className="hover:text-gray-900 cursor-pointer">Home</span>
+          <span 
+  className="hover:text-gray-900 cursor-pointer"
+  onClick={handleHomeClick}
+>
+  Home
+</span>
             <span className="text-gray-400">/</span>
             <span className="text-gray-900 font-medium">Menu</span>
           </div>
@@ -438,21 +541,32 @@ const Menu = () => {
                   <h2 className="text-xl lg:text-2xl font-semibold text-gray-900">
                     {group.catName} ({group.items.length})
                   </h2>
-                  <button
-                    onClick={() => toggleCategoryCollapse(group.catId)}
-                    className="p-2 text-gray-600 hover:text-gray-800 transition-colors"
-                  >
-                    {collapsedByCategory[group.catId] ? (
-                      <ChevronUp size={20} />
-                    ) : (
-                      <ChevronDown size={20} />
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => toggleCategoryCollapse(group.catId)}
+                      className="p-2 text-gray-600 hover:text-gray-800 transition-colors"
+                    >
+                      {collapsedByCategory[group.catId] ? (
+                        <ChevronUp size={20} />
+                      ) : (
+                        <ChevronDown size={20} />
+                      )}
+                    </button>
+                    {/* View All for this category */}
+                    {!(selectedCategoriesMemo.length === 1 && selectedCategoriesMemo[0] === group.catId) && (
+                      <button
+                        onClick={() => handleViewAllCategory(group.catId)}
+                        className="px-3 py-1 text-sm rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50"
+                      >
+                        View All
+                      </button>
                     )}
-                  </button>
+                  </div>
                 </div>
 
                 {!collapsedByCategory[group.catId] && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
-                    {group.items.map((product) => (
+                    {(selectedCategoriesMemo.length === 1 && selectedCategoriesMemo[0] === group.catId ? group.items : group.items.slice(0, 3)).map((product) => (
                       <div
                         key={product._id}
                         className="relative rounded-4xl border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
@@ -523,21 +637,49 @@ const Menu = () => {
                                 </span>
                               )}
                             </div>
-                            {/* Add to Cart Button */}
+                            {/* Add to Cart Button / Quantity Controls */}
                             <div className="flex justify-center mt-4">
                               {(() => {
                                 const stock = Number(product.stock || 0);
                                 const isOutOfStock = !product.hasStock || stock <= 0;
-                                const isInCart = addedSet[product._id] || cart.find((i) => (i.id || i._id) === product._id);
+                                const cartItem = cart.find((i) => (i.id || i._id) === product._id);
+                                const isInCart = addedSet[product._id] || cartItem;
                                 
-                                if (isInCart) {
+                                if (isInCart && cartItem) {
+                                  // Show quantity controls
                                   return (
-                                    <a
-                                      href="/cart"
-                                      className="w-[40%] text-center py-2 px-4 rounded-4xl text-sm font-medium transition-colors bg-green-600 text-white hover:bg-green-700"
-                                    >
-                                      Go to Cart
-                                    </a>
+                                    <div className="flex items-center space-x-3">
+                                      <div className="flex items-center border border-gray-300 rounded-full bg-white">
+                                        <button 
+                                          onClick={(e) => handleQuantityChange(product, cartItem.quantity - 1, e)}
+                                          className="p-2 hover:bg-gray-50 rounded-l-full transition-colors"
+                                        >
+                                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="w-4 h-4 text-gray-600 hover:text-black" stroke="currentColor" strokeWidth="2">
+                                            <path d="M5 12h14"/>
+                                          </svg>
+                                        </button>
+                                        <span className="px-3 py-1 text-sm text-gray-800 font-medium min-w-[2rem] text-center">
+                                          {cartItem.quantity}
+                                        </span>
+                                        <button 
+                                          onClick={(e) => handleQuantityChange(product, cartItem.quantity + 1, e)}
+                                          disabled={isOutOfStock || (stock > 0 && cartItem.quantity >= stock)}
+                                          className={`p-2 rounded-r-full transition-colors ${
+                                            isOutOfStock || (stock > 0 && cartItem.quantity >= stock)
+                                              ? 'opacity-50 cursor-not-allowed' 
+                                              : 'hover:bg-gray-50'
+                                          }`}
+                                        >
+                                          <svg width="16" height="16" viewBox="0 0 24 24" className={`w-4 h-4 ${
+                                            isOutOfStock || (stock > 0 && cartItem.quantity >= stock)
+                                              ? 'text-gray-400' 
+                                              : 'text-gray-600 hover:text-black'
+                                          }`} fill="none" stroke="currentColor" strokeWidth="2">
+                                            <path d="M12 5v14M5 12h14"/>
+                                          </svg>
+                                        </button>
+                                      </div>
+                                    </div>
                                   );
                                 } else if (isOutOfStock) {
                                   return (

@@ -4,11 +4,13 @@ import { useRouter } from 'next/router';
 import { subscribeEmail } from '../service/service';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useUser } from '../context/UserContext';
 
 function App() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const { isLoggedIn } = useUser();
 
   const handleSubscribe = async (e) => {
     e.preventDefault();
@@ -71,17 +73,19 @@ function App() {
             {/* Navigation Links */}
             <div className="flex space-x-16">
               <div className="space-y-4">
-                <a href="#" className="block hover:text-gray-200 transition-colors">Home</a>
-                <a href="#" className="block hover:text-gray-200 transition-colors">Articles</a>
+                <a href="/" className="block hover:text-gray-200 transition-colors">Home</a>
+                <a href="/resourcecenter" className="block hover:text-gray-200 transition-colors">Articles</a>
                 <a href="#" className="block hover:text-gray-200 transition-colors">Events</a>
                 <a href="#" className="block hover:text-gray-200 transition-colors">Podcast</a>
                 <a href="/contact" className="block hover:text-gray-200 transition-colors">Contact</a>
               </div>
               <div className="space-y-4">
-                <a href="#" className="block hover:text-gray-200 transition-colors">Register</a>
+                {!isLoggedIn && (
+                  <a href="/auth/register" className="block hover:text-gray-200 transition-colors">Register</a>
+                )}
                 <a href="#" className="block hover:text-gray-200 transition-colors">About Us</a>
-                <a href="#" className="block hover:text-gray-200 transition-colors">Blogs</a>
-                <a href="#" className="block hover:text-gray-200 transition-colors">Rewards</a>
+                <a href="/resourcecenter" className="block hover:text-gray-200 transition-colors">Blogs</a>
+                <a href="/rewards" className="block hover:text-gray-200 transition-colors">Rewards</a>
               </div>
             </div>
           </div>
