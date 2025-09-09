@@ -75,8 +75,8 @@ function App() {
               <div className="space-y-4">
                 <a href="/" className="block hover:text-gray-200 transition-colors">Home</a>
                 <a href="/resourcecenter" className="block hover:text-gray-200 transition-colors">Articles</a>
-                <a href="#" className="block hover:text-gray-200 transition-colors">Events</a>
-                <a href="#" className="block hover:text-gray-200 transition-colors">Podcast</a>
+                <a href="/commingsoon" className="block hover:text-gray-200 transition-colors">Comming soon</a>
+               
                 <a href="/contact" className="block hover:text-gray-200 transition-colors">Contact</a>
               </div>
               <div className="space-y-4">

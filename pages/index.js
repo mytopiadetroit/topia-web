@@ -61,7 +61,7 @@ export default function Home() {
           </h1>
           <p className="text-sm md:text-lg lg:text-xl mb-8 font-light max-w-3xl mx-auto">
            Access curated resources science-backed wisdom,<br />
-            and a supportive network of wellnes enthusiasts.
+            and a supportive network of wellness enthusiasts.
           </p>
          <button 
             onClick={() => {
@@ -244,7 +244,7 @@ export default function Home() {
                  personalized benefits, and a community of growth await.
                 </p>
                 
-                <button className="bg-[#2E2E2E] hover:bg-[#2E2E2E] text-white px-8 py-4 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105">
+                <button   onClick={() => router.push('/commingsoon')} className="bg-[#2E2E2E] hover:bg-[#2E2E2E] text-white px-8 py-4 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105">
                   Comming Soon 
                 </button>
               </div>

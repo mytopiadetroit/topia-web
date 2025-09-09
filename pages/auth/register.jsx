@@ -17,6 +17,8 @@ const Register = () => {
     month: 'Month',
     year: 'Year',
     howDidYouHear: 'How did you hear about us ?',
+    takesMedication: false,
+    medicationDetails: '',
     agreeToTerms: false
   });
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -62,147 +64,149 @@ const Register = () => {
     }
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  
-  // Basic validation
-  if (!formData.email || !formData.fullName || !formData.phone) {
-    setError('Please fill in all required fields');
-    return;
-  }
-  
-  // Phone number validation using libphonenumber-js
-  const phoneNumber = parsePhoneNumberFromString(formData.phone);
-  if (!phoneNumber || !phoneNumber.isValid()) {
-    setError('Please enter a valid phone number');
-    safeToast.error('Please enter a valid phone number');
-    return;
-  }
-  
-  // Check if phone number length is valid for the country
-  const nationalNumber = phoneNumber.nationalNumber;
-  const countryCode = phoneNumber.country;
-  
-  if (!phoneNumber.isPossible()) {
-    setError(`The phone number length is not valid for ${phoneNumber.country}`);
-    safeToast.error(`The phone number length is not valid for ${phoneNumber.country}`);
-    return;
-  }
-  
-  if (formData.day === 'Day' || formData.month === 'Month' || formData.year === 'Year') {
-    setError('Please select your complete date of birth');
-    return;
-  }
-  
- 
-  const birthDate = new Date(`${formData.year}-${months.indexOf(formData.month) + 1}-${formData.day}`);
-  const today = new Date();
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const monthDiff = today.getMonth() - (months.indexOf(formData.month));
-  const dayDiff = today.getDate() - formData.day;
-  
-  if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
-    age--;
-  }
-  
-  if (age < 21) {
-    setError('You must be at least 21 years old to register');
-    safeToast.error('You must be at least 21 years old to register');
-    return;
-  }
-  
-  if (formData.howDidYouHear === 'How did you hear about us ?') {
-    setError('Please select how you heard about us');
-    return;
-  }
-  
-  if (!formData.agreeToTerms) {
-    setError('You must agree to the terms and conditions');
-    return;
-  }
-  
-  if (!selectedFile) {
-    setError('Please upload your government ID');
-    return;
-  }
-  
-  try {
-    setLoading(true);
-    setError('');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     
-    // Format the date of birth
-    const dob = `${formData.year}-${months.indexOf(formData.month) + 1}-${formData.day}`;
-    
-    // Create form data for file upload
-    const formDataToSend = new FormData();
-    formDataToSend.append('email', formData.email);
-    formDataToSend.append('fullName', formData.fullName);
-    formDataToSend.append('phone', formData.phone); // Phone number is already formatted with country code by react-phone-input-2
-    formDataToSend.append('day', formData.day);
-    formDataToSend.append('month', formData.month);
-    formDataToSend.append('year', formData.year);
-    formDataToSend.append('howDidYouHear', formData.howDidYouHear);
-    formDataToSend.append('govId', selectedFile);
-    
-    const response = await ApiFormData('post', 'auth/register', formDataToSend, router);
-    
-    
-    
-    // Check if registration was successful - improved condition
-    if (response && (response.message === "Registration successful" || response.success === true || response.user || response.status === 'success')) {
-      // Store user data (no token in this response)
-      if (response.user) {
-        localStorage.setItem('topiaDetail', JSON.stringify(response.user));
-      }
-      
-      // Show success toast message with proper styling
-      safeToast.success('Registration successful!');
-      
-      // Redirect to login page after a delay to ensure toast is visible
-      setTimeout(() => {
-        router.push('/auth/login');
-      }, 2000);
-      
-      return; // Important: return early to prevent error toast
-    } else {
-      // Registration failed
-      const errorMessage = response?.message || response?.error || 'Registration failed. Please try again.';
-
-      safeToast.error(errorMessage);
-      setError(errorMessage);
-    }
-  } catch (err) {
-    console.error('Registration error:', err);
-    
-    // Check if error response has success indicators
-    if (err.response && err.response.data && 
-        (err.response.data.message === "Registration successful" || 
-         err.response.data.success === true || 
-         err.response.data.user)) {
-      
-      // It's actually success but came through catch block
-      if (err.response.data.user) {
-        localStorage.setItem('topiaDetail', JSON.stringify(err.response.data.user));
-      }
-      
-      safeToast.success('Registration successful!');
-      
-      setTimeout(() => {
-        router.push('/auth/login');
-      }, 2000);
-      
+    // Basic validation
+    if (!formData.email || !formData.fullName || !formData.phone) {
+      setError('Please fill in all required fields');
       return;
     }
     
-    // Actual error
-    const errorMessage = err.response?.data?.message || err.message || 'registration failed. Please try again.';
+    // Phone number validation using libphonenumber-js
+    const phoneNumber = parsePhoneNumberFromString(formData.phone);
+    if (!phoneNumber || !phoneNumber.isValid()) {
+      setError('Please enter a valid phone number');
+      safeToast.error('Please enter a valid phone number');
+      return;
+    }
     
-    safeToast.error(errorMessage);
-    setError(errorMessage);
-  } finally {
-    setLoading(false);
-  }
-};
+    // Check if phone number length is valid for the country
+    const nationalNumber = phoneNumber.nationalNumber;
+    const countryCode = phoneNumber.country;
+    
+    if (!phoneNumber.isPossible()) {
+      setError(`The phone number length is not valid for ${phoneNumber.country}`);
+      safeToast.error(`The phone number length is not valid for ${phoneNumber.country}`);
+      return;
+    }
+    
+    if (formData.day === 'Day' || formData.month === 'Month' || formData.year === 'Year') {
+      setError('Please select your complete date of birth');
+      return;
+    }
+    
+ 
+    const birthDate = new Date(`${formData.year}-${months.indexOf(formData.month) + 1}-${formData.day}`);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - (months.indexOf(formData.month));
+    const dayDiff = today.getDate() - formData.day;
+    
+    if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+      age--;
+    }
+    
+    if (age < 21) {
+      setError('You must be at least 21 years old to register');
+      safeToast.error('You must be at least 21 years old to register');
+      return;
+    }
+    
+    if (formData.howDidYouHear === 'How did you hear about us ?') {
+      setError('Please select how you heard about us');
+      return;
+    }
+    
+    if (!formData.agreeToTerms) {
+      setError('You must agree to the terms and conditions');
+      return;
+    }
+    
+    if (!selectedFile) {
+      setError('Please upload your government ID');
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      setError('');
+      
+      // Format the date of birth
+      const dob = `${formData.year}-${months.indexOf(formData.month) + 1}-${formData.day}`;
+      
+      // Create form data for file upload
+      const formDataToSend = new FormData();
+      formDataToSend.append('email', formData.email);
+      formDataToSend.append('fullName', formData.fullName);
+      formDataToSend.append('phone', formData.phone);
+      formDataToSend.append('day', formData.day);
+      formDataToSend.append('month', formData.month);
+      formDataToSend.append('year', formData.year);
+      formDataToSend.append('howDidYouHear', formData.howDidYouHear);
+      // Ensure takesMedication is sent as a boolean
+      formDataToSend.append('takesMedication', formData.takesMedication ? 'true' : 'false');
+      formDataToSend.append('medicationDetails', formData.medicationDetails);
+      formDataToSend.append('govId', selectedFile);
+      
+      const response = await ApiFormData('post', 'auth/register', formDataToSend, router);
+      
+      
+      // Check if registration was successful - improved condition
+      if (response && (response.message === "Registration successful" || response.success === true || response.user || response.status === 'success')) {
+        // Store user data (no token in this response)
+        if (response.user) {
+          localStorage.setItem('topiaDetail', JSON.stringify(response.user));
+        }
+        
+        // Show success toast message with proper styling
+        safeToast.success('Registration successful!');
+        
+        // Redirect to login page after a delay to ensure toast is visible
+        setTimeout(() => {
+          router.push('/auth/login');
+        }, 2000);
+        
+        return; // Important: return early to prevent error toast
+      } else {
+        // Registration failed
+        const errorMessage = response?.message || response?.error || 'Registration failed. Please try again.';
+
+        safeToast.error(errorMessage);
+        setError(errorMessage);
+      }
+    } catch (err) {
+      console.error('Registration error:', err);
+      
+      // Check if error response has success indicators
+      if (err.response && err.response.data && 
+          (err.response.data.message === "Registration successful" || 
+           err.response.data.success === true || 
+           err.response.data.user)) {
+        
+        // It's actually success but came through catch block
+        if (err.response.data.user) {
+          localStorage.setItem('topiaDetail', JSON.stringify(err.response.data.user));
+        }
+        
+        safeToast.success('Registration successful!');
+        
+        setTimeout(() => {
+          router.push('/auth/login');
+        }, 2000);
+        
+        return;
+      }
+      
+      // Actual error
+      const errorMessage = err.response?.data?.message || err.message || 'registration failed. Please try again.';
+      
+      safeToast.error(errorMessage);
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const days = Array.from({ length: 31 }, (_, i) => i + 1);
   const months = [
@@ -241,13 +245,13 @@ const handleSubmit = async (e) => {
       </div>
 
       {/* Right Side - Registration Form */}
- <div className="w-full lg:w-2/3 bg-white flex p-4 lg:p-8 overflow-y-auto">
-  <div className="w-full max-w-md mx-auto my-4 lg:my-auto">
+      <div className="w-full lg:w-2/3 bg-white flex p-4 lg:p-8 overflow-y-auto">
+        <div className="w-full max-w-md mx-auto my-4 lg:my-auto">
           {/* Header */}
           <div className="mb-6 lg:mb-8 mt-4 lg:mt-0">
-  <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2 break-words">Register</h1>
-  <p className="text-gray-600 text-sm break-words">Registration must match Information on Goverment issued ID</p>
-</div>
+            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2 break-words">Register</h1>
+            <p className="text-gray-600 text-sm break-words">Registration must match Information on Goverment issued ID</p>
+          </div>
 
           <div className="space-y-4">
             {/* Email Field */}
@@ -318,7 +322,6 @@ const handleSubmit = async (e) => {
               />
               <p className='text-gray-700 ml-2 mt-1 text-[12px]'>*Verification code will be send for Confirmation</p>
             </div>
-
 
             {/* Birthday Label */}
             <div className="pt-2">
@@ -392,7 +395,53 @@ const handleSubmit = async (e) => {
               <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
             </div>
 
-            {/* Government ID Upload Section */}
+            {/* Medication Information */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Do you take any medication?
+              </label>
+              <div className="flex space-x-4">
+                <label className="inline-flex items-center">
+                  <input
+                    type="radio"
+                    className="form-radio h-4 w-4 text-indigo-600"
+                    name="takesMedication"
+                    checked={formData.takesMedication === true}
+                    onChange={() => setFormData(prev => ({ ...prev, takesMedication: true }))}
+                  />
+                  <span className="ml-2 text-gray-700">Yes</span>
+                </label>
+                <label className="inline-flex items-center">
+                  <input
+                    type="radio"
+                    className="form-radio h-4 w-4 text-indigo-600"
+                    name="takesMedication"
+                    checked={formData.takesMedication === false}
+                    onChange={() => setFormData(prev => ({ ...prev, takesMedication: false, medicationDetails: '' }))}
+                  />
+                  <span className="ml-2 text-gray-700">No</span>
+                </label>
+              </div>
+              
+              {formData.takesMedication && (
+                <div className="mt-2">
+                  <label htmlFor="medicationDetails" className="block text-sm font-medium text-gray-700">
+                    Please list your medications:
+                  </label>
+                  <input
+                    type="text"
+                    id="medicationDetails"
+                    name="medicationDetails"
+                    value={formData.medicationDetails}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full rounded-md border text-gray-700 border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                    placeholder="Enter medication names separated by commas"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Government ID Upload */}
             <div className="bg-blue-50 p-4 rounded-2xl mt-6">
               <p className="text-xs text-gray-600 mb-3">
                 *Drag & drop your government-issued ID here, or click to upload.

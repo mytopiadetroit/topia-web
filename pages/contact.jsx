@@ -96,11 +96,11 @@ export default function ContactPage() {
               <h2 className="text-xl font-semibold text-gray-900">Get in touch</h2>
               <p className="text-gray-600 mt-2">Reach us at:</p>
               <div className="mt-4 space-y-3 text-gray-700">
-                <p>Email: support@example.com</p>
+                <p>Email: Mytopiadetroit@gmail.com</p>
                 <p>Phone: +91 99999 99999</p>
                 <p>Address: New York, USA</p>
               </div>
-              <img src="/images/contact.png" alt="Contact" className="mt-6 w-full rounded-xl hidden md:block" onError={(e)=>{e.currentTarget.style.display='none';}} />
+              {/* <img src="/images/contact.png" alt="Contact" className="mt-6 w-full rounded-xl hidden md:block" onError={(e)=>{e.currentTarget.style.display='none';}} /> */}
             </div>
           </div>
         </section>
