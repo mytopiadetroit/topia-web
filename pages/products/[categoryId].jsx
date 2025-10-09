@@ -1,8 +1,42 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import Sidebar from '../../components/sidebar';
-import { fetchProductsByCategory, fetchAllCategories, createProduct, toast } from '../../service/service';
+import { fetchProductsByCategory, fetchAllCategories, createProduct, updateProductOrder, toast } from '../../service/service';
 import Swal from 'sweetalert2';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, TouchSensor } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+// SortableItem component
+export function SortableItem({ id, children }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 1 : 'auto',
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes}>
+      <tr
+        className="hover:bg-gray-50"
+        style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+        {...listeners}
+      >
+        {children}
+      </tr>
+    </div>
+  );
+}
 import { 
   Package, 
   Search, 
@@ -31,6 +65,7 @@ export default function ProductsByCategory() {
   const [productModalLoading, setProductModalLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [isReordering, setIsReordering] = useState(false);
   const [form, setForm] = useState({
     name: '',
     price: '',
@@ -44,6 +79,64 @@ export default function ProductsByCategory() {
   const fileInputRef = useRef(null);
   const router = useRouter();
   const { categoryId } = router.query;
+
+  // Set up sensors for DnD
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
+    })
+  );
+
+  // Handle drag end event
+  const handleDragEnd = async (event) => {
+    const { active, over } = event;
+    
+    if (active.id !== over.id) {
+      setProducts((items) => {
+        const oldIndex = items.findIndex(item => item._id === active.id);
+        const newIndex = items.findIndex(item => item._id === over.id);
+        const newItems = arrayMove(items, oldIndex, newIndex);
+        
+        // Update order in the database
+        updateProductOrderInDatabase(newItems);
+        
+        return newItems;
+      });
+    }
+  };
+
+  // Update product order in the database
+  const updateProductOrderInDatabase = async (reorderedProducts) => {
+    try {
+      await Promise.all(
+        reorderedProducts.map((product, index) => 
+          updateProductOrder(product._id, index + 1, router)
+        )
+      );
+      toast.success('Product order updated successfully');
+    } catch (error) {
+      console.error('Error updating product order:', error);
+      toast.error('Failed to update product order');
+      // Revert to previous state if update fails
+      loadProducts();
+    }
+  };
+
+  // Toggle reorder mode
+  const toggleReorderMode = () => {
+    setIsReordering(!isReordering);
+  };
 
   useEffect(() => {
     if (categoryId) {
@@ -317,61 +410,72 @@ export default function ProductsByCategory() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredProducts.map((product) => (
-                  <tr key={product._id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-12 w-12 rounded-md overflow-hidden bg-gray-100 flex items-center justify-center">
-                          {product.images && product.images.length > 0 ? (
-                            <img src={product.images[0]} alt={product.name} className="h-12 w-12 object-cover" />
-                          ) : (
-                            <Package className="h-6 w-6 text-gray-400" />
-                          )}
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                          <div className="text-xs text-gray-500 line-clamp-1">{product.description?.main}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-semibold text-gray-900">{formatPrice(product.price)}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${product.hasStock ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                        {product.hasStock ? 'In Stock' : 'Out of Stock'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(product.createdAt)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => handleViewProduct(product._id)}
-                          className="text-blue-600 hover:text-blue-900 p-1"
-                          title="View Product"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => handleEditProduct(product._id)}
-                          className="text-green-600 hover:text-green-900 p-1"
-                          title="Edit Product"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteProduct(product._id)}
-                          className="text-red-600 hover:text-red-900 p-1"
-                          title="Delete Product"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
+              <DndContext 
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext 
+                  items={filteredProducts.map(product => product._id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {filteredProducts.map((product) => (
+                      <SortableItem key={product._id} id={product._id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="flex-shrink-0 h-12 w-12 rounded-md overflow-hidden bg-gray-100 flex items-center justify-center">
+                              {product.images && product.images.length > 0 ? (
+                                <img src={product.images[0]} alt={product.name} className="h-12 w-12 object-cover" />
+                              ) : (
+                                <Package className="h-6 w-6 text-gray-400" />
+                              )}
+                            </div>
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                              <div className="text-xs text-gray-500 line-clamp-1">{product.description?.main}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-semibold text-gray-900">{formatPrice(product.price)}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${product.hasStock ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                            {product.hasStock ? 'In Stock' : 'Out of Stock'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(product.createdAt)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() => handleViewProduct(product._id)}
+                              className="text-blue-600 hover:text-blue-900 p-1"
+                              title="View Product"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => handleEditProduct(product._id)}
+                              className="text-green-600 hover:text-green-900 p-1"
+                              title="Edit Product"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteProduct(product._id)}
+                              className="text-red-600 hover:text-red-900 p-1"
+                              title="Delete Product"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </SortableItem>
+                    ))}
+                  </tbody>
+                </SortableContext>
+              </DndContext>
             </table>
           </div>
         </div>

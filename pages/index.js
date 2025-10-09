@@ -14,6 +14,34 @@ export default function Home() {
   const { darkMode, toggleDarkMode } = useApp();
   const router = useRouter();
 
+  const handleShare = async () => {
+    const shareData = {
+      title: 'Shroomtopia - Your Wellness Journey',
+      text: 'Check out this amazing wellness platform!',
+      url: 'https://main.d2hdxwwdjspab.amplifyapp.com/'
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback for browsers that don't support Web Share API
+        await navigator.clipboard.writeText(shareData.url);
+        alert('Link copied to clipboard!');
+      }
+    } catch (err) {
+      console.error('Error sharing:', err);
+      // Fallback to copying to clipboard if sharing fails
+      try {
+        await navigator.clipboard.writeText(shareData.url);
+        alert('Link copied to clipboard!');
+      } catch (clipboardErr) {
+        console.error('Error copying to clipboard:', clipboardErr);
+        alert('Could not share the link. Please copy it manually: ' + shareData.url);
+      }
+    }
+  };
+
   useEffect(() => {
     setIsVisible(true);
   }, []);
@@ -38,6 +66,8 @@ export default function Home() {
             className="w-full h-full object-cover"
             style={{ filter: 'blur(8px)' }}
             fill
+            priority={true}
+            sizes="100vw"
           />
           {/* Overlay Image with More Blur and Darkness */}
           <Image
@@ -49,6 +79,8 @@ export default function Home() {
               filter: 'blur(16px) brightness(0.7)', 
             }}
             fill
+            priority={true}
+            sizes="100vw"
           />
         </div>
         
@@ -71,7 +103,7 @@ export default function Home() {
                 router.push('/auth/login');
               }
             }}
-            className="bg-[#8EAFF633] hover:bg-[#8EAFF633] text-white px-8 py-4 rounded-4xl text-lg  font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2 mx-auto"
+            className="bg-[#2546B633] hover:bg-[#2546B633] text-white px-8 py-4 rounded-4xl text-lg  font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2 mx-auto"
           >
             <span>Get Started</span>
             <ChevronRight className="w-5 h-5" />
@@ -91,10 +123,11 @@ export default function Home() {
   <Image 
     src="/images/ii2.png"
     alt="Natural ginger root"
-    className="h-[250px] sm:h-[350px] lg:h-[600px] w-full lg:w-[31.5vw]  object-cover lg:-ml-[2vw] lg:transform lg:-translate-x-12"
+    className="h-[250px] sm:h-[350px] lg:h-[600px] w-full lg:w-[31.5vw] object-cover lg:-ml-[2vw] lg:transform lg:-translate-x-12"
     style={{ objectPosition: 'left' }}
     width={400}
     height={100}
+    priority={true}
   />
 </div>
 
@@ -167,7 +200,7 @@ export default function Home() {
       <p className="text-lg text-[#2E2E2E] mb-8 leading-relaxed">
        Delve into audio, guides, videos, and more <br /> curated to inspire learning, growth, and vitality..
       </p>
-      <button className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2">
+      <button  onClick={() => router.push('/resourcecenter')} className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2">
         <span>Access The Resource Centre</span>
         <ChevronRight className="w-5 h-5" />
       </button>
@@ -274,7 +307,7 @@ export default function Home() {
               </p>
               
              <button
-  onClick={() => router.push('/profile')}
+  onClick={() => router.push('/rewards')}
   className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2"
 >
   <span>Get Rewards</span>
@@ -308,14 +341,14 @@ export default function Home() {
             <div className="absolute bottom-20 left-32 w-10 h-6  rounded-lg opacity-40"></div>
             
             <div className="text-center relative z-10">
-              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
+              <h2  className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
                 Your Feedback Helps Us Cater To Your Journey
               </h2>
               <p className="text-gray-600 text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
                 Tell us about your experience with the products you&apos;ve tried.<br />
                 Your insights help others make better choices—and you&apos;ll earn rewards for every shared experience.
               </p>
-              <button className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2 mx-auto">
+              <button onClick={() => router.push('/myhistory')} className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2 mx-auto">
                 <span>Share Your Product Experience</span>
                 <ChevronRight className="w-5 h-5" />
               </button>
@@ -331,7 +364,10 @@ export default function Home() {
               Your journey matters. Share how mushrooms and wellness products have transformed your life, and<br />
               inspire others to explore their own path. Earn rewards for contributing to our shared journey.
             </p>
-            <button className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2 mx-auto">
+            <button 
+              onClick={handleShare}
+              className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2 mx-auto"
+            >
               <span>Share Your Wellness Journey</span>
               <ChevronRight className="w-5 h-5" />
             </button>

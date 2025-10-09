@@ -47,18 +47,26 @@ export default function MyOrders() {
       try {
         setIsLoading(true);
         const res = await Api('get', 'orders', null, router);
-        console.log("+++",res)
+        console.log("API Response:", JSON.stringify(res, null, 2));
         if (res.success) {
           // Normalize to fields we use in UI
           const mapped = (res.data || []).map(o => ({
             id: o.orderNumber,
             total: o.totalAmount,
             status: o.status, // backend statuses: pending, unfulfilled, fulfilled, incomplete
-            products: o.items.map(it => ({
-              name: it.name,
-              amount: it.price * it.quantity,
-              image: it.image || (it.product && it.product.images && it.product.images[0]) || ''
-            }))
+            products: o.items.map(it => {
+              // Log the full item structure to understand what's available
+              console.log('Order item:', JSON.stringify(it, null, 2));
+              const productId = it.product?._id || it.productId || (it.product && it.product.id) || null;
+              console.log('Extracted product ID:', productId);
+              return {
+                id: productId,
+                originalItem: it, // Keep original item for debugging
+                name: it.name,
+                amount: it.price * it.quantity,
+                image: it.image || (it.product?.images?.[0]) || ''
+              };
+            })
           }));
           setOrders(mapped);
         } else {
@@ -162,29 +170,55 @@ export default function MyOrders() {
 
                 {/* Products */}
                 <div className="space-y-3">
-                  {productsToShow.map((product, productIndex) => (
-                    <div key={productIndex} className="flex items-center justify-between">
-                      {/* Left Side - Product Info */}
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
-                          {product.image ? (
-                            <img src={product.image} alt={product.name} className="w-12 h-12 object-cover" />
-                          ) : (
-                            <div className="w-10 h-10 bg-[#2E2E2E40] rounded-lg"></div>
-                          )}
+                  {productsToShow.map((product, productIndex) => {
+                    // Product ID is now included in the product object
+                    
+                    return (
+                      <div key={productIndex} className="flex items-center justify-between">
+                        {/* Left Side - Product Info */}
+                        <div 
+                          className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent event bubbling
+                            console.log('Product clicked:', product);
+                            if (product.id) {
+                              console.log('Navigating to product:', product.id);
+                              router.push(`/productdetails?id=${product.id}`);
+                            } else {
+                              console.error('No product ID found. Full product object:', product);
+                              // Try to get ID from original item if available
+                              const fallbackId = product.originalItem?.product?._id || 
+                                              product.originalItem?.productId || 
+                                              product.originalItem?.product?.id;
+                              if (fallbackId) {
+                                console.log('Found fallback ID:', fallbackId);
+                                router.push(`/productdetails?id=${fallbackId}`);
+                              } else {
+                                toast.error('Could not find product details');
+                              }
+                            }
+                          }}
+                        >
+                          <div className="w-12 h-12 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
+                            {product.image ? (
+                              <img src={product.image} alt={product.name} className="w-12 h-12 object-cover" />
+                            ) : (
+                              <div className="w-10 h-10 bg-[#2E2E2E40] rounded-lg"></div>
+                            )}
+                          </div>
+                          <span className="text-sm text-gray-900">{product.name}</span>
                         </div>
-                        <span className="text-sm text-gray-900">{product.name}</span>
-                      </div>
 
-                      {/* Right Side - Status and Amount */}
-                      <div className="flex items-center gap-4">
-                        <span className={`text-sm font-medium ${getStatusColor(order.status)}`}>
-                          Status: {activeFilter === 'Ready for Pick-Up' ? 'Ready for Pick-Up' : activeFilter === 'Picked' ? 'Picked' : activeFilter === 'Processing' ? 'Processing' : order.status}
-                        </span>
-                        <span className="text-sm text-gray-600">Amount: ${product.amount}</span>
+                        {/* Right Side - Status and Amount */}
+                        <div className="flex items-center gap-4">
+                          <span className={`text-sm font-medium ${getStatusColor(order.status)}`}>
+                            Status: {activeFilter === 'Ready for Pick-Up' ? 'Ready for Pick-Up' : activeFilter === 'Picked' ? 'Picked' : activeFilter === 'Processing' ? 'Processing' : order.status}
+                          </span>
+                          <span className="text-sm text-gray-600">Amount: ${product.amount}</span>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             );

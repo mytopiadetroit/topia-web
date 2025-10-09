@@ -88,15 +88,16 @@ const Menu = () => {
     try {
       setLoadingData(true);
       const response = await Api('GET', 'categories/categories', null, router);
+      console.log('Categories API Response:', response);
       if (response.success) {
         setCategories(response.data);
         
-        // Initialize category filters from URL immediately after fetching categories
+      
         const { category, primaryUse } = router.query;
         const initialFilters = {};
         
         response.data.forEach(cat => {
-          // Set from URL if available, otherwise false
+       
           initialFilters[cat._id] = category ? 
             (Array.isArray(category) ? category.includes(cat._id) : category === cat._id) : 
             false;
@@ -104,7 +105,7 @@ const Menu = () => {
         
         setCategoryFilters(initialFilters);
         
-        // Also set primary use filters if available in URL
+       
         if (primaryUse) {
           const selectedPrimaryUses = Array.isArray(primaryUse) ? primaryUse : [primaryUse];
           setPrimaryUseFilters({
@@ -119,17 +120,20 @@ const Menu = () => {
     }
   };
 
-  // Fetch products from backend
+ 
   const fetchProducts = async () => {
     try {
       setLoadingData(true);
-      const response = await Api('GET', 'products?limit=21', null, router);
+      // Remove the limit to get all products
+      const response = await Api('GET', 'products', null, router);
+      console.log('Products API Response:', response);
       if (response.success) {
-        const capped = (response.data || []).slice(0, 21);
-        setProducts(capped);
-        setFilteredProducts(capped);
-        // prefetch aggregates for initial page (best effort)
-        const ids = capped.slice(0, 30).map(p => p._id);
+        const allProducts = response.data || [];
+        setProducts(allProducts);
+        setFilteredProducts(allProducts);
+        
+        // Get aggregates for all products
+        const ids = allProducts.map(p => p._id);
         fetchAggregatesForProducts(ids);
       }
     } catch (error) {
@@ -151,6 +155,9 @@ const Menu = () => {
     }
   };
 
+  // State to track if any category is selected
+  const [hasCategorySelected, setHasCategorySelected] = useState(false);
+
   // Filter products based on selected filters
   useEffect(() => {
     let filtered = [...products];
@@ -159,7 +166,9 @@ const Menu = () => {
     const selectedCategories = Object.keys(categoryFilters).filter(key => categoryFilters[key]);
     if (selectedCategories.length > 0) {
       filtered = filtered.filter(product => 
-        selectedCategories.includes(product.category._id || product.category)
+        product.category && selectedCategories.includes(
+          typeof product.category === 'object' ? product.category._id : product.category
+        )
       );
     }
 
@@ -382,18 +391,32 @@ const Menu = () => {
         </button>
         
         {categoryOpen && (
-          <div className="space-y-3 max-h-60 overflow-y-auto">
+          <div className="space-y-3">
             {categories.map((category) => (
-              <label key={category._id} className="flex items-center cursor-pointer group">
-                <input
-                  type="checkbox"
-                  checked={categoryFilters[category._id] || false}
-                  onChange={() => handleCategoryChange(category._id)}
-                  className="w-4 h-4 text-[#536690] border-gray-300 rounded focus:ring-[#536690] focus:ring-2"
-                />
-                <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
-                  {category.category}
-                </span>
+              <label key={category._id} className="flex items-center cursor-pointer group w-full">
+                <div className="flex items-center w-full">
+                  <input
+                    type="checkbox"
+                    checked={categoryFilters[category._id] || false}
+                    onChange={() => handleCategoryChange(category._id)}
+                    className="w-4 h-4 text-[#536690] border-gray-300 rounded focus:ring-[#536690] focus:ring-2 flex-shrink-0"
+                  />
+                  {category.image && (
+                    <div className="ml-3 w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                      <img 
+                        src={category.image} 
+                        alt={category.category}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  )}
+                  <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 transition-colors truncate">
+                    {category.category}
+                  </span>
+                </div>
               </label>
             ))}
           </div>
@@ -566,7 +589,7 @@ const Menu = () => {
 
                 {!collapsedByCategory[group.catId] && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
-                    {(selectedCategoriesMemo.length === 1 && selectedCategoriesMemo[0] === group.catId ? group.items : group.items.slice(0, 3)).map((product) => (
+                    {group.items.map((product) => (
                       <div
                         key={product._id}
                         className="relative rounded-4xl border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
@@ -710,28 +733,28 @@ const Menu = () => {
                 )}
               </div>
             ))}
-
-            {/* No products message */}
-            {filteredProducts.length === 0 && !loadingData && (
-              <div className="text-center py-12">
-                <div className="max-w-md mx-auto">
-                  <div className="mb-4">
-                    <Filter size={48} className="text-gray-300 mx-auto" />
-                  </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
-                  <p className="text-gray-500 text-sm lg:text-base mb-6">
-                    No products match your current filters. Try adjusting your filter criteria.
-                  </p>
-                  <button 
-                    onClick={clearAllFilters}
-                    className="px-6 py-3 bg-[#536690] text-white rounded-full hover:bg-[#536690]/90 transition-colors font-medium"
-                  >
-                    Clear All Filters
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
+
+          {/* No products message */}
+          {filteredProducts.length === 0 && !loadingData && (
+            <div className="text-center py-12">
+              <div className="max-w-md mx-auto">
+                <div className="mb-4">
+                  <Filter size={48} className="text-gray-300 mx-auto" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
+                <p className="text-gray-500 text-sm lg:text-base mb-6">
+                  No products match your current filters. Try adjusting your filter criteria.
+                </p>
+                <button 
+                  onClick={clearAllFilters}
+                  className="px-4 py-2 bg-[#536690] text-white rounded-lg hover:bg-[#536690]/90 transition-colors"
+                >
+                  Clear all filters
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

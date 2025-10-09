@@ -1,5 +1,6 @@
-import { createContext, useState, useContext, useEffect } from 'react';
+import { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
+import { toast } from 'react-toastify';
 
 // Create the context
 const UserContext = createContext();
@@ -16,6 +17,36 @@ export const UserProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  // Check if token is valid
+  const isTokenValid = useCallback((token) => {
+    if (!token) return false;
+    
+    try {
+      // Decode the token to check expiration
+      const base64Url = token.split('.')[1];
+      if (!base64Url) return false;
+      
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const payload = JSON.parse(window.atob(base64));
+      
+      // Check if token is expired
+      const currentTime = Date.now() / 1000;
+      return payload.exp > currentTime;
+    } catch (error) {
+      console.error('Error validating token:', error);
+      return false;
+    }
+  }, []);
+
+  // Clear user session
+  const clearSession = useCallback(() => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userDetail');
+    setUser(null);
+    setIsLoggedIn(false);
+    document.dispatchEvent(new Event('auth-state-changed'));
+  }, []);
+
   // Check if user is logged in on initial load
   useEffect(() => {
     const checkUserLoggedIn = () => {
@@ -23,17 +54,25 @@ export const UserProvider = ({ children }) => {
         const token = localStorage.getItem('token');
         const userDetail = localStorage.getItem('userDetail');
         
-        if (token && userDetail) {
-          setUser(JSON.parse(userDetail));
-          setIsLoggedIn(true);
-        } else {
-          setUser(null);
-          setIsLoggedIn(false);
+        // If no token or user detail, clear session
+        if (!token || !userDetail) {
+          clearSession();
+          return;
         }
+        
+        // Check if token is valid
+        if (!isTokenValid(token)) {
+          console.log('Token is invalid or expired');
+          clearSession();
+          return;
+        }
+        
+        // Set user data
+        setUser(JSON.parse(userDetail));
+        setIsLoggedIn(true);
       } catch (error) {
         console.error('Error checking user login status:', error);
-        setUser(null);
-        setIsLoggedIn(false);
+        clearSession();
       } finally {
         setLoading(false);
       }
@@ -43,8 +82,10 @@ export const UserProvider = ({ children }) => {
     checkUserLoggedIn();
     
     // Listen for storage events (when localStorage changes in other tabs)
-    const handleStorageChange = () => {
-      checkUserLoggedIn();
+    const handleStorageChange = (event) => {
+      if (event.key === 'token' || event.key === 'userDetail' || !event.key) {
+        checkUserLoggedIn();
+      }
     };
     
     // Listen for custom auth state changed event
@@ -52,16 +93,27 @@ export const UserProvider = ({ children }) => {
       checkUserLoggedIn();
     };
     
+    // Listen for API errors
+    const handleApiError = (event) => {
+      if (event.detail?.status === 401 || event.detail?.status === 403) {
+        clearSession();
+        toast.error('Your session has expired. Please login again.');
+        router.push('/auth/login');
+      }
+    };
+    
     // Add event listeners
     window.addEventListener('storage', handleStorageChange);
     document.addEventListener('auth-state-changed', handleAuthStateChanged);
+    window.addEventListener('api-error', handleApiError);
     
     // Clean up event listeners
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       document.removeEventListener('auth-state-changed', handleAuthStateChanged);
+      window.removeEventListener('api-error', handleApiError);
     };
-  }, []);
+  }, [isTokenValid, clearSession, router]);
 
   // Login function
   const login = (userData, token) => {
@@ -85,28 +137,26 @@ export const UserProvider = ({ children }) => {
   };
 
   // Logout function
-  const logout = () => {
+  const logout = useCallback(async () => {
     try {
-      // Clear localStorage
-      localStorage.removeItem('token');
-      localStorage.removeItem('userDetail');
+      // Clear session
+      clearSession();
       
-      // Update state
-      setUser(null);
-      setIsLoggedIn(false);
+      // Show success message
+      toast.success('Successfully logged out');
       
-      // Dispatch auth-state-changed event
-      document.dispatchEvent(new Event('auth-state-changed'));
-      
-      // Redirect to login page
-      router.push('/auth/login');
+      // Redirect to login page if not already there
+      if (router.pathname !== '/auth/login') {
+        router.push('/auth/login');
+      }
       
       return true;
     } catch (error) {
       console.error('Logout error:', error);
+      toast.error('Failed to logout. Please try again.');
       return false;
     }
-  };
+  }, [clearSession, router]);
 
   // Update user data
   const updateUser = (newUserData) => {

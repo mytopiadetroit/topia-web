@@ -504,7 +504,7 @@ const Register = () => {
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="w-full bg-[#8EAFF6CC] hover:bg-[#8EAFF6CC] text-white font-medium py-3 px-4 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#8EAFF6CC] focus:ring-offset-2 mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-[#80A6F7] hover:bg-[#8EAFF6CC] text-white font-medium py-3 px-4 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#8EAFF6CC] focus:ring-offset-2 mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Processing...' : 'Register'}
             </button>

@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import { useUser } from '../context/UserContext';
 import { useApp } from '../context/AppContext';
 import { useWishlist } from '../context/WishlistContext';
+import { toast } from 'react-toastify';
 
 export default function Navbar() {
   const router = useRouter();
@@ -16,6 +17,41 @@ export default function Navbar() {
   const { user, isLoggedIn, logout } = useUser();
   const { cartCount } = useApp();
   const { count: wishlistCount } = useWishlist();
+  
+  // Listen for auth state changes
+  useEffect(() => {
+    const handleAuthChange = () => {
+      // This will trigger a re-render when auth state changes
+    };
+    
+    // Listen for custom auth state change events
+    window.addEventListener('storage', handleAuthChange);
+    document.addEventListener('auth-state-changed', handleAuthChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleAuthChange);
+      document.removeEventListener('auth-state-changed', handleAuthChange);
+    };
+  }, []);
+  
+  // Handle 403 errors from API responses
+  useEffect(() => {
+    const handleApiError = (event) => {
+      // Check if this is an API error with 403 status
+      if (event.detail?.status === 403) {
+        toast.error('Your session has expired. Please login again.');
+        logout();
+        router.push('/auth/login');
+      }
+    };
+    
+    // Listen for API errors
+    window.addEventListener('api-error', handleApiError);
+    
+    return () => {
+      window.removeEventListener('api-error', handleApiError);
+    };
+  }, [logout, router]);
   
   // Create refs for the profile dropdown and side drawer
   const profileRef = useRef(null);
@@ -59,11 +95,17 @@ export default function Navbar() {
     setIsMobileProfileOpen(false);
   };
 
-  const handleLogout = () => {
-    logout();
-    setIsMenuOpen(false);
-    setIsProfileOpen(false);
-    setIsMobileProfileOpen(false);
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setIsMenuOpen(false);
+      setIsProfileOpen(false);
+      setIsMobileProfileOpen(false);
+      router.push('/auth/login');
+    } catch (error) {
+      console.error('Error during logout:', error);
+      toast.error('Failed to logout. Please try again.');
+    }
   };
 
   return (
@@ -279,7 +321,7 @@ export default function Navbar() {
                 </a>
                 
                 <a 
-                  href="#" 
+                  href="/resourcecenter" 
                   onClick={handleNavItemClick}
                   className="flex items-center space-x-3 px-2 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 group"
                 >
@@ -287,17 +329,17 @@ export default function Navbar() {
                   <span className="font-medium">Resource Centre</span>
                 </a>
                 
-                <a 
+                {/* <a 
                   href="#" 
                   onClick={handleNavItemClick}
                   className="flex items-center space-x-3 px-2 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 group"
                 >
                   <Users className="w-5 h-5 group-hover:text-blue-600" />
                   <span className="font-medium">Join GAG</span>
-                </a>
+                </a> */}
                 
                 <a 
-                  href="#" 
+                  href="/myhistory" 
                   onClick={handleNavItemClick}
                   className="flex items-center space-x-3 px-2 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 group"
                 >
@@ -306,7 +348,7 @@ export default function Navbar() {
                 </a>
                 
                 <a 
-                  href="#" 
+                  href="/rewards" 
                   onClick={handleNavItemClick}
                   className="flex items-center space-x-3 px-2 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 group"
                 >

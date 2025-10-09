@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronRight, Mail, Bell, Star, Sparkles } from 'lucide-react';
+import { useRouter } from 'next/router';
+import { subscribeEmail } from '../service/service';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function ComingSoon() {
+  const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
   const [email, setEmail] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
@@ -36,11 +42,32 @@ export default function ComingSoon() {
     return () => clearInterval(timer);
   }, []);
 
-  const handleSubscribe = () => {
-    if (email) {
-      setIsSubscribed(true);
-      setEmail('');
-      setTimeout(() => setIsSubscribed(false), 3000);
+  const handleSubscribe = async (e) => {
+    e?.preventDefault();
+    
+    // Validate email
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast.error('Please enter a valid email');
+      return;
+    }
+    
+    try {
+      setSubmitting(true);
+      const res = await subscribeEmail(email, router);
+      
+      if (res.success) {
+        toast.success('Subscribed successfully! Thank you for joining us.');
+        setEmail('');
+        setIsSubscribed(true);
+        setTimeout(() => setIsSubscribed(false), 3000);
+      } else {
+        toast.error(res.message || 'Subscription failed');
+      }
+    } catch (err) {
+      console.error('Subscription error:', err);
+      toast.error('Failed to subscribe. Please try again later.');
+    } finally {
+      setSubmitting(false);
     }
   };
 

@@ -1,7 +1,8 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { subscribeEmail } from '../service/service';
+import axios from 'axios';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useUser } from '../context/UserContext';
@@ -10,7 +11,23 @@ function App() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [shopSettings, setShopSettings] = useState(null);
   const { isLoggedIn } = useUser();
+
+  useEffect(() => {
+    const loadShopSettings = async () => {
+      try {
+        const response = await axios.get('https://api.mypsyguide.io/api/shop-settings');
+        console.log('Shop settings response:', response);
+        if (response.data.success) {
+          setShopSettings(response.data.data);
+        }
+      } catch (err) {
+        console.error('Failed to load shop settings:', err);
+      }
+    };
+    loadShopSettings();
+  }, []);
 
   const handleSubscribe = async (e) => {
     e.preventDefault();
@@ -34,84 +51,156 @@ function App() {
     }
   };
 
+  const formatTime = (time) => {
+    if (!time) return '';
+    const [hours, minutes] = time.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+    return `${displayHour}:${minutes} ${ampm}`;
+  };
+
+  const getCurrentDayTiming = () => {
+    if (!shopSettings?.timings) return null;
+    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const today = days[new Date().getDay()];
+    return shopSettings.timings.find(t => t.day.toLowerCase() === today);
+  };
+
+  const todayTiming = getCurrentDayTiming();
+
   return (
     <div>
       {/* Footer Component */}
       <footer className="bg-gradient-to-r from-[#80A6F7] via-[#80A6F7] to-[#80A6F7] text-white">
         <div className="container mx-auto px-6 py-16">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
-            {/* Logo Section */}
-            <div className="flex-shrink-0 ">
-              <div className="flex items-center space-x-3">
-                <div className="w-40 h-40 flex items-center justify-center">
-                  <img src='/images/logo.png' className='mb-20'/>
+            {/* Logo and Contact Section - 3 columns */}
+            <div className="lg:col-span-3">
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="w-32 h-32 flex items-center justify-center">
+                  <img src='/images/logo.png' alt="Logo" className='object-contain w-full h-full'/>
                 </div>
               </div>
+              
+              {shopSettings?.phone && (
+                <div className="mb-4">
+                  <p className="text-sm opacity-90 mb-1">Contact Us:</p>
+                  <p className="text-xl font-bold">{shopSettings.phone}</p>
+                </div>
+              )}
+
+              {/* Today's Timing Display */}
+              {todayTiming && (
+                <div className="bg-[#80A6F7] bg-opacity-20 rounded-lg p-3 backdrop-blur-sm border border-white border-opacity-30">
+                  <p className="text-sm font-bold mb-2">Today's Hours</p>
+                  {todayTiming.isOpen ? (
+                    <div className="flex items-center">
+                      <span className="inline-block w-2 h-2 bg-green-300 rounded-full mr-2"></span>
+                      <span className="text-sm font-semibold">
+                        {formatTime(todayTiming.openingTime)} - {formatTime(todayTiming.closingTime)}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center">
+                      <span className="inline-block w-2 h-2 bg-red-300 rounded-full mr-2"></span>
+                      <span className="text-sm font-semibold">Closed</span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
-            {/* Newsletter Section */}
-            <div className="text-center flex-1 max-w-md">
+            {/* Newsletter Section - 5 columns */}
+            <div className="lg:col-span-5 text-center">
               <h3 className="text-2xl font-bold mb-3">Stay Updated With the Latest Insights</h3>
               <p className="text-sm opacity-90 mb-6 leading-relaxed">
                 Subscribe to our newsletter to get insider tips, expert advice, and exclusive insights and updates tailored just for you.
               </p>
-              <form onSubmit={handleSubscribe} className="flex border-white w-full">
+              <form onSubmit={handleSubscribe} className="flex w-full max-w-md mx-auto">
                 <input 
                   type="email" 
                   placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="flex-1 px-2 py-3 rounded-l-lg bg-[#80A6F7] text-white placeholder-white border border-white focus:outline-none focus:ring-2 focus:ring-white"
+                  className="flex-1 px-4 py-3 rounded-l-lg bg-[#80A6F7] text-white placeholder-white placeholder-opacity-80 border border-white focus:outline-none focus:ring-2 focus:ring-white"
                 />
-                <button type="submit" disabled={submitting} className="bg-white text-[#80A6F7] px-6 py-3 rounded-r-lg font-semibold hover:bg-gray-100 transition-colors disabled:opacity-60">
+                <button 
+                  type="submit" 
+                  disabled={submitting} 
+                  className="bg-white text-[#80A6F7] px-6 py-3 rounded-r-lg font-semibold hover:bg-gray-100 transition-colors disabled:opacity-60 whitespace-nowrap"
+                >
                   {submitting ? 'Submitting...' : 'Subscribe'}
                 </button>
               </form>
             </div>
 
-            {/* Navigation Links */}
-            <div className="flex space-x-16">
-              <div className="space-y-4">
-                <a href="/" className="block hover:text-gray-200 transition-colors">Home</a>
-                <a href="/resourcecenter" className="block hover:text-gray-200 transition-colors">Articles</a>
-                <a href="/commingsoon" className="block hover:text-gray-200 transition-colors">Comming soon</a>
-               
-                <a href="/contact" className="block hover:text-gray-200 transition-colors">Contact</a>
+            {/* Navigation Links and Timings - 4 columns */}
+            <div className="lg:col-span-4">
+              <div className="grid grid-cols-2 gap-6">
+                {/* Left Navigation */}
+                <div className="space-y-3">
+                  <a href="/" className="block hover:text-gray-200 transition-colors font-medium">Home</a>
+                  <a href="/resourcecenter" className="block hover:text-gray-200 transition-colors font-medium">Articles</a>
+                  <a href="/commingsoon" className="block hover:text-gray-200 transition-colors font-medium">Coming soon</a>
+                  <a href="/contact" className="block hover:text-gray-200 transition-colors font-medium">Contact</a>
+                </div>
+                
+                {/* Right Navigation */}
+                <div className="space-y-3">
+                  {!isLoggedIn && (
+                    <a href="/auth/register" className="block hover:text-gray-200 transition-colors font-medium">Register</a>
+                  )}
+                  <a href="#" className="block hover:text-gray-200 transition-colors font-medium">About Us</a>
+                  <a href="/resourcecenter" className="block hover:text-gray-200 transition-colors font-medium">Blogs</a>
+                  <a href="/rewards" className="block hover:text-gray-200 transition-colors font-medium">Rewards</a>
+                </div>
               </div>
-              <div className="space-y-4">
-                {!isLoggedIn && (
-                  <a href="/auth/register" className="block hover:text-gray-200 transition-colors">Register</a>
-                )}
-                <a href="#" className="block hover:text-gray-200 transition-colors">About Us</a>
-                <a href="/resourcecenter" className="block hover:text-gray-200 transition-colors">Blogs</a>
-                <a href="/rewards" className="block hover:text-gray-200 transition-colors">Rewards</a>
-              </div>
+
+              {/* Full Week Timings */}
+              {shopSettings?.timings && (
+                <div className="bg-[#80A6F7] bg-opacity-20 rounded-lg p-4 backdrop-blur-sm border border-white border-opacity-30 mt-6">
+                  <p className="text-sm font-bold mb-3 pb-2 border-b border-white border-opacity-40">Opening Hours</p>
+                  <div className="space-y-2">
+                    {shopSettings.timings.map((timing) => (
+                      <div key={timing._id} className="flex justify-between items-center text-sm">
+                        <span className="capitalize font-medium">{timing.day.substring(0, 3)}</span>
+                        {timing.isOpen ? (
+                          <span className="font-semibold">
+                            {formatTime(timing.openingTime)} - {formatTime(timing.closingTime)}
+                          </span>
+                        ) : (
+                          <span className="opacity-80">Closed</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         {/* Footer Bottom */}
-        <div className="border-t border-white border-opacity-20">
+        <div className="border-t border-white border-opacity-30">
           <div className="container mx-auto px-6 py-6">
             <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-              <div className="flex items-center space-x-2 text-sm opacity-80">
+              <div className="flex items-center space-x-2 text-sm font-medium">
                 <span>©</span>
                 <span>Copyright</span>
               </div>
-              <div className="flex flex-wrap items-center space-x-6 text-sm">
-                <a href="/terms" className="hover:text-gray-200 transition-colors opacity-80">Terms of Use</a>
+              <div className="flex flex-wrap items-center space-x-6 text-sm font-medium">
+                <a href="/terms" className="hover:text-gray-200 transition-colors">Terms of Use</a>
                 <span className="opacity-60">|</span>
-                <a href="/privacypolicy" className="hover:text-gray-200 transition-colors opacity-80">Privacy Policy</a>
+                <a href="/privacypolicy" className="hover:text-gray-200 transition-colors">Privacy Policy</a>
                 <span className="opacity-60">|</span>
-                <a href="#" className="hover:text-gray-200 transition-colors opacity-80">Cookie Policy</a>
+                <a href="#" className="hover:text-gray-200 transition-colors">Cookie Policy</a>
               </div>
             </div>
           </div>
         </div>
       </footer>
-
-      {/* Toasts are managed globally in _app.js */}
     </div>
   );
 }

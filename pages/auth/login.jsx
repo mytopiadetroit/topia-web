@@ -81,7 +81,7 @@ const Login = () => {
       const formattedPhone = formData.phone;
       
       try {
-        const response = await Api('post', 'auth/login', {
+        const response = await Api('post', 'auth/admin-login', {
           phone: formattedPhone
         }, router);
         
@@ -99,22 +99,22 @@ const Login = () => {
             return;
           }
           
-          // Store user data and token in localStorage only (not using UserContext login yet)
+          
           if (response.user && response.token) {
             localStorage.setItem('topiaDetail', JSON.stringify(response.user));
             localStorage.setItem('token', response.token);
           }
           
-          // Show success toast message
+        
           safeToast.success('OTP has been sent! Please enter your OTP.');
           
-          // Redirect to OTP verification page after a short delay to ensure toast is visible
+         
           setTimeout(() => {
             router.push('/auth/otp');
           }, 1000);
         } else {
           console.log('Login failed, checking for suspension error');
-          // Check if it's a suspension error
+        
           if (response.message && response.message.includes('suspended')) {
             console.log('Suspension error in response, redirecting to /suspend');
             safeToast.error(response.message);
@@ -233,7 +233,7 @@ const Login = () => {
               type="button"
               onClick={handleLogin}
               disabled={loading}
-              className=" bg-[#8EAFF6CC] hover:bg-[#8EAFF6CC] text-white font-medium py-2 px-6 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#8EAFF6CC] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className=" bg-[#80A6F7] hover:bg-[#8EAFF6CC] text-white font-medium py-2 px-6 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#8EAFF6CC] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Checking...' : 'Check-In'}
             </button>

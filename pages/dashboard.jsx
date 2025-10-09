@@ -158,9 +158,7 @@ export default function Dashboard({ user, loader }) {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-gray-900">Low Quantity Stock</h3>
-                <button className="text-blue-600 text-sm font-medium hover:text-blue-700">
-                  See All
-                </button>
+                
               </div>
               
               <div className="space-y-4">
@@ -185,9 +183,7 @@ export default function Dashboard({ user, loader }) {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-gray-900">Top Selling Stock</h3>
-                <button className="text-blue-600 text-sm font-medium hover:text-blue-700">
-                  See All
-                </button>
+               
               </div>
               
               {/* Table Header */}
