@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
+const VERIFICATION_DURATION = 2 * 60 * 60 * 1000; // 2 hours in milliseconds
+
 export default function AgeVerification({ children }) {
   const [isVerified, setIsVerified] = useState(false);
   const [showError, setShowError] = useState(false);
@@ -7,17 +9,47 @@ export default function AgeVerification({ children }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user was previously verified
-    const verified = localStorage.getItem('ageVerified');
-    if (verified === 'true') {
-      setIsVerified(true);
-    }
+    // Check if user was previously verified within the last 2 hours
+    const checkVerification = () => {
+      // Check session storage first (for non-remembered sessions)
+      const sessionVerified = sessionStorage.getItem('ageVerified') === 'true';
+      const sessionTimestamp = sessionStorage.getItem('ageVerifiedTimestamp');
+      
+      if (sessionVerified && sessionTimestamp) {
+        const timeSinceSessionVerification = Date.now() - parseInt(sessionTimestamp, 10);
+        if (timeSinceSessionVerification < VERIFICATION_DURATION) {
+          return true;
+        }
+      }
+      
+      // Check local storage (for remembered sessions)
+      const localVerified = localStorage.getItem('ageVerified') === 'true';
+      const localTimestamp = localStorage.getItem('ageVerifiedTimestamp');
+      
+      if (localVerified && localTimestamp) {
+        const timeSinceLocalVerification = Date.now() - parseInt(localTimestamp, 10);
+        if (timeSinceLocalVerification < VERIFICATION_DURATION) {
+          return true;
+        }
+      }
+      
+      return false;
+    };
+    
+    const shouldVerify = checkVerification();
+    setIsVerified(shouldVerify);
     setIsLoading(false);
   }, []);
 
   const handleYes = () => {
+    const now = Date.now();
     if (rememberMe) {
       localStorage.setItem('ageVerified', 'true');
+      localStorage.setItem('ageVerifiedTimestamp', now.toString());
+    } else {
+      // Only set session storage if not remembering
+      sessionStorage.setItem('ageVerified', 'true');
+      sessionStorage.setItem('ageVerifiedTimestamp', now.toString());
     }
     setIsVerified(true);
     setShowError(false);
@@ -25,7 +57,6 @@ export default function AgeVerification({ children }) {
 
   const handleNo = () => {
     setShowError(true);
-    setIsVerified(false);
   };
 
   // Show nothing while checking localStorage

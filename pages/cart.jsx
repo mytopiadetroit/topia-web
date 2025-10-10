@@ -71,7 +71,11 @@ const Cart = () => {
     try {
       // Prepare order data (pickup flow)
       const orderData = {
-        items: cart,
+        items: cart.map(item => ({
+          ...item,
+          // Ensure intensity is included for each product
+          intensity: item.intensity || 5 // Default to 5 if intensity is not set
+        })),
         shippingAddress: {},
         paymentMethod: 'pay_at_pickup',
         notes: 'Pickup at store'

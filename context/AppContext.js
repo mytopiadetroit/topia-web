@@ -97,7 +97,9 @@ export const AppProvider = ({ children }) => {
           ...product,
           // Ensure consistent id field exists for comparisons later
           id: productId,
-          quantity: finalQuantity
+          quantity: finalQuantity,
+          // Include intensity with a default of 5 if not provided
+          intensity: product.intensity || 5
         };
         return [...prevCart, normalizedProduct];
       }

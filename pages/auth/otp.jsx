@@ -42,7 +42,7 @@ const OtpVerification = () => {
       setLoading(true);
       setError('');
       
-      const response = await Api('post', 'auth/admin-verify-otp', {
+      const response = await Api('post', 'auth/verify-otp', {
         otp,
         phone: userPhone
       }, router);

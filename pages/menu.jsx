@@ -1,5 +1,6 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { debounce } from 'lodash';
 import { ChevronDown, ChevronUp, Filter, X, Menu as MenuIcon } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
@@ -15,6 +16,7 @@ const Menu = () => {
   const [collapsedByCategory, setCollapsedByCategory] = useState({});
   const [categoryOpen, setCategoryOpen] = useState(true);
   const [primaryUseOpen, setPrimaryUseOpen] = useState(true);
+  const [intensityOpen, setIntensityOpen] = useState(true);
   
   // Side drawer state
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -35,6 +37,16 @@ const Menu = () => {
     therapeutic: false,
     functional: false
   });
+  const [intensityFilters, setIntensityFilters] = useState({
+    mild: false,
+    medium: false,
+    strong: false
+  });
+
+  // Price range filter state
+  const [priceRange, setPriceRange] = useState([0, 100]);
+  const [localPriceRange, setLocalPriceRange] = useState([0, 100]);
+  const [priceRangeOpen, setPriceRangeOpen] = useState(true);
 
   useEffect(() => {
     // Only check after loading is complete
@@ -180,8 +192,33 @@ const Menu = () => {
       );
     }
 
+    // Filter by intensity
+    const selectedIntensities = Object.keys(intensityFilters).filter(key => intensityFilters[key]);
+    if (selectedIntensities.length > 0) {
+      filtered = filtered.filter(product => {
+        if (!product.intensity) return false;
+        const intensity = parseInt(product.intensity, 10);
+        return selectedIntensities.some(type => {
+          if (type === 'mild') return intensity >= 1 && intensity <= 3;
+          if (type === 'medium') return intensity >= 4 && intensity <= 7;
+          if (type === 'strong') return intensity >= 8 && intensity <= 10;
+          return false;
+        });
+      });
+    }
+
+    // Filter by price range
+    filtered = filtered.filter(product => {
+      const price = Number(product.price || 0);
+      // For "Over $80" case where max is 9999
+      if (priceRange[1] >= 9999) {
+        return price >= priceRange[0];
+      }
+      return price >= priceRange[0] && price <= priceRange[1];
+    });
+
     setFilteredProducts(filtered);
-  }, [products, categoryFilters, primaryUseFilters]);
+  }, [products, categoryFilters, primaryUseFilters, intensityFilters, priceRange]);
 
   // Group filtered products by category for sectioned rendering
   const groupedByCategory = useMemo(() => {
@@ -224,9 +261,12 @@ const Menu = () => {
   };
 
   // Function to update URL with current filters
-  const updateURL = (newCategoryFilters, newPrimaryUseFilters) => {
+  const updateURL = (newCategoryFilters, newPrimaryUseFilters, newIntensityFilters = null) => {
     const selectedCategories = Object.keys(newCategoryFilters).filter(key => newCategoryFilters[key]);
     const selectedPrimaryUses = Object.keys(newPrimaryUseFilters).filter(key => newPrimaryUseFilters[key]);
+    const selectedIntensities = newIntensityFilters ? 
+      Object.keys(newIntensityFilters).filter(key => newIntensityFilters[key]) : 
+      [];
     
     const query = { ...router.query };
     
@@ -242,6 +282,13 @@ const Menu = () => {
       query.primaryUse = selectedPrimaryUses;
     } else {
       delete query.primaryUse;
+    }
+    
+    // Update intensity in URL
+    if (selectedIntensities.length > 0) {
+      query.intensity = selectedIntensities;
+    } else {
+      delete query.intensity;
     }
     
     router.push({
@@ -269,7 +316,28 @@ const Menu = () => {
       [useType]: !primaryUseFilters[useType]
     };
     setPrimaryUseFilters(newPrimaryUseFilters);
-    updateURL(categoryFilters, newPrimaryUseFilters);
+    updateURL(categoryFilters, newPrimaryUseFilters, intensityFilters);
+  };
+
+  const handleIntensityChange = (intensityType) => {
+    const newIntensityFilters = {
+      ...intensityFilters,
+      [intensityType]: !intensityFilters[intensityType]
+    };
+    setIntensityFilters(newIntensityFilters);
+    updateURL(categoryFilters, primaryUseFilters, newIntensityFilters);
+  };
+
+  // Reset all filters
+  const resetAllFilters = () => {
+    const newCategoryFilters = {};
+    categories.forEach(cat => {
+      newCategoryFilters[cat._id] = false;
+    });
+    setCategoryFilters(newCategoryFilters);
+    setPrimaryUseFilters({ therapeutic: false, functional: false });
+    setIntensityFilters({ mild: false, medium: false, strong: false });
+    updateURL({}, {}, {});
   };
 
   const handleAddToCart = (product, e) => {
@@ -317,15 +385,21 @@ const Menu = () => {
   const clearAllFilters = () => {
     const newCategoryFilters = {};
     const newPrimaryUseFilters = { therapeutic: false, functional: false };
+    const newIntensityFilters = { mild: false, medium: false, strong: false };
     
     setCategoryFilters(newCategoryFilters);
     setPrimaryUseFilters(newPrimaryUseFilters);
+    setIntensityFilters(newIntensityFilters);
+    setPriceRange([priceRangeLimits.min, priceRangeLimits.max]);
     setIsDrawerOpen(false);
     
     // Clear URL parameters
     const query = { ...router.query };
     delete query.category;
     delete query.primaryUse;
+    delete query.intensity;
+    delete query.minPrice;
+    delete query.maxPrice;
     
     router.push({
       pathname: router.pathname,
@@ -333,12 +407,46 @@ const Menu = () => {
     }, undefined, { shallow: true });
   };
 
+  // Get min and max price from products
+  const priceRangeLimits = useMemo(() => {
+    if (!products || products.length === 0) return { min: 0, max: 100 };
+    const prices = products.map(p => p.price);
+    const min = Math.floor(Math.min(...prices) / 20) * 20; // Round down to nearest 20
+    const max = Math.ceil(Math.max(...prices) / 20) * 20;   // Round up to nearest 20
+    return { min, max };
+  }, [products]);
+
+  // Apply price range filter with debounce
+  const applyPriceRange = useCallback(
+    debounce((newRange) => {
+      setPriceRange([...newRange]);
+    }, 100),
+    [] // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  // Handle price range change
+  const handlePriceRangeChange = useCallback((newRange) => {
+    setLocalPriceRange(newRange);
+    setPriceRange(newRange);
+  }, []);
+
+  // Reset price range
+  const resetPriceRange = useCallback(() => {
+    const newRange = [priceRangeLimits.min, priceRangeLimits.max];
+    setLocalPriceRange([...newRange]);
+    setPriceRange([...newRange]);
+  }, [priceRangeLimits]);
+
   // Calculate active filter count
   const activeFilterCount = useMemo(() => {
     const categoryCount = Object.values(categoryFilters).filter(Boolean).length;
+
     const primaryUseCount = Object.values(primaryUseFilters).filter(Boolean).length;
-    return categoryCount + primaryUseCount;
-  }, [categoryFilters, primaryUseFilters]);
+    const intensityCount = Object.values(intensityFilters).filter(Boolean).length;
+    const priceFilterActive = priceRange[0] > priceRangeLimits.min || 
+                            priceRange[1] < priceRangeLimits.max;
+    return categoryCount + primaryUseCount + intensityCount + (priceFilterActive ? 1 : 0);
+  }, [categoryFilters, primaryUseFilters, intensityFilters, priceRange, priceRangeLimits]);
 
   // Color presets for badges
   const colors = [
@@ -457,6 +565,87 @@ const Menu = () => {
                 Functional / Medicinal
               </span>
             </label>
+          </div>
+        )}
+      </div>
+
+      {/* Intensity Filter */}
+      <div className="mt-6">
+        <button
+          onClick={() => setIntensityOpen(!intensityOpen)}
+          className="flex items-center justify-between w-full text-left font-medium text-gray-900 mb-4"
+        >
+          Intensity
+          {intensityOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </button>
+        
+        {intensityOpen && (
+          <div className="space-y-3">
+            {[
+              { id: 'mild', label: 'Mild (1-3)' },
+              { id: 'medium', label: 'Medium (4-7)' },
+              { id: 'strong', label: 'Strong (8-10)' }
+            ].map((intensity) => (
+              <label key={intensity.id} className="flex items-center cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={intensityFilters[intensity.id] || false}
+                  onChange={() => handleIntensityChange(intensity.id)}
+                  className="w-4 h-4 text-[#536690] border-gray-300 rounded focus:ring-[#536690] focus:ring-2"
+                />
+                <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
+                  {intensity.label}
+                </span>
+              </label>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Price Range Filter */}
+      <div className="mt-6">
+        <button
+          onClick={() => setPriceRangeOpen(!priceRangeOpen)}
+          className="flex items-center justify-between w-full text-left font-medium text-gray-900 mb-4"
+        >
+          Price Range
+          {priceRangeOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </button>
+        
+        {priceRangeOpen && (
+          <div className="space-y-3">
+            {[
+              { id: '20', label: 'Under $20', range: [0, 20] },
+              { id: '40', label: '$20 - $40', range: [20, 40] },
+              { id: '60', label: '$40 - $60', range: [40, 60] },
+              { id: '80', label: '$60 - $80', range: [60, 80] },
+              { id: '80+', label: 'Over $80', range: [80, 9999] }
+            ].map((priceOption) => {
+              const isActive = priceRange[0] === priceOption.range[0] && 
+                             priceRange[1] === priceOption.range[1];
+              
+              return (
+                <label key={priceOption.id} className="flex items-center cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={isActive}
+                    onChange={() => handlePriceRangeChange([...priceOption.range])}
+                    className="w-4 h-4 text-[#536690] border-gray-300 rounded focus:ring-[#536690] focus:ring-2"
+                  />
+                  <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
+                    {priceOption.label}
+                  </span>
+                </label>
+              );
+            })}
+            {(priceRange[0] > 0 || priceRange[1] < 9999) && (
+              <button
+                onClick={resetPriceRange}
+                className="text-xs text-[#536690] hover:underline mt-2 block"
+              >
+                Reset Price Filter
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -639,6 +828,32 @@ const Menu = () => {
                           <div className="space-y-3">
                             <h3 className="font-medium text-gray-900 text-sm">{product.name}</h3>
                             <p className="text-lg font-semibold text-gray-900">$ {product.price}</p>
+                            {product.intensity && (
+                              <div className="mt-1">
+                                <div className="flex items-center">
+                                  <span className="text-xs font-medium text-gray-500 mr-2">Intensity:</span>
+                                  <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                    product.intensity <= 3 ? 'bg-green-100 text-green-800' : 
+                                    product.intensity <= 7 ? 'bg-yellow-100 text-yellow-800' : 
+                                    'bg-red-100 text-red-800'
+                                  }`}>
+                                    {product.intensity <= 3 ? 'Mild' : product.intensity <= 7 ? 'Medium' : 'Strong'} ({product.intensity}/10)
+                                  </span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                                  <div 
+                                    className="h-1.5 rounded-full transition-all duration-300"
+                                    style={{ 
+                                      width: `${(product.intensity / 10) * 100}%`,
+                                      backgroundColor: 
+                                        product.intensity <= 3 ? '#10B981' : 
+                                        product.intensity <= 7 ? '#F59E0B' : 
+                                        '#EF4444'
+                                    }}
+                                  ></div>
+                                </div>
+                              </div>
+                            )}
                             {/* Tags (dynamic top-5 by review aggregate) */}
                             <div className="flex flex-wrap p-4 gap-1">
                               {(reviewAggByProduct[product._id] || []).map((agg, idx) => {
