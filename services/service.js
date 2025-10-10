@@ -1,8 +1,8 @@
 import axios from "axios";
 import { toast } from 'react-toastify';
 
-  //  const ConstantsUrl = "http://localhost:5000/api/";
- const ConstantsUrl = "https://api.mypsyguide.io/api/";
+// const ConstantsUrl = "http://localhost:5000/api/";
+  const ConstantsUrl = "https://api.mypsyguide.io/api/";
 
 let isRedirecting = false;
  
@@ -160,10 +160,10 @@ export const setGlobalRouter = (router) => {
 };
 
 // API function
-function Api(method, url, data, router, params) {
+function Api(method, url, data, router, params, preventRedirect = false) {
   return new Promise(function (resolve, reject) {
    
-    if (isRedirecting) {
+    if (isRedirecting && !preventRedirect) {
       resolve({ success: false, redirect: true });
       return;
     }
@@ -186,6 +186,10 @@ function Api(method, url, data, router, params) {
       (err) => {
         if (err.response) {
           if (err?.response?.status === 401) {
+            if (preventRedirect) {
+              // If preventRedirect is true, reject with the error instead of redirecting
+              return reject(err.response.data);
+            }
             if (typeof window !== "undefined") {
               handleTokenExpiration(router);
               return resolve({ success: false, redirect: true });

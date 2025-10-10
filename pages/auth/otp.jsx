@@ -42,32 +42,36 @@ const OtpVerification = () => {
       setLoading(true);
       setError('');
       
+      // Make the API call with preventRedirect set to true
       const response = await Api('post', 'auth/verify-otp', {
         otp,
         phone: userPhone
-      }, router);
+      }, router, null, true); // Pass true to prevent automatic redirection
       
-      if (response.success) {
+      if (response && response.success) {
         // Use the login function from UserContext
         if (response.token && response.user) {
           login(response.user, response.token);
+          
+          // Show success toast message
+          safeToast.success('Login successful!');
+          
+          // Only redirect on successful login
+          setTimeout(() => {
+            router.push('/');
+          }, 1500);
         }
-        
-        // Show success toast message
-        safeToast.success('Login successful!');
-        
-        // Redirect to home page after a delay to ensure toast is visible
-        setTimeout(() => {
-          router.push('/');
-        }, 1500);
       } else {
-        safeToast.error(response.message || 'OTP verification failed. Please try again.');
-        setError(response.message || 'OTP verification failed. Please try again.');
+        const errorMessage = response?.message || 'OTP verification failed. Please try again.';
+        safeToast.error(errorMessage);
+        setError(errorMessage);
       }
     } catch (err) {
       console.error('OTP verification error:', err);
-      safeToast.error('An error occurred during OTP verification. Please try again.');
-      setError(err.message || 'Something went wrong. Please try again.');
+      // Handle the error message from the API response
+      const errorMessage = err?.message || 'An error occurred during OTP verification. Please try again.';
+      safeToast.error(errorMessage);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

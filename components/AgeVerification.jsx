@@ -9,9 +9,9 @@ export default function AgeVerification({ children }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user was previously verified within the last 2 hours
+
     const checkVerification = () => {
-      // Check session storage first (for non-remembered sessions)
+    
       const sessionVerified = sessionStorage.getItem('ageVerified') === 'true';
       const sessionTimestamp = sessionStorage.getItem('ageVerifiedTimestamp');
       
@@ -22,7 +22,7 @@ export default function AgeVerification({ children }) {
         }
       }
       
-      // Check local storage (for remembered sessions)
+      
       const localVerified = localStorage.getItem('ageVerified') === 'true';
       const localTimestamp = localStorage.getItem('ageVerifiedTimestamp');
       

@@ -77,7 +77,7 @@ export default function App({ Component, pageProps }) {
     // Add script to document
     document.head.appendChild(script);
 
-    // Set timeout to check if script loaded
+    
     const loadCheck = setTimeout(() => {
       if (!window.Tawk_API) {
         console.warn('Tawk.to did not load within timeout');
