@@ -93,7 +93,7 @@ export default function AgeVerification({ children }) {
       <div className="relative z-10 text-center px-4 max-w-2xl w-full">
         {/* Logo Text */}
         <div className="mb-12 relative flex justify-center">
-          <div className="text-7xl md:text-8xl lg:text-9xl font-black text-white transform -rotate-2 relative" style={{ letterSpacing: '-0.02em' }}>
+          <div className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white transform -rotate-2 relative" style={{ letterSpacing: '-0.02em' }}>
             <span className="absolute inset-0 text-transparent bg-clip-text bg-gradient-to-br from-purple-400 to-purple-600 blur-sm">
               SHROOMTOPIA
             </span>
@@ -161,11 +161,11 @@ export default function AgeVerification({ children }) {
         {/* Terms and Privacy */}
         <p className="text-sm text-gray-300">
           By entering our site, you agree to our{' '}
-          <a href="#" className="underline hover:text-white transition-colors">
+          <a href="/terms" className="underline hover:text-white transition-colors">
             Terms & Conditions
           </a>
           {' '}and{' '}
-          <a href="#" className="underline hover:text-white transition-colors">
+          <a href="/privacypolicy" className="underline hover:text-white transition-colors">
             Privacy Policy
           </a>
           .
