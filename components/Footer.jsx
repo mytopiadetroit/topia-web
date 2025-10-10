@@ -114,22 +114,24 @@ function App() {
 
             {/* Newsletter Section - 5 columns */}
             <div className="lg:col-span-5 text-center">
-              <h3 className="text-2xl font-bold mb-3">Stay Updated With the Latest Insights</h3>
-              <p className="text-sm opacity-90 mb-6 leading-relaxed">
+              <h3 className="text-xl sm:text-2xl font-bold mb-3 px-2 sm:px-0">Stay Updated With the Latest Insights</h3>
+              <p className="text-sm opacity-90 mb-6 leading-relaxed px-4 sm:px-0">
                 Subscribe to our newsletter to get insider tips, expert advice, and exclusive insights and updates tailored just for you.
               </p>
-              <form onSubmit={handleSubscribe} className="flex w-full max-w-md mx-auto">
-                <input 
-                  type="email" 
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="flex-1 px-4 py-3 rounded-l-lg bg-[#80A6F7] text-white placeholder-white placeholder-opacity-80 border border-white focus:outline-none focus:ring-2 focus:ring-white"
-                />
+              <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row w-full max-w-md mx-auto px-4 sm:px-0">
+                <div className="flex-1 mb-3 sm:mb-0 sm:mr-2">
+                  <input 
+                    type="email" 
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full px-4 py-3 rounded-lg sm:rounded-r-none bg-[#80A6F7] text-white placeholder-white placeholder-opacity-80 border border-white focus:outline-none focus:ring-2 focus:ring-white"
+                  />
+                </div>
                 <button 
                   type="submit" 
                   disabled={submitting} 
-                  className="bg-white text-[#80A6F7] px-6 py-3 rounded-r-lg font-semibold hover:bg-gray-100 transition-colors disabled:opacity-60 whitespace-nowrap"
+                  className="bg-white text-[#80A6F7] px-6 py-3 rounded-lg sm:rounded-l-none font-semibold hover:bg-gray-100 transition-colors disabled:opacity-60 whitespace-nowrap w-full sm:w-auto"
                 >
                   {submitting ? 'Submitting...' : 'Subscribe'}
                 </button>
