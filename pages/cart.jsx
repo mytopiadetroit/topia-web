@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import { useUser } from '../context/UserContext';
 import { useApp } from '../context/AppContext';
-import { Api } from '@/services/service';
+import { Api } from '@/service/service';
 
 const Cart = () => {
   const router = useRouter();

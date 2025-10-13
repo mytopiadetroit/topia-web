@@ -99,7 +99,7 @@ axios.interceptors.response.use(
         if (typeof window !== "undefined") {
           localStorage.removeItem("userDetail");
           localStorage.removeItem("token");
-          
+           window.location.href = "/";
           window.dispatchEvent(new Event('storage'));
           document.dispatchEvent(new Event('auth-state-changed'));
           

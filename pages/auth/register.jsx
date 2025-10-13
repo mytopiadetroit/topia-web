@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { useRouter } from 'next/router';
-import { Api, ApiFormData } from '../../services/service';
+import { Api, ApiFormData } from '../../service/service';
 import Link from 'next/link';
 import { safeToast } from '../../utils/toast';
 import PhoneInput from 'react-phone-input-2';

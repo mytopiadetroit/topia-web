@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { Api } from '../services/service';
+import { Api } from '../service/service';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
 

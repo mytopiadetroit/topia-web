@@ -3,7 +3,7 @@ import { Check, ChevronLeft } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import { useUser } from '../context/UserContext';
-import { Api } from '../services/service';
+import { Api } from '../service/service';
 
 export default function OrderConfirm() {
   const router = useRouter();

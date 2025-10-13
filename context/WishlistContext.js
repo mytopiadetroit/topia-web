@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { Api } from '../services/service';
+import { Api } from '../service/service';
 import { useRouter } from 'next/router';
 import { useUser } from './UserContext';
 

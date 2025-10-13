@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { useRouter } from 'next/router';
-import { Api } from '../../services/service';
+import { Api } from '../../service/service';
 import Link from 'next/link';
 import { safeToast } from '../../utils/toast';
 import { useUser } from '../../context/UserContext';
@@ -81,7 +81,7 @@ const Login = () => {
       const formattedPhone = formData.phone;
       
       try {
-        const response = await Api('post', 'auth/login', {
+        const response = await Api('post', 'auth/admin-login', {
           phone: formattedPhone
         }, router);
         

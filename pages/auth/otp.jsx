@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { useRouter } from 'next/router';
-import { Api } from '../../services/service';
+import { Api } from '../../service/service';
 import { safeToast } from '../../utils/toast';
 import { useUser } from '../../context/UserContext';
 
@@ -43,7 +43,7 @@ const OtpVerification = () => {
       setError('');
       
       // Make the API call with preventRedirect set to true
-      const response = await Api('post', 'auth/verify-otp', {
+      const response = await Api('post', 'auth/admin-verify-otp', {
         otp,
         phone: userPhone
       }, router, null, true); // Pass true to prevent automatic redirection

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Edit, FileText, Upload, X, Check, Camera } from 'lucide-react';
-import { Api } from '../services/service';
+import { Api } from '../service/service';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import { useUser } from '../context/UserContext';
