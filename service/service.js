@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // const ConstantsUrl = "http://localhost:5000/api/";
-     const ConstantsUrl = "https://api.mypsyguide.io/api/";
+      const ConstantsUrl = "https://api.mypsyguide.io/api/";
 
 let isRedirecting = false;
 
@@ -402,7 +402,56 @@ export const updateProductOrder = async (productId, newOrder, router) => {
   }
 };
 
-export { Api, timeSince, ApiFormData, setGlobalRouter, toast, setGlobalToast, fetchAllCategories, fetchProductsByCategory, createProduct, fetchAllUsers, fetchUserById, updateUser, deleteUser };
+// Helper function to fetch all review tags
+const fetchAllReviewTags = (router) => {
+  return Api('GET', 'review-tags', null, router);
+};
+
+// Helper function to create a new review tag
+const createReviewTagApi = (data, router) => {
+  return Api('POST', 'review-tags', data, router);
+};
+
+// Helper function to update a review tag
+const updateReviewTagApi = (id, data, router) => {
+  return Api('PUT', `review-tags/${id}`, data, router);
+};
+
+// Helper function to delete a review tag
+const deleteReviewTagApi = (id, router) => {
+  return Api('DELETE', `review-tags/${id}`, null, router);
+};
+
+// Gallery helpers
+const fetchGalleryImages = async (router) => {
+  try {
+    return await Api('get', 'gallery', null, router);
+  } catch (error) {
+    console.error('Error fetching gallery images:', error);
+    throw error;
+  }
+};
+
+export { 
+  Api, 
+  timeSince, 
+  ApiFormData, 
+  setGlobalRouter, 
+  toast, 
+  setGlobalToast, 
+  fetchAllCategories, 
+  fetchProductsByCategory, 
+  createProduct, 
+  fetchAllUsers, 
+  fetchUserById, 
+  updateUser, 
+  deleteUser,
+  fetchAllReviewTags,
+  createReviewTagApi,
+  updateReviewTagApi,
+  deleteReviewTagApi,
+  fetchGalleryImages
+};
 export const submitContactMessage = async (data, router) => {
   try {
     return await Api('post', 'contacts', data, router);

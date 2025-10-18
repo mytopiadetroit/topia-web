@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
+import { fetchGalleryImages } from '../service/service';
 // Simple UUID generator for visitorId
 const uuid = () =>
   'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -58,11 +59,53 @@ const ResourceCenter = () => {
   const [liked, setLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [viewsCount, setViewsCount] = useState(0);
+  
+  // Gallery states
+  const [galleryImages, setGalleryImages] = useState([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [showFullscreen, setShowFullscreen] = useState(false);
+  const [fullscreenImage, setFullscreenImage] = useState(null);
 
   useEffect(() => {
     loadContent();
     loadCategories();
+    loadGalleryImages();
   }, [filters]);
+
+  // Auto-slide gallery effect
+  useEffect(() => {
+    if (galleryImages.length === 0 || isPaused) return;
+    
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % galleryImages.length);
+    }, 2000); // Change image every 2 seconds
+
+    return () => clearInterval(interval);
+  }, [galleryImages.length, isPaused]);
+
+  const loadGalleryImages = async () => {
+    try {
+      const response = await fetchGalleryImages(router);
+      if (response.success && response.data) {
+        setGalleryImages(response.data);
+      }
+    } catch (error) {
+      console.error('Error loading gallery images:', error);
+    }
+  };
+
+  const handleImageClick = (image) => {
+    setFullscreenImage(image);
+    setShowFullscreen(true);
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeFullscreen = () => {
+    setShowFullscreen(false);
+    setFullscreenImage(null);
+    document.body.style.overflow = 'auto';
+  };
 
 const loadContent = async () => {
   try {
@@ -278,6 +321,82 @@ const openContentModal = async (contentId) => {
                 </div>
               </div>
             </div>
+
+            {/* Gallery Visual Guides Section */}
+            {galleryImages.length > 0 && (
+              <div className="mt-12">
+                <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center">
+                  Visual Guides
+                </h2>
+                <div 
+                  className="relative max-w-4xl mx-auto"
+                  onMouseEnter={() => setIsPaused(true)}
+                  onMouseLeave={() => setIsPaused(false)}
+                >
+                  {/* Main Image Display */}
+                  <div className="relative overflow-hidden rounded-2xl shadow-2xl aspect-video bg-white/10">
+                    {galleryImages.map((image, index) => (
+                      <div
+                        key={image._id}
+                        className={`absolute inset-0 transition-opacity duration-1000 cursor-pointer ${
+                          index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+                        }`}
+                        onClick={() => handleImageClick(image)}
+                      >
+                        <img
+                          src={image.imageUrl.startsWith('http') ? image.imageUrl : `http://localhost:5000${image.imageUrl}`}
+                          alt={image.title}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
+                          <h3 className="text-white text-xl font-semibold">{image.title}</h3>
+                          {image.description && (
+                            <p className="text-white/90 text-sm mt-1">{image.description}</p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Carousel Indicators */}
+                  <div className="flex justify-center gap-2 mt-4">
+                    {galleryImages.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentImageIndex(index)}
+                        className={`h-2 rounded-full transition-all ${
+                          index === currentImageIndex 
+                            ? 'bg-white w-8' 
+                            : 'bg-white/40 w-2 hover:bg-white/60'
+                        }`}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Navigation Arrows */}
+                  {galleryImages.length > 1 && (
+                    <>
+                      <button
+                        onClick={() => setCurrentImageIndex((prev) => 
+                          prev === 0 ? galleryImages.length - 1 : prev - 1
+                        )}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full backdrop-blur-sm transition-all"
+                      >
+                        ❮
+                      </button>
+                      <button
+                        onClick={() => setCurrentImageIndex((prev) => 
+                          (prev + 1) % galleryImages.length
+                        )}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full backdrop-blur-sm transition-all"
+                      >
+                        ❯
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -463,10 +582,10 @@ const openContentModal = async (contentId) => {
 
         {/* Content Modal */}
         {showModal && selectedContent && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg w-[95vw] h-[95vh] overflow-y-auto shadow-2xl">
               {/* Modal Header */}
-              <div className="sticky top-0 bg-white border-b p-6 flex items-center justify-between">
+              <div className="sticky top-0 bg-white border-b p-6 flex items-center justify-between z-10">
                 <div>
                   <span className={`px-3 py-1 text-sm font-medium rounded-full ${
                     selectedContent.type === 'video' 
@@ -518,7 +637,7 @@ const openContentModal = async (contentId) => {
     <img
       src={selectedContent.featuredImage}
       alt={selectedContent.title}
-      className="w-full h-64 md:h-96 object-cover rounded-lg"
+      className="w-full h-auto rounded-lg"
     />
   </div>
 ) : null}
@@ -561,6 +680,35 @@ const openContentModal = async (contentId) => {
                     📤 Share
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Fullscreen Image Modal */}
+        {showFullscreen && fullscreenImage && (
+          <div 
+            className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4"
+            onClick={closeFullscreen}
+          >
+            <button
+              onClick={closeFullscreen}
+              className="absolute top-4 right-4 text-white text-4xl hover:text-gray-300 z-10"
+            >
+              ×
+            </button>
+            <div className="relative max-w-7xl w-full h-full flex flex-col items-center justify-center">
+              <img
+                src={fullscreenImage.imageUrl.startsWith('http') ? fullscreenImage.imageUrl : `http://localhost:5000${fullscreenImage.imageUrl}`}
+                alt={fullscreenImage.title}
+                className="max-w-full max-h-[85vh] object-contain"
+                onClick={(e) => e.stopPropagation()}
+              />
+              <div className="mt-6 text-center">
+                <h3 className="text-white text-2xl font-semibold mb-2">{fullscreenImage.title}</h3>
+                {fullscreenImage.description && (
+                  <p className="text-white/80 text-lg">{fullscreenImage.description}</p>
+                )}
               </div>
             </div>
           </div>

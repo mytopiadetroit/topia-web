@@ -28,19 +28,6 @@ const RewardsPage = () => {
     proofVideo: null
   });
 
-  const defaultTasks = [
-    { id: 'join-groove', title: 'Join Groove Group', reward: 1, completed: false },
-    { id: 'follow-ig', title: 'Follow Us On IG', reward: 1, completed: false },
-    { id: 'save-whatsapp', title: 'Save WhatsApp Contact', reward: 1, completed: false },
-    { id: 'google-review', title: 'Google Review', reward: 1, completed: false },
-    { id: 'tag-selfie', title: 'Tag Us Selfie Wall Photo', reward: 1, completed: false },
-    { id: 'first-experience', title: 'First Experience Share', reward: 1, completed: false },
-    { id: 'subscribe-yt', title: 'Subscribe YT Channel', reward: 1, completed: false },
-    { id: 'share-journey', title: 'Share Your Journey', reward: 1, completed: false },
-    { id: 'bring-friend', title: 'Bring a Friend', reward: 1, completed: false },
-    { id: 'special-reward', title: 'Special Reward', reward: 1, completed: false }
-  ];
-
   useEffect(() => {
     loadRewardData();
   }, [activeTab]);
@@ -49,16 +36,17 @@ const RewardsPage = () => {
     setLoading(true);
     try {
       if (activeTab === 'claim') {
-        // Load reward tasks or use default
+        // Load reward tasks from backend (dynamic)
         try {
           const response = await fetchRewardTasks(router);
           if (response.success) {
-            setRewardTasks(response.data);
+            setRewardTasks(response.data || []);
           } else {
-            setRewardTasks(defaultTasks);
+            setRewardTasks([]);
           }
         } catch (error) {
-          setRewardTasks(defaultTasks);
+          console.error('Error fetching tasks:', error);
+          setRewardTasks([]);
         }
       } else if (activeTab === 'history') {
         const response = await fetchUserRewards(router);
@@ -156,9 +144,15 @@ const RewardsPage = () => {
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">Reward Center</h1>
-            <p className="text-lg text-gray-600">
-              Earn $15 for Every Stamp Collected and $1 for Each Check-in or Shared Experience!
-            </p>
+            {rewardTasks.length > 0 ? (
+              <p className="text-lg text-gray-600">
+                Earn $15 for Every Stamp Collected and $1 for Each Check-in or Shared Experience!
+              </p>
+            ) : (
+              <p className="text-lg text-gray-600">
+                Your gateway to exciting rewards and exclusive benefits
+              </p>
+            )}
           </div>
 
           {/* Tabs */}
@@ -199,6 +193,80 @@ const RewardsPage = () => {
 
           {/* Content */}
           {activeTab === 'claim' && (
+            rewardTasks.length === 0 ? (
+              // Coming Soon Screen - Enhanced
+              <div className="flex flex-col items-center justify-center py-20 px-4">
+                <div className="text-center max-w-2xl relative">
+                  {/* Animated Background Elements */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse"></div>
+                  
+                  {/* Main Content */}
+                  <div className="relative z-10">
+                    {/* Animated Icon */}
+                    <div className="mb-8 relative">
+                      <div className="inline-block relative">
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full blur-xl opacity-50 animate-pulse"></div>
+                        <div className="relative bg-gradient-to-r from-blue-500 to-purple-600 rounded-full p-8 shadow-2xl">
+                          <svg
+                            className="w-16 h-16 text-white"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Title */}
+                    <h2 className="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                      Coming Soon!
+                    </h2>
+                    
+                    {/* Subtitle */}
+                    <p className="text-xl text-gray-700 mb-6 font-medium">
+                      Exciting Rewards Are On Their Way
+                    </p>
+                    
+                    {/* Description */}
+                    <p className="text-base text-gray-600 mb-8 leading-relaxed">
+                      We're preparing amazing tasks and rewards just for you. Complete challenges, earn points, and unlock exclusive benefits!
+                    </p>
+
+                    {/* Features Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                      <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+                        <div className="text-4xl mb-3">🎯</div>
+                        <h3 className="font-semibold text-gray-900 mb-2">Easy Tasks</h3>
+                        <p className="text-sm text-gray-600">Simple challenges to complete</p>
+                      </div>
+                      <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+                        <div className="text-4xl mb-3">💰</div>
+                        <h3 className="font-semibold text-gray-900 mb-2">Great Rewards</h3>
+                        <p className="text-sm text-gray-600">Earn points and benefits</p>
+                      </div>
+                      <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+                        <div className="text-4xl mb-3">⚡</div>
+                        <h3 className="font-semibold text-gray-900 mb-2">Quick Approval</h3>
+                        <p className="text-sm text-gray-600">Fast reward processing</p>
+                      </div>
+                    </div>
+
+                    {/* CTA Badge */}
+                    <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-full">
+                      <span className="text-3xl animate-bounce">🎁</span>
+                      <span className="text-sm font-semibold text-gray-700">Check back soon for updates!</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 justify-items-center">
               {rewardTasks.map((task) => (
                 <div
@@ -229,6 +297,7 @@ const RewardsPage = () => {
                 </div>
               ))}
             </div>
+            )
           )}
 
           {activeTab === 'history' && (

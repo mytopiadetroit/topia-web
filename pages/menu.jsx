@@ -1,12 +1,12 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { debounce } from 'lodash';
-import { ChevronDown, ChevronUp, Filter, X, Menu as MenuIcon } from 'lucide-react';
+import { ChevronDown, ChevronUp, Filter, X, Menu as MenuIcon, Tag } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import { useUser } from '../context/UserContext';
 import { useApp } from '../context/AppContext';
-import { Api } from '../service/service';
+import { Api, fetchAllReviewTags } from '../service/service';
 
 const Menu = () => {
   const router = useRouter();
@@ -17,6 +17,7 @@ const Menu = () => {
   const [categoryOpen, setCategoryOpen] = useState(true);
   const [primaryUseOpen, setPrimaryUseOpen] = useState(true);
   const [intensityOpen, setIntensityOpen] = useState(true);
+  const [reviewTagsOpen, setReviewTagsOpen] = useState(true);
   
   // Side drawer state
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -30,6 +31,10 @@ const Menu = () => {
   
   // dynamic review aggregates cache: productId -> array of { _id, count, label, emoji }
   const [reviewAggByProduct, setReviewAggByProduct] = useState({});
+  
+  // Review tags state
+  const [reviewTags, setReviewTags] = useState([]);
+  const [selectedReviewTags, setSelectedReviewTags] = useState({});
   
   // Filter states
   const [categoryFilters, setCategoryFilters] = useState({});
@@ -51,6 +56,25 @@ const [localPriceRange, setLocalPriceRange] = useState([0, 0]);
 const [totalPages, setTotalPages] = useState(1);
 const [totalItems, setTotalItems] = useState(0);
 const ITEMS_PER_PAGE = 15;
+
+  // Fetch review tags
+  const fetchReviewTags = async () => {
+    try {
+      const response = await fetchAllReviewTags(router);
+      if (response.success) {
+        setReviewTags(response.data || []);
+        // Initialize selected tags as false
+        const initialTags = {};
+        response.data.forEach(tag => {
+          initialTags[tag._id] = false;
+        });
+        setSelectedReviewTags(initialTags);
+      }
+    } catch (error) {
+      console.error('Error fetching review tags:', error);
+      toast.error('Failed to load review tags');
+    }
+  };
 
   useEffect(() => {
     // Only check after loading is complete
@@ -80,6 +104,7 @@ const ITEMS_PER_PAGE = 15;
         // Fetch data if user is logged in
         fetchCategories();
         fetchProducts();
+        fetchReviewTags();
       }
     }
   }, [isLoggedIn, loading, router]);
@@ -140,8 +165,8 @@ const ITEMS_PER_PAGE = 15;
   const fetchProducts = async () => {
     try {
       setLoadingData(true);
-      // Fetch ALL products without pagination for filtering
-      const response = await Api('GET', 'products?limit=10000', null, router);
+      // Fetch ALL products without pagination for filtering and include review tags
+      const response = await Api('GET', 'products?limit=10000&populate=reviewTags', null, router);
       console.log('Products API Response:', response);
       if (response.success) {
         const allProducts = response.data || [];
@@ -186,7 +211,6 @@ const ITEMS_PER_PAGE = 15;
   useEffect(() => {
     let filtered = [...products];
   
-  
     const selectedCategories = Object.keys(categoryFilters).filter(key => categoryFilters[key]);
     if (selectedCategories.length > 0) {
       filtered = filtered.filter(product => 
@@ -195,7 +219,6 @@ const ITEMS_PER_PAGE = 15;
         )
       );
     }
-  
   
     const selectedPrimaryUses = Object.keys(primaryUseFilters).filter(key => primaryUseFilters[key]);
     if (selectedPrimaryUses.length > 0) {
@@ -219,6 +242,22 @@ const ITEMS_PER_PAGE = 15;
       });
     }
   
+    // Filter by review tags
+    const selectedTags = Object.keys(selectedReviewTags).filter(key => selectedReviewTags[key]);
+    if (selectedTags.length > 0) {
+      filtered = filtered.filter(product => {
+        // Check if product has reviewTags and it's an array
+        if (!product.reviewTags || !Array.isArray(product.reviewTags)) {
+          return false;
+        }
+        
+        // Check if product has all the selected review tags
+        return selectedTags.every(tagId => 
+          product.reviewTags.some(tag => tag._id === tagId)
+        );
+      });
+    }
+  
     // Filter by price range
     filtered = filtered.filter(product => {
       const price = Number(product.price || 0);
@@ -232,7 +271,7 @@ const ITEMS_PER_PAGE = 15;
     setTotalItems(filtered.length);
     setTotalPages(Math.ceil(filtered.length / ITEMS_PER_PAGE));
     setCurrentPage(1); // Reset to first page when filters change
-  }, [products, categoryFilters, primaryUseFilters, intensityFilters, priceRange]);
+  }, [products, categoryFilters, primaryUseFilters, intensityFilters, selectedReviewTags, priceRange, reviewAggByProduct]);
 
   const sortedProducts = useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -324,6 +363,14 @@ const ITEMS_PER_PAGE = 15;
     updateURL(categoryFilters, primaryUseFilters, newIntensityFilters);
   };
 
+  // Handle review tag toggle
+  const handleReviewTagToggle = (tagId) => {
+    setSelectedReviewTags(prev => ({
+      ...prev,
+      [tagId]: !prev[tagId]
+    }));
+  };
+
   // Reset all filters
   const resetAllFilters = () => {
     const newCategoryFilters = {};
@@ -333,6 +380,14 @@ const ITEMS_PER_PAGE = 15;
     setCategoryFilters(newCategoryFilters);
     setPrimaryUseFilters({ therapeutic: false, functional: false });
     setIntensityFilters({ mild: false, medium: false, strong: false });
+    
+    // Reset review tags
+    const resetTags = {};
+    reviewTags.forEach(tag => {
+      resetTags[tag._id] = false;
+    });
+    setSelectedReviewTags(resetTags);
+    
     updateURL({}, {}, {});
   };
 
@@ -436,13 +491,13 @@ const ITEMS_PER_PAGE = 15;
   // Calculate active filter count
   const activeFilterCount = useMemo(() => {
     const categoryCount = Object.values(categoryFilters).filter(Boolean).length;
-
     const primaryUseCount = Object.values(primaryUseFilters).filter(Boolean).length;
     const intensityCount = Object.values(intensityFilters).filter(Boolean).length;
+    const reviewTagCount = Object.values(selectedReviewTags).filter(Boolean).length;
     const priceFilterActive = priceRange[0] > priceRangeLimits.min || 
                             priceRange[1] < priceRangeLimits.max;
-    return categoryCount + primaryUseCount + intensityCount + (priceFilterActive ? 1 : 0);
-  }, [categoryFilters, primaryUseFilters, intensityFilters, priceRange, priceRangeLimits]);
+    return categoryCount + primaryUseCount + intensityCount + reviewTagCount + (priceFilterActive ? 1 : 0);
+  }, [categoryFilters, primaryUseFilters, intensityFilters, selectedReviewTags, priceRange, priceRangeLimits]);
 
   // Color presets for badges
   const colors = [
@@ -594,6 +649,44 @@ const ITEMS_PER_PAGE = 15;
                 </span>
               </label>
             ))}
+          </div>
+        )}
+      </div>
+
+      {/* Review Tags Filter */}
+      <div className="mt-6">
+        <button
+          onClick={() => setReviewTagsOpen(!reviewTagsOpen)}
+          className="flex items-center justify-between w-full text-left font-medium text-gray-900 mb-4"
+        >
+          <span className="flex items-center">
+            <Tag size={16} className="mr-2" />
+            Review Tags
+          </span>
+          {reviewTagsOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </button>
+        
+        {reviewTagsOpen && (
+          <div className="space-y-3">
+            {reviewTags.length > 0 ? (
+              reviewTags
+                .filter(tag => tag.isActive) // Only show active tags
+                .map(tag => (
+                  <label key={tag._id} className="flex items-center cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={selectedReviewTags[tag._id] || false}
+                      onChange={() => handleReviewTagToggle(tag._id)}
+                      className="w-4 h-4 text-[#536690] border-gray-300 rounded focus:ring-[#536690] focus:ring-2"
+                    />
+                    <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
+                      {tag.label}
+                    </span>
+                  </label>
+                ))
+            ) : (
+              <p className="text-sm text-gray-500">No review tags available</p>
+            )}
           </div>
         )}
       </div>

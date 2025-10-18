@@ -14,6 +14,8 @@ export default function ProductDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [reviewAgg, setReviewAgg] = useState([]);
+  const [selectedVariant, setSelectedVariant] = useState(null);
+  const [selectedFlavor, setSelectedFlavor] = useState(null);
   const router = useRouter();
   const { id } = router.query;
   const { isLoggedIn, userLoading } = useUser();
@@ -56,6 +58,53 @@ export default function ProductDetails() {
       fetchAgg();
     }
   }, [id, isLoggedIn]);
+
+  // Set default variant and flavor when product loads
+  useEffect(() => {
+    if (product) {
+      // Set default variant if product has variants
+      if (product.hasVariants && product.variants && product.variants.length > 0) {
+        setSelectedVariant(product.variants[0]);
+      } else {
+        setSelectedVariant(null);
+      }
+      
+      // Set default flavor if product has flavors
+      if (product.flavors && product.flavors.length > 0) {
+        setSelectedFlavor(product.flavors[0]);
+      } else {
+        setSelectedFlavor(null);
+      }
+    }
+  }, [product]);
+
+  // Calculate final price based on selected variant and flavor
+  const getFinalPrice = () => {
+    let price = 0;
+    
+    // If product has variants, use selected variant price
+    if (product?.hasVariants && selectedVariant) {
+      price = Number(selectedVariant.price || 0);
+    } else {
+      // Otherwise use base product price
+      price = Number(product?.price || 0);
+    }
+    
+    // Add flavor price if flavor is selected
+    if (selectedFlavor) {
+      price += Number(selectedFlavor.price || 0);
+    }
+    
+    return price.toFixed(2);
+  };
+
+  // Get available stock based on selection
+  const getAvailableStock = () => {
+    if (product?.hasVariants && selectedVariant) {
+      return Number(selectedVariant.stock || 0);
+    }
+    return Number(product?.stock || 0);
+  };
 
   const fetchProduct = async () => {
     try {
@@ -103,7 +152,7 @@ export default function ProductDetails() {
 
   // Handle quantity change
   const increaseQuantity = () => setQuantity(prev => {
-    const max = Math.max(0, Number(product?.stock ?? 0));
+    const max = Math.max(0, getAvailableStock());
     const next = prev + 1;
     if (max > 0 && next > max) return max;
     return next;
@@ -113,11 +162,37 @@ export default function ProductDetails() {
   // Handle add to cart
   const handleAddToCart = () => {
     if (!product) return;
-    const stock = Number(product.stock || 0);
+    const stock = getAvailableStock();
     if (!product.hasStock || stock <= 0) return;
+    
+    // Validate variant selection if product has variants
+    if (product.hasVariants && !selectedVariant) {
+      toast.error('Please select a size');
+      return;
+    }
+    
     const qty = Math.min(quantity, stock);
-    addToCart(product, qty);
-    toast.success(`${product.name} added to cart!`);
+    
+    // Create cart item with variant and flavor info
+    const cartItem = {
+      ...product,
+      selectedVariant: selectedVariant,
+      selectedFlavor: selectedFlavor,
+      finalPrice: getFinalPrice(),
+    };
+    
+    addToCart(cartItem, qty);
+    
+    let message = `${product.name}`;
+    if (selectedVariant) {
+      message += ` (${selectedVariant.size.value}${selectedVariant.size.unit})`;
+    }
+    if (selectedFlavor) {
+      message += ` - ${selectedFlavor.name}`;
+    }
+    message += ' added to cart!';
+    
+    toast.success(message);
   };
 
   // Loading state
@@ -248,10 +323,83 @@ export default function ProductDetails() {
               )}
             </div>
 
+            {/* Size Variant Selection */}
+            {product.hasVariants && product.variants && product.variants.length > 0 && (
+              <div className="mb-4">
+                <h3 className="text-sm text-gray-700 font-semibold mb-2">Select Size</h3>
+                <div className="flex flex-wrap gap-2">
+                  {product.variants.map((variant, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setSelectedVariant(variant);
+                        setQuantity(1); // Reset quantity when changing variant
+                      }}
+                      className={`px-3 py-2 border-2 rounded-lg transition-all text-left ${
+                        selectedVariant === variant
+                          ? 'border-[#536690] bg-blue-50'
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-gray-900">
+                          {variant.size.value}{variant.size.unit}
+                        </span>
+                        <span className="text-sm text-[#536690] font-medium">
+                          ${Number(variant.price).toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="text-xs text-gray-500 mt-0.5">
+                        Stock: {variant.stock}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Flavor Selection */}
+            {product.flavors && product.flavors.length > 0 && (
+              <div className="mb-4">
+                <h3 className="text-sm text-gray-700 font-semibold mb-2">Select Flavor</h3>
+                <div className="flex flex-wrap gap-2">
+                  {product.flavors.map((flavor, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedFlavor(flavor)}
+                      className={`px-3 py-2 border-2 rounded-lg transition-all ${
+                        selectedFlavor === flavor
+                          ? 'border-green-600 bg-green-50'
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-gray-900">
+                          {flavor.name}
+                        </span>
+                        <span className="text-sm text-green-600 font-medium">
+                          {Number(flavor.price) > 0 ? `+$${Number(flavor.price).toFixed(2)}` : 'Free'}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Price */}
             <div className="mb-6">
-              <h2 className="text-lg text-gray-700 font-semibold mb-2">Price</h2>
-              <p className="text-3xl font-bold text-[#536690]">$ {product.price}</p>
+              <h2 className="text-lg text-gray-700 font-semibold mb-2">Final Price</h2>
+              <div className="flex items-baseline gap-2">
+                <p className="text-3xl font-bold text-[#536690]">$ {getFinalPrice()}</p>
+                {(selectedVariant || selectedFlavor) && (
+                  <span className="text-sm text-gray-500">
+                    {selectedVariant && `(${selectedVariant.size.value}${selectedVariant.size.unit})`}
+                    {selectedVariant && selectedFlavor && ' + '}
+                    {selectedFlavor && `${selectedFlavor.name}`}
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* Quantity Selector (respect stock limits) */}
@@ -268,16 +416,16 @@ export default function ProductDetails() {
                 <span className="text-xl font-semibold text-gray-800 w-16 text-center">{quantity}</span>
                 <button 
                   onClick={increaseQuantity}
-                  disabled={Number(product?.stock || 0) > 0 && quantity >= Number(product?.stock || 0)}
+                  disabled={getAvailableStock() > 0 && quantity >= getAvailableStock()}
                   className="w-10 h-10 rounded-full text-gray-600 border border-gray-300 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span className="text-lg">+</span>
                 </button>
               </div>
-              {Number(product?.stock || 0) <= 0 ? (
+              {getAvailableStock() <= 0 ? (
                 <p className="mt-2 text-sm text-red-600">Out of stock</p>
-              ) : Number(product?.stock || 0) < 5 ? (
-                <p className="mt-2 text-sm text-gray-600">Only {Number(product?.stock || 0)} left</p>
+              ) : getAvailableStock() < 5 ? (
+                <p className="mt-2 text-sm text-gray-600">Only {getAvailableStock()} left</p>
               ) : null}
             </div>
 
@@ -285,13 +433,13 @@ export default function ProductDetails() {
             <div className="flex items-center gap-4 mb-8">
               <button 
                 onClick={handleAddToCart}
-                disabled={!product.hasStock || Number(product?.stock || 0) <= 0}
+                disabled={!product.hasStock || getAvailableStock() <= 0}
                 className={`bg-[#536690] hover:bg-[#536690] text-white font-medium py-3 px-8 rounded-full flex items-center justify-center gap-2 flex-1 transition-colors ${
-                  (!product.hasStock || Number(product?.stock || 0) <= 0) ? 'opacity-50 cursor-not-allowed' : ''
+                  (!product.hasStock || getAvailableStock() <= 0) ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >
-                <span>{(product.hasStock && Number(product?.stock || 0) > 0) ? 'Add to Cart' : 'Out of Stock'}</span>
-                {(product.hasStock && Number(product?.stock || 0) > 0) && <span className="text-xl">+</span>}
+                <span>{(product.hasStock && getAvailableStock() > 0) ? 'Add to Cart' : 'Out of Stock'}</span>
+                {(product.hasStock && getAvailableStock() > 0) && <span className="text-xl">+</span>}
               </button>
               
               <button onClick={handleToggleWishlist} className="border border-gray-300 bg-white text-gray-500 font-medium py-3 px-6 rounded-full hover:bg-gray-50 transition-colors flex items-center justify-center">
