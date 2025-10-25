@@ -174,7 +174,7 @@ export default function Home() {
           OUR MISSION
         </h3>
         <p className="text-white text-base md:text-lg lg:text-xl leading-relaxed max-w-4xl mx-auto">
-          At SHROOMTOPIA, we are dedicated to enhancing your wellness journey through the power of therapeutic mushrooms. We believe in blending nature's gifts with modern lifestyles to promote creativity, relaxation, and enjoyment.
+          At SHROOMTOPIA, we are dedicated to enhancing your wellness journey through the power of therapeutic mushrooms. We believe in blending nature&apos;s gifts with modern lifestyles to promote creativity, relaxation, and enjoyment.
         </p>
       </div>
     </div>
