@@ -132,22 +132,23 @@ export default function Navbar() {
             </div>
 
             {/* Desktop Navigation */}
-           <div className="hidden md:block w-[670px] rounded-4xl bg-[url('/images/navbar.png')] bg-cover bg-center">
-              <div className="ml-10 flex items-baseline space-x-8">
+           <div className="hidden md:block w-[680px] rounded-4xl bg-[url('/images/navbar.png')] bg-cover bg-center">
+              <div className="ml-20 flex items-baseline space-x-12">
+                <a href="/" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
+                  HOME
+                </a>
                 <a href="/menu" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
-                  Menu
+                  MENU
                 </a>
                 <a href="/resourcecenter" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
-                  Resource Centre
+               RESOURCE CENTER
+
                 </a>
-                <a href="/about" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
-                  About
-                </a>
-                <a href="/myhistory" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
-                  Experiences
-                </a>
+                  {/* <a href="/myhistory" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
+                    Experiences
+                  </a> */}
                 <a href="/rewards" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
-                  Rewards
+                  REWARDS
                 </a>
               </div>
             </div>
@@ -185,7 +186,7 @@ export default function Navbar() {
                 >
                   <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
                     {isLoggedIn ? (
-                      <img src={user?.avatar || "/images/avatar.png"} alt="Profile" className="w-full h-full object-cover" />
+                      <img src={user?.avatar || "/images/pic1.png"} alt="Profile" className="w-full h-full object-cover" />
                     ) : (
                       <User className="w-5 h-5 text-gray-600" />
                     )}
@@ -338,14 +339,14 @@ export default function Navbar() {
                   <span className="font-medium">Join GAG</span>
                 </a> */}
                 
-                <a 
+                {/* <a 
                   href="/myhistory" 
                   onClick={handleNavItemClick}
                   className="flex items-center space-x-3 px-2 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 group"
                 >
                   <Award className="w-5 h-5 group-hover:text-blue-600" />
                   <span className="font-medium"> Experiences</span>
-                </a>
+                </a> */}
                 
                 <a 
                   href="/rewards" 

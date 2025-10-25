@@ -60,15 +60,6 @@ function App() {
     return `${displayHour}:${minutes} ${ampm}`;
   };
 
-  const getCurrentDayTiming = () => {
-    if (!shopSettings?.timings) return null;
-    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-    const today = days[new Date().getDay()];
-    return shopSettings.timings.find(t => t.day.toLowerCase() === today);
-  };
-
-  const todayTiming = getCurrentDayTiming();
-
   return (
     <div>
       {/* Footer Component */}
@@ -83,33 +74,6 @@ function App() {
                   <img src='/images/logo.png' alt="Logo" className='object-contain w-full h-full'/>
                 </div>
               </div>
-              
-              {shopSettings?.phone && (
-                <div className="mb-4">
-                  <p className="text-sm opacity-90 mb-1">Contact Us:</p>
-                  <p className="text-xl font-bold">{shopSettings.phone}</p>
-                </div>
-              )}
-
-              {/* Today's Timing Display */}
-              {todayTiming && (
-                <div className="bg-[#80A6F7] bg-opacity-20 rounded-lg p-3 backdrop-blur-sm border border-white border-opacity-30">
-                  <p className="text-sm font-bold mb-2">Today's Hours</p>
-                  {todayTiming.isOpen ? (
-                    <div className="flex items-center">
-                      <span className="inline-block w-2 h-2 bg-green-300 rounded-full mr-2"></span>
-                      <span className="text-sm font-semibold">
-                        {formatTime(todayTiming.openingTime)} - {formatTime(todayTiming.closingTime)}
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center">
-                      <span className="inline-block w-2 h-2 bg-red-300 rounded-full mr-2"></span>
-                      <span className="text-sm font-semibold">Closed</span>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
 
             {/* Newsletter Section - 5 columns */}
@@ -161,7 +125,7 @@ function App() {
               </div>
 
               {/* Full Week Timings */}
-              {shopSettings?.timings && (
+              {/* {shopSettings?.timings && (
                 <div className="bg-[#80A6F7] bg-opacity-20 rounded-lg p-4 backdrop-blur-sm border border-white border-opacity-30 mt-6">
                   <p className="text-sm font-bold mb-3 pb-2 border-b border-white border-opacity-40">Opening Hours</p>
                   <div className="space-y-2">
@@ -179,7 +143,7 @@ function App() {
                     ))}
                   </div>
                 </div>
-              )}
+              )} */}
             </div>
           </div>
         </div>

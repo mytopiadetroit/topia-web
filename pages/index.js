@@ -13,6 +13,38 @@ export default function Home() {
   const { isLoggedIn, user } = useUser();
   const { darkMode, toggleDarkMode } = useApp();
   const router = useRouter();
+  const [shopSettings, setShopSettings] = useState(null);
+  const [todayTiming, setTodayTiming] = useState(null);
+  const [showAllHours, setShowAllHours] = useState(false);
+
+  useEffect(() => {
+    const loadShopSettings = async () => {
+      try {
+        const response = await fetch('https://api.mypsyguide.io/api/shop-settings');
+        const data = await response.json();
+        if (data.success) {
+          setShopSettings(data.data);
+          // Get today's timing
+          const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+          const today = days[new Date().getDay()];
+          const timing = data.data.timings.find(t => t.day.toLowerCase() === today);
+          setTodayTiming(timing);
+        }
+      } catch (err) {
+        console.error('Failed to load shop settings:', err);
+      }
+    };
+    loadShopSettings();
+  }, []);
+
+  const formatTime = (time) => {
+    if (!time) return '';
+    const [hours, minutes] = time.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+    return `${displayHour}:${minutes} ${ampm}`;
+  };
 
   const handleShare = async () => {
     const shareData = {
@@ -49,129 +81,105 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white">
     
-       {/* Top notification bar */}
-      {/* <div className="bg-gray-800 text-white text-center py-2 text-sm">
-        <span>Check the live streaming! Wednesday July 15th / 7:30 PM EST | </span>
-        <span className="text-blue-300 cursor-pointer">YouTube ➤</span>
-      </div> */}
+     
       
-      {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        {/* Background Image */}
-        <div className="absolute inset-0 z-0">
-         
-          <Image 
-            src="/images/img.png"
-            alt="People in conversation"
-            className="w-full h-full object-cover"
-            style={{ filter: 'blur(8px)' }}
-            fill
-            priority={true}
-            sizes="100vw"
-          />
-          {/* Overlay Image with More Blur and Darkness */}
-          <Image
-            src="/images/f.png"
-            alt="Overlay"
-            className="w-full h-full object-cover absolute inset-0 pointer-events-none"
-            style={{
-              zIndex: 1,
-              filter: 'blur(16px) brightness(0.7)', 
-            }}
-            fill
-            priority={true}
-            sizes="100vw"
-          />
-        </div>
-        
-        {/* Hero Content */}
-        <div className={`relative z-10 text-center text-white px-4 max-w-4xl mx-auto transform transition-all duration-1000 ${
-          isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
-        }`}>
-          <h1 className="text-xl md:text-3xl lg:text-4xl font-bold mb-6 leading-tight">
-           Unlock Your Path to Health and Knowledge
-          </h1>
-          <p className="text-sm md:text-lg lg:text-xl mb-8 font-light max-w-3xl mx-auto">
-           Access curated resources science-backed wisdom,<br />
-            and a supportive network of wellness enthusiasts.
-          </p>
-         <button 
-            onClick={() => {
-              if (isLoggedIn) {
-                router.push('/menu');
-              } else {
-                router.push('/auth/login');
-              }
-            }}
-            className="bg-[#2546B633] hover:bg-[#2546B633] text-white px-8 py-4 rounded-4xl text-lg  font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2 mx-auto"
-          >
-            <span>Get Started</span>
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        </div>
-      </section>
-
-      {/* Content Section */}
-      <section className="py-6 px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid relative lg:grid-cols-2 gap-12 items-center">
-             <div className="absolute inset-0 z-0 flex justify-center items-center pointer-events-none">
-    <div className="w-full h-full "></div>
+ {/* Hero Section */}
+<section className="relative h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-900 via-black to-gray-800">
+  {/* Background Image - Blue Mushrooms */}
+  <div className="absolute inset-0 z-0">
+    <Image 
+      src="/images/mush3.jpg"
+      alt="Glowing blue mushrooms"
+      className="w-full h-full object-cover opacity-60"
+      fill
+      priority={true}
+      sizes="100vw"
+    />
+    {/* Dark gradient overlay */}
+    <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent"></div>
   </div>
-            {/* Ginger Image */}
-<div className="flex items-center overflow-hidden lg:overflow-visible">
-  <Image 
-    src="/images/ii2.png"
-    alt="Natural ginger root"
-    className="h-[250px] sm:h-[350px] lg:h-[600px] w-full lg:w-[31.5vw] object-cover lg:-ml-[2vw] lg:transform lg:-translate-x-12"
-    style={{ objectPosition: 'left' }}
-    width={400}
-    height={100}
-    priority={true}
-  />
-</div>
+  
+  {/* Hero Content - Left Aligned */}
+  <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 lg:px-16">
+    <div className={`max-w-xl transform transition-all duration-1000 ${
+      isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
+    }`}>
+      <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-6 leading-tight tracking-tight">
+        ELEVATE YOUR<br />
+        WELLNESS<br />
+        NATURALLY
+      </h1>
+      <p className="text-base md:text-lg lg:text-xl text-gray-300 mb-10 font-light leading-relaxed">
+        Discover the power of therapeutic<br />
+        mushrooms today!
+      </p>
+      <button 
+        onClick={() => {
+          if (isLoggedIn) {
+            router.push('/menu');
+          } else {
+            router.push('/auth/login');
+          }
+        }}
+        className="bg-white hover:bg-gray-100 text-black px-10 py-4 rounded-full text-base md:text-lg font-semibold transition-all duration-300 transform hover:scale-105 inline-block uppercase tracking-wider"
+      >
+        MENU
+      </button>
+    </div>
+  </div>
 
-            {/* Content Card */}
-            <div className="relative">
-              <div
-                className="rounded-3xl p-8 lg:p-12   transform transition-all duration-500 hover:-translate-y-2"
-                style={{
-                 
-                 
-                }}
-              >
-                <div className="relative">
-                  {/* Cursor Animation */}
-                  {/* <div className="absolute -top-4 -right-4 w-12 h-12 opacity-70">
-                    <div className="w-6 h-6 bg-gray-800 rounded-full animate-pulse"></div>
-                    <div className="absolute top-0 left-6 w-4 h-8 bg-gray-800 rounded-sm animate-pulse"></div>
-                  </div> */}
-                  <div className="mb-4">
-                    <span className="inline-block text-[#2E2E2E] text-sm font-semibold px-4 py-2 rounded-full">
-                      Natural Wellness
-                    </span>
-                  </div>
-                  <h2 className="text-3xl lg:text-4xl font-bold text-[#2E2E2E] mb-6">
-                  The Mushroom Treasury
-<br />
-                  
-                  </h2>
-                  <p className="text-[#2E2E2E] text-lg mb-8 leading-relaxed">
-                   An exclusive collection of nature&apos;s finest functional and,<br />therapeutic mushrooms for your well-being<br /> 
-                   
-                  </p>
-                 <button
-  onClick={() => router.push('/menu')}
-  className="bg-[#2E2E2E] hover:bg-gray-800 text-white px-8 py-3 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2"
->
-  <span>Browser Menu</span>
-</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+  {/* Decorative mushroom image on right - visible on larger screens */}
+  {/* <div className="absolute right-0 top-0 bottom-0 w-1/2 hidden lg:block pointer-events-none">
+    <div className="relative w-full h-full">
+      <Image 
+        src="/images/mush.webp"
+        alt="Blue mushrooms decoration"
+        className="object-contain object-right opacity-80"
+        fill
+        priority={true}
+        sizes="50vw"
+      />
+    </div>
+  </div> */}
+</section>
+
+     {/* Content Section */}
+<section className="py-16 px-4 bg-white">
+  <div className="max-w-5xl mx-auto">
+    {/* Discover Shroomtopia Header */}
+    <div className="text-center mb-16">
+      <h2 className="text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-500 tracking-[0.1em] uppercase">
+        DISCOVER SHROOMTOPIA
+      </h2>
+    </div>
+
+    {/* Mission Card with Background Image */}
+    <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+      {/* Background Image */}
+      <div className="absolute inset-0 z-0">
+        <Image 
+          src="/images/mush5.jpg"
+          alt="Mushroom preparation background"
+          className="w-full h-full object-cover"
+          fill
+          sizes="(max-width: 768px) 100vw, 1200px"
+        />
+        {/* Light overlay for better text visibility */}
+        <div className="absolute inset-0 bg-black/50"></div>
+      </div>
+
+      {/* Mission Content */}
+      <div className="relative z-10 py-20 md:py-24 lg:py-28 px-8 md:px-16 lg:px-24 text-center">
+        <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-8 tracking-wide uppercase">
+          OUR MISSION
+        </h3>
+        <p className="text-white text-base md:text-lg lg:text-xl leading-relaxed max-w-4xl mx-auto">
+          At SHROOMTOPIA, we are dedicated to enhancing your wellness journey through the power of therapeutic mushrooms. We believe in blending nature's gifts with modern lifestyles to promote creativity, relaxation, and enjoyment.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
 
     
       
@@ -356,7 +364,7 @@ export default function Home() {
           </div>
 
           {/* Community Story Section */}
-          <div className="text-center">
+          {/* <div className="text-center">
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
               Inspire The Community With Your Story
             </h2>
@@ -371,7 +379,183 @@ export default function Home() {
               <span>Share Your Wellness Journey</span>
               <ChevronRight className="w-5 h-5" />
             </button>
+          </div> */}
+
+ {/* Contact Us Section - Break out of parent container */}
+<section className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen py-20 bg-gray-50">
+  <div className="grid lg:grid-cols-2 gap-0">
+    {/* Left Content */}
+    <div className="px-4 md:px-8 lg:px-16 xl:px-24 flex items-center justify-end">
+      <div className="max-w-xl w-full">
+        <h2 className="text-5xl lg:text-6xl font-bold text-gray-800 tracking-wider mb-12 uppercase">
+          CONTACT US
+        </h2>
+        
+        <div className="space-y-10">
+          <div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">
+              Better yet, see us in person!
+            </h3>
+            <p className="text-gray-600 text-lg leading-relaxed">
+              We love our customers, so feel free to visit during normal business hours.
+            </p>
           </div>
+
+          <div>
+            <h4 className="text-2xl font-bold text-gray-900 mb-6">
+              SHROOMTOPIA
+            </h4>
+            
+            <div className="space-y-4 text-gray-700">
+              <p className="text-lg">
+                8201 8 Mile Road, Detroit, MI, USA
+              </p>
+              
+              {shopSettings?.phone && (
+                <p className="text-lg">
+                  +{shopSettings.phone}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <h4 className="text-2xl font-bold text-gray-900 mb-4">
+              Hours
+            </h4>
+            {todayTiming ? (
+              <div className="flex items-center space-x-2 text-gray-700">
+                <span className="text-lg">
+                  {todayTiming.isOpen ? 'Open today' : 'Closed today'}
+                </span>
+                {todayTiming.isOpen && (
+                  <span className="text-lg font-semibold">
+                    {formatTime(todayTiming.openingTime)} - {formatTime(todayTiming.closingTime)}
+                  </span>
+                )}
+                <svg
+                  onClick={() => setShowAllHours(v => !v)}
+                  className={`w-5 h-5 text-gray-500 cursor-pointer transition-transform ${showAllHours ? 'rotate-180' : ''}`}
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-2 text-gray-700">
+                <span className="text-lg">Loading hours...</span>
+              </div>
+            )}
+
+            {showAllHours && shopSettings?.timings && (
+              <div className="mt-3 pl-0">
+                {(() => {
+                  const orderedDays = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+                  const byDay = {};
+                  shopSettings.timings.forEach(t => { byDay[t.day?.toLowerCase?.()] = t; });
+                  return (
+                    <div className="space-y-2">
+                      {orderedDays.map(d => {
+                        const t = byDay[d];
+                        const label = d.charAt(0).toUpperCase() + d.slice(1);
+                        return (
+                          <div key={d} className="flex items-center justify-between text-gray-700">
+                            <span className="text-sm">{label}</span>
+                            {t ? (
+                              t.isOpen ? (
+                                <span className="text-sm font-semibold">
+                                  {formatTime(t.openingTime)} - {formatTime(t.closingTime)}
+                                </span>
+                              ) : (
+                                <span className="text-sm font-semibold">Closed</span>
+                              )
+                            ) : (
+                              <span className="text-sm font-semibold">—</span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* Right Map - 2px gap from right edge */}
+    <div className="relative h-[600px] lg:h-[700px] w-full pr-[20px]">
+      {/* Get Directions Button */}
+      <button
+        onClick={() => window.open('https://www.google.com/maps/dir//8201+8+Mile+Rd,+Detroit,+MI+48234,+USA/@42.4455298,-83.1537416,17z', '_blank')}
+        className="absolute top-4 left-4 z-20 bg-white hover:bg-gray-50 text-gray-900 px-6 py-3 rounded-lg font-semibold shadow-xl transition-all duration-300 flex items-center space-x-2 border border-gray-200"
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+        <span>GET DIRECTIONS</span>
+      </button>
+
+      {/* Zoom Controls with Google Maps links */}
+      <div className="absolute top-4 right-6 z-20 flex flex-col space-y-2">
+        <button
+          onClick={() => window.open('https://www.google.com/maps/@42.4455298,-83.1537416,18z', '_blank')}
+          className="bg-white hover:bg-gray-100 text-gray-900 w-10 h-10 rounded-lg shadow-xl transition-all duration-300 flex items-center justify-center border border-gray-200"
+          title="Zoom In"
+        >
+          <span className="text-2xl font-bold leading-none">+</span>
+        </button>
+        <button
+          onClick={() => window.open('https://www.google.com/maps/@42.4455298,-83.1537416,16z', '_blank')}
+          className="bg-white hover:bg-gray-100 text-gray-900 w-10 h-10 rounded-lg shadow-xl transition-all duration-300 flex items-center justify-center border border-gray-200"
+          title="Zoom Out"
+        >
+          <span className="text-2xl font-bold leading-none">−</span>
+        </button>
+      </div>
+
+      {/* Interactive Map */}
+      <iframe
+        id="map-iframe"
+        src="https://www.openstreetmap.org/export/embed.html?bbox=-83.1587416%2C42.4405298%2C-83.1487416%2C42.4505298&layer=mapnik&marker=42.4455298%2C-83.1537416"
+        className="w-full h-full"
+        style={{ border: 0, display: 'block', margin: 0, padding: 0 }}
+        allowFullScreen
+        loading="lazy"
+        title="ShroomTopia Location Map"
+      />
+      
+      {/* Map Info Footer */}
+      <p className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 text-sm text-gray-600 bg-white/90 px-4 py-2 rounded-full shadow-lg backdrop-blur-sm">
+        Use mouse wheel or pinch to zoom • Drag to pan
+      </p>
+    </div>
+  </div>
+</section>
+
+{/* 
+<section className="py-20 px-4 bg-white">
+  <div className="max-w-4xl mx-auto text-center">
+    <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
+      Inspire The Community With Your Story
+    </h2>
+    <p className="text-gray-600 text-lg mb-8 leading-relaxed">
+      Your journey matters. Share how mushrooms and wellness products have transformed your life, and<br />
+      inspire others to explore their own path. Earn rewards for contributing to our shared journey.
+    </p>
+    <button 
+      onClick={handleShare}
+      className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2 mx-auto"
+    >
+      <span>Share Your Wellness Journey</span>
+      <ChevronRight className="w-5 h-5" />
+    </button>
+  </div>
+</section> */}
+
+
         </div>
       </section>
 

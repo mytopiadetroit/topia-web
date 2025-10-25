@@ -179,7 +179,24 @@ const Cart = () => {
   />
 </div>
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 text-sm">{item.name}</h3>
+                        <h3 className="font-semibold text-gray-900 text-sm">
+                          {item.displayName || item.name}
+                        </h3>
+                        {item.selectedVariant && (
+                          <p className="text-sm text-gray-600">
+                            Size: {item.selectedVariant.size.value}{item.selectedVariant.size.unit}
+                          </p>
+                        )}
+                        {item.selectedFlavor && (
+                          <p className="text-sm text-gray-600">
+                            Flavor: {item.selectedFlavor.name}
+                            {item.selectedFlavor.price > 0 && (
+                              <span className="text-green-600 ml-1">
+                                (+${Number(item.selectedFlavor.price).toFixed(2)})
+                              </span>
+                            )}
+                          </p>
+                        )}
                         <p className="text-gray-500 text-sm mt-1">Quantity: {item.quantity}</p>
                         {isOutOfStock && (
                           <p className="text-red-500 text-sm mt-1">Out of stock</p>
@@ -187,7 +204,14 @@ const Cart = () => {
                         {!isOutOfStock && stock < 5 && (
                           <p className="text-orange-500 text-sm mt-1">Only {stock} left</p>
                         )}
-                        <p className="font-semibold text-lg text-gray-900 mt-10">$ {item.price}</p>
+                        <p className="font-semibold text-lg text-gray-900 mt-2">
+                          ${Number(item.price || 0).toFixed(2)}
+                          {item.quantity > 1 && (
+                            <span className="text-sm text-gray-500 ml-2">
+                              (${(Number(item.price || 0) / item.quantity).toFixed(2)} each)
+                            </span>
+                          )}
+                        </p>
                       </div>
                       {/* Quantity Controls and Delete */}
                       <div className="flex items-end mt-14 gap-3 mr-4">

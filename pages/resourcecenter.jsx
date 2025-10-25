@@ -73,16 +73,15 @@ const ResourceCenter = () => {
     loadGalleryImages();
   }, [filters]);
 
-  // Auto-slide gallery effect
-  useEffect(() => {
-    if (galleryImages.length === 0 || isPaused) return;
-    
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % galleryImages.length);
-    }, 2000); // Change image every 2 seconds
+ useEffect(() => {
+  if (galleryImages.length === 0 || isPaused || showFullscreen) return; // Add showFullscreen check
+  
+  const interval = setInterval(() => {
+    setCurrentImageIndex((prev) => (prev + 1) % galleryImages.length);
+  }, 2000);
 
-    return () => clearInterval(interval);
-  }, [galleryImages.length, isPaused]);
+  return () => clearInterval(interval);
+}, [galleryImages.length, isPaused, showFullscreen]);
 
   const loadGalleryImages = async () => {
     try {
@@ -95,15 +94,27 @@ const ResourceCenter = () => {
     }
   };
 
-  const handleImageClick = (image) => {
+const handleImageClick = (image, index) => {
+  console.log('Clicked image index:', index);
+  console.log('Clicked image:', image.title);
+  
+  setIsPaused(true);
+  setShowFullscreen(false); // Add this
+  setFullscreenImage(null);  // Add this - reset first
+  
+  // Use setTimeout to ensure state updates
+  setTimeout(() => {
+    setCurrentImageIndex(index);
     setFullscreenImage(image);
     setShowFullscreen(true);
     document.body.style.overflow = 'hidden';
-  };
+  }, 0);
+};
 
   const closeFullscreen = () => {
     setShowFullscreen(false);
     setFullscreenImage(null);
+     setIsPaused(false);
     document.body.style.overflow = 'auto';
   };
 
@@ -325,7 +336,7 @@ const openContentModal = async (contentId) => {
             {/* Gallery Visual Guides Section */}
             {galleryImages.length > 0 && (
               <div className="mt-12">
-                <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center">
+                <h2 className="text-2xl md:text-3xl font-bold tracking-[0.5em] uppercase mb-6 text-center">
                   Visual Guides
                 </h2>
                 <div 
@@ -334,20 +345,25 @@ const openContentModal = async (contentId) => {
                   onMouseLeave={() => setIsPaused(false)}
                 >
                   {/* Main Image Display */}
-                  <div className="relative overflow-hidden rounded-2xl shadow-2xl aspect-video bg-white/10">
-                    {galleryImages.map((image, index) => (
-                      <div
-                        key={image._id}
-                        className={`absolute inset-0 transition-opacity duration-1000 cursor-pointer ${
-                          index === currentImageIndex ? 'opacity-100' : 'opacity-0'
-                        }`}
-                        onClick={() => handleImageClick(image)}
-                      >
-                        <img
-                          src={image.imageUrl.startsWith('http') ? image.imageUrl : `http://localhost:5000${image.imageUrl}`}
-                          alt={image.title}
-                          className="w-full h-full object-cover"
-                        />
+                  <div 
+  className="relative overflow-hidden rounded-2xl shadow-2xl aspect-video bg-white/10 cursor-pointer"
+  onMouseEnter={() => setIsPaused(true)}
+  onMouseLeave={() => setIsPaused(false)}
+  onClick={() => handleImageClick(galleryImages[currentImageIndex], currentImageIndex)} // Move onClick here
+>
+  {galleryImages.map((image, index) => (
+    <div
+      key={image._id}
+      className={`absolute inset-0 transition-opacity duration-1000 ${
+        index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+      }`}
+      // Remove onClick from here
+    >
+      <img
+        src={image.imageUrl.startsWith('http') ? image.imageUrl : `http://localhost:5000${image.imageUrl}`}
+        alt={image.title}
+        className="w-full h-full object-cover"
+      />
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
                           <h3 className="text-white text-xl font-semibold">{image.title}</h3>
                           {image.description && (
@@ -374,26 +390,26 @@ const openContentModal = async (contentId) => {
                   </div>
 
                   {/* Navigation Arrows */}
-                  {galleryImages.length > 1 && (
-                    <>
-                      <button
-                        onClick={() => setCurrentImageIndex((prev) => 
-                          prev === 0 ? galleryImages.length - 1 : prev - 1
-                        )}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full backdrop-blur-sm transition-all"
-                      >
-                        ❮
-                      </button>
-                      <button
-                        onClick={() => setCurrentImageIndex((prev) => 
-                          (prev + 1) % galleryImages.length
-                        )}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full backdrop-blur-sm transition-all"
-                      >
-                        ❯
-                      </button>
-                    </>
-                  )}
+                 {galleryImages.length > 1 && (
+  <>
+    <button
+      onClick={() => setCurrentImageIndex((prev) => 
+        prev === 0 ? galleryImages.length - 1 : prev - 1
+      )}
+      className="absolute -left-3 md:left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-2 md:p-3 rounded-full backdrop-blur-sm transition-all"
+    >
+      ❮
+    </button>
+    <button
+      onClick={() => setCurrentImageIndex((prev) => 
+        (prev + 1) % galleryImages.length
+      )}
+      className="absolute -right-2 md:right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-2 md:p-3 rounded-full backdrop-blur-sm transition-all"
+    >
+      ❯
+    </button>
+  </>
+)}
                 </div>
               </div>
             )}
@@ -686,26 +702,28 @@ const openContentModal = async (contentId) => {
         )}
 
         {/* Fullscreen Image Modal */}
-        {showFullscreen && fullscreenImage && (
-          <div 
-            className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4"
-            onClick={closeFullscreen}
-          >
-            <button
-              onClick={closeFullscreen}
-              className="absolute top-4 right-4 text-white text-4xl hover:text-gray-300 z-10"
-            >
-              ×
-            </button>
-            <div className="relative max-w-7xl w-full h-full flex flex-col items-center justify-center">
-              <img
-                src={fullscreenImage.imageUrl.startsWith('http') ? fullscreenImage.imageUrl : `http://localhost:5000${fullscreenImage.imageUrl}`}
-                alt={fullscreenImage.title}
-                className="max-w-full max-h-[85vh] object-contain"
-                onClick={(e) => e.stopPropagation()}
-              />
-              <div className="mt-6 text-center">
-                <h3 className="text-white text-2xl font-semibold mb-2">{fullscreenImage.title}</h3>
+      {showFullscreen && fullscreenImage && (
+  <div 
+    className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4"
+    onClick={closeFullscreen}
+  >
+    <button
+      onClick={closeFullscreen}
+      className="absolute top-4 right-4 text-white text-4xl hover:text-gray-300 z-10"
+    >
+      ×
+    </button>
+    <div className="relative max-w-7xl w-full h-full flex flex-col items-center justify-center">
+      {console.log('RENDERING fullscreenImage:', fullscreenImage.title, fullscreenImage._id)}
+      <img
+        src={fullscreenImage.imageUrl.startsWith('http') ? fullscreenImage.imageUrl : `http://localhost:5000${fullscreenImage.imageUrl}`}
+        alt={fullscreenImage.title}
+        className="max-w-full max-h-[85vh] object-contain"
+        onClick={(e) => e.stopPropagation()}
+      />
+      <div className="mt-6 text-center">
+        <h3 className="text-white text-2xl font-semibold mb-2">{fullscreenImage.title}</h3>
+        {/* <p className="text-red-500">ID: {fullscreenImage._id}</p> */}
                 {fullscreenImage.description && (
                   <p className="text-white/80 text-lg">{fullscreenImage.description}</p>
                 )}

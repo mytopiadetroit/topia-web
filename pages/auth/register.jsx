@@ -233,6 +233,20 @@ const Register = () => {
     'No Contact Preference'
   ];
 
+  // Check if all required fields are filled
+  const isFormFilled = 
+    formData.email.trim() !== '' &&
+    formData.fullName.trim() !== '' &&
+    phoneNumber.length >= 10 &&
+    !error &&
+    formData.phone &&
+    formData.day !== 'Day' &&
+    formData.month !== 'Month' &&
+    formData.year !== 'Year' &&
+    formData.howDidYouHear !== 'How did you hear about us ?' &&
+    formData.agreeToTerms &&
+    selectedFile !== null;
+
   return (
     <div className="h-screen flex overflow-hidden">
       {/* Left Side - Mushroom Image */}
@@ -504,7 +518,11 @@ const Register = () => {
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="w-full bg-[#80A6F7] hover:bg-[#8EAFF6CC] text-white font-medium py-3 px-4 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#8EAFF6CC] focus:ring-offset-2 mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`w-full ${
+                isFormFilled 
+                  ? 'bg-[#6B92E8] hover:bg-[#5A81D7]' 
+                  : 'bg-[#80A6F7] hover:bg-[#8EAFF6CC]'
+              } text-white font-medium py-3 px-4 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#8EAFF6CC] focus:ring-offset-2 mt-6 disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {loading ? 'Processing...' : 'Register'}
             </button>

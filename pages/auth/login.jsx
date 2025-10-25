@@ -152,6 +152,9 @@ const Login = () => {
     }
   };
 
+  // Check if form is filled (phone number has at least 10 digits and is valid)
+  const isFormFilled = phoneNumber.length >= 10 && !error && formData.phone;
+
   return (
     <div className="h-screen flex overflow-hidden">
       {/* Left Side - Mushroom Image */}
@@ -233,7 +236,11 @@ const Login = () => {
               type="button"
               onClick={handleLogin}
               disabled={loading}
-              className=" bg-[#80A6F7] hover:bg-[#8EAFF6CC] text-white font-medium py-2 px-6 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#8EAFF6CC] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`${
+                isFormFilled 
+                  ? 'bg-[#6B92E8] hover:bg-[#5A81D7]' 
+                  : 'bg-[#80A6F7] hover:bg-[#8EAFF6CC]'
+              } text-white font-medium py-2 px-6 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#8EAFF6CC] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {loading ? 'Checking...' : 'Check-In'}
             </button>

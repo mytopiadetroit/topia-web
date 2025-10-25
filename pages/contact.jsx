@@ -1,8 +1,5 @@
 "use client";
 import { useState } from 'react';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
-import { Api } from '../service/service';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
 
@@ -12,6 +9,9 @@ export default function ContactPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // Check if form is filled
+  const isFormFilled = form.fullName && form.email && form.mobileNumber && form.message;
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -55,7 +55,6 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      {/* <Navbar /> */}
       <main className="flex-1">
         <section className="bg-[url('/images/navba.png')] bg-cover bg-center py-16">
           <div className="max-w-5xl mx-auto px-4">
@@ -86,7 +85,11 @@ export default function ContactPage() {
                 </div>
                 {error && <p className="text-red-600 text-sm">{error}</p>}
                 {success && <p className="text-green-600 text-sm">{success}</p>}
-                <button type="submit" disabled={submitting} className="w-full bg-[#80A6F7] hover:bg-[#6f95ee] text-white font-semibold py-3 rounded-xl transition disabled:opacity-60">
+                <button 
+                  type="submit" 
+                  disabled={submitting} 
+                  className={`w-full ${isFormFilled ? 'bg-[#6f95ee]' : 'bg-[#80A6F7]'} hover:bg-[#5f85dd] text-white font-semibold py-3 rounded-xl transition disabled:opacity-60`}
+                >
                   {submitting ? 'Sending...' : 'Send Message'}
                 </button>
               </form>
@@ -97,17 +100,13 @@ export default function ContactPage() {
               <p className="text-gray-600 mt-2">Reach us at:</p>
               <div className="mt-4 space-y-3 text-gray-700">
                 <p>Email: Mytopiadetroit@gmail.com</p>
-                <p>Phone: +91 99999 99999</p>
-                <p>Address: New York, USA</p>
+                <p>Phone: +313-231-8760</p>
+                <p>Address: 8201 8 Mile Road, Detroit, MI, USA</p>
               </div>
-              {/* <img src="/images/contact.png" alt="Contact" className="mt-6 w-full rounded-xl hidden md:block" onError={(e)=>{e.currentTarget.style.display='none';}} /> */}
             </div>
           </div>
         </section>
       </main>
-     
     </div>
   );
 }
-
-

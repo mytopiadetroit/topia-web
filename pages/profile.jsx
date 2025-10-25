@@ -434,7 +434,7 @@ const Profile = () => {
                  />
                ) : (
                  <img 
-                   src="/images/pic.png" 
+                   src="/images/pic1.png" 
                    alt="Profile" 
                    className="w-full h-full object-cover"
                  />

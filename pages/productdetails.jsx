@@ -14,8 +14,10 @@ export default function ProductDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [reviewAgg, setReviewAgg] = useState([]);
+  const [relatedProducts, setRelatedProducts] = useState([]);
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [selectedFlavor, setSelectedFlavor] = useState(null);
+  const [relatedLoading, setRelatedLoading] = useState(false);
   const router = useRouter();
   const { id } = router.query;
   const { isLoggedIn, userLoading } = useUser();
@@ -78,25 +80,61 @@ export default function ProductDetails() {
     }
   }, [product]);
 
-  // Calculate final price based on selected variant and flavor
+  // Fetch related products when product loads
+  useEffect(() => {
+    if (product && product._id) {
+      fetchRelatedProducts();
+    }
+  }, [product]);
+
+  const fetchRelatedProducts = async () => {
+    try {
+      setRelatedLoading(true);
+      const response = await Api('GET', `products/${product._id}/related?limit=4`, null, router);
+      if (response.success) {
+        setRelatedProducts(response.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching related products:', error);
+    } finally {
+      setRelatedLoading(false);
+    }
+  };
   const getFinalPrice = () => {
+    if (!product) return '0.00';
+    
     let price = 0;
     
-    // If product has variants, use selected variant price
-    if (product?.hasVariants && selectedVariant) {
-      price = Number(selectedVariant.price || 0);
-    } else {
-      // Otherwise use base product price
-      price = Number(product?.price || 0);
-    }
-    
-    // Add flavor price if flavor is selected
+    // If a flavor is selected, use its price directly
     if (selectedFlavor) {
-      price += Number(selectedFlavor.price || 0);
+      console.log('Using flavor price directly:', selectedFlavor.price);
+      price = Number(selectedFlavor.price) || 0;
+    } 
+    // Otherwise, use variant price or base product price
+    else if (product?.hasVariants && selectedVariant) {
+      price = Number(selectedVariant.price || 0);
+      console.log('Using variant price:', price);
+    } else {
+      price = Number(product?.price || 0);
+      console.log('Using base product price:', price);
     }
     
-    return price.toFixed(2);
+    const finalPrice = price.toFixed(2);
+    console.log('Final calculated price:', finalPrice);
+    return finalPrice;
   };
+
+  // Update price display when variant or flavor changes
+  const [displayPrice, setDisplayPrice] = useState('0.00');
+  
+  // Update price whenever relevant state changes
+  useEffect(() => {
+    if (product) {
+      const newPrice = getFinalPrice();
+      console.log('Updating display price to:', newPrice);
+      setDisplayPrice(newPrice);
+    }
+  }, [selectedVariant, selectedFlavor, product, quantity]);
 
   // Get available stock based on selection
   const getAvailableStock = () => {
@@ -146,6 +184,7 @@ export default function ProductDetails() {
   const fetchAgg = async () => {
     try {
       const r = await Api('GET', `reviews/product/${id}/aggregate?limit=5`, null, router);
+      console.log('Review Agg response:', r);
       if (r.success) setReviewAgg(r.data || []);
     } catch (e) {}
   }
@@ -161,38 +200,56 @@ export default function ProductDetails() {
 
   // Handle add to cart
   const handleAddToCart = () => {
-    if (!product) return;
-    const stock = getAvailableStock();
-    if (!product.hasStock || stock <= 0) return;
-    
-    // Validate variant selection if product has variants
-    if (product.hasVariants && !selectedVariant) {
-      toast.error('Please select a size');
+    if (!isLoggedIn) {
+      toast.error('Please login to add items to cart');
+      router.push('/auth/login');
       return;
     }
+
+    const qty = quantity;
+    const finalPrice = getFinalPrice();
     
-    const qty = Math.min(quantity, stock);
-    
-    // Create cart item with variant and flavor info
+    // Create a clean cart item with all necessary details
     const cartItem = {
       ...product,
+      // Ensure we're using the final calculated price
+      price: Number(finalPrice),
+      // Keep original price for reference
+      originalPrice: Number(product.price),
+      // Include selected variant and flavor
       selectedVariant: selectedVariant,
       selectedFlavor: selectedFlavor,
-      finalPrice: getFinalPrice(),
+      // Create a unique display name that includes variant and flavor
+      displayName: [
+        product.name,
+        selectedVariant && `(${selectedVariant.size.value}${selectedVariant.size.unit})`,
+        selectedFlavor && selectedFlavor.name
+      ].filter(Boolean).join(' ')
     };
     
+    // Add to cart with the updated item
     addToCart(cartItem, qty);
     
-    let message = `${product.name}`;
-    if (selectedVariant) {
-      message += ` (${selectedVariant.size.value}${selectedVariant.size.unit})`;
-    }
-    if (selectedFlavor) {
-      message += ` - ${selectedFlavor.name}`;
-    }
-    message += ' added to cart!';
+    // Create success message
+    let message = [
+      product.name,
+      selectedVariant && `(${selectedVariant.size.value}${selectedVariant.size.unit})`,
+      selectedFlavor && selectedFlavor.name
+    ].filter(Boolean).join(' ');
     
-    toast.success(message);
+    toast.success(`${message} added to cart!`);
+  };
+
+  // Helper function to generate display name with variant and flavor
+  const generateDisplayName = (product, variant, flavor) => {
+    let name = product.name;
+    if (variant) {
+      name += ` (${variant.size.value}${variant.size.unit})`;
+    }
+    if (flavor) {
+      name += ` - ${flavor.name}`;
+    }
+    return name;
   };
 
   // Loading state
@@ -334,6 +391,9 @@ export default function ProductDetails() {
                       onClick={() => {
                         setSelectedVariant(variant);
                         setQuantity(1); // Reset quantity when changing variant
+                        // Force price update when variant changes
+                        const newPrice = getFinalPrice();
+                        setDisplayPrice(newPrice);
                       }}
                       className={`px-3 py-2 border-2 rounded-lg transition-all text-left ${
                         selectedVariant === variant
@@ -366,9 +426,16 @@ export default function ProductDetails() {
                   {product.flavors.map((flavor, index) => (
                     <button
                       key={index}
-                      onClick={() => setSelectedFlavor(flavor)}
+                      onClick={() => {
+                        console.log('Selected flavor:', flavor);
+                        // Update the selected flavor
+                        setSelectedFlavor({
+                          ...flavor,
+                          price: Number(flavor.price) // Ensure price is a number
+                        });
+                      }}
                       className={`px-3 py-2 border-2 rounded-lg transition-all ${
-                        selectedFlavor === flavor
+                        selectedFlavor?._id === flavor._id
                           ? 'border-green-600 bg-green-50'
                           : 'border-gray-300 hover:border-gray-400'
                       }`}
@@ -391,13 +458,21 @@ export default function ProductDetails() {
             <div className="mb-6">
               <h2 className="text-lg text-gray-700 font-semibold mb-2">Final Price</h2>
               <div className="flex items-baseline gap-2">
-                <p className="text-3xl font-bold text-[#536690]">$ {getFinalPrice()}</p>
+                <p className="text-3xl font-bold text-[#536690]">$ {displayPrice}</p>
                 {(selectedVariant || selectedFlavor) && (
-                  <span className="text-sm text-gray-500">
-                    {selectedVariant && `(${selectedVariant.size.value}${selectedVariant.size.unit})`}
-                    {selectedVariant && selectedFlavor && ' + '}
-                    {selectedFlavor && `${selectedFlavor.name}`}
-                  </span>
+                  <div className="text-sm text-gray-500">
+                    {selectedVariant && (
+                      <span className="block">
+                        Size: {selectedVariant.size.value}{selectedVariant.size.unit} (${Number(selectedVariant.price).toFixed(2)})
+                      </span>
+                    )}
+                    {selectedFlavor && (
+                      <span className="block">
+                        Flavor: {selectedFlavor.name} 
+                        {selectedFlavor.price > 0 ? `(+$${Number(selectedFlavor.price).toFixed(2)})` : '(Free)'}
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
@@ -520,6 +595,83 @@ export default function ProductDetails() {
     </div>
   </div>
 </div>
+
+        {/* You May Also Like Section */}
+        {relatedProducts.length > 0 && (
+          <div className="mt-16">
+            <h2 className="text-3xl font-bold text-gray-900 mb-8">You May Also Like</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {relatedProducts.map((relatedProduct) => (
+                <div
+                  key={relatedProduct._id}
+                  className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer group"
+                  onClick={() => router.push(`/productdetails?id=${relatedProduct._id}`)}
+                >
+                  {/* Product Image */}
+                  <div className="aspect-square bg-gray-100 rounded-t-lg overflow-hidden">
+                    <img
+                      src={relatedProduct.images && relatedProduct.images.length > 0
+                        ? (relatedProduct.images[0].startsWith('http') ? relatedProduct.images[0] : `http://localhost:5000${relatedProduct.images[0]}`)
+                        : '/images/details.png'
+                      }
+                      alt={relatedProduct.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+
+                  {/* Product Info */}
+                  <div className="p-4">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-[#536690] transition-colors">
+                      {relatedProduct.name}
+                    </h3>
+
+                    {/* Price */}
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-xl font-bold text-[#536690]">
+                        ${Number(relatedProduct.price || 0).toFixed(2)}
+                      </span>
+                      {relatedProduct.hasVariants && relatedProduct.variants && (
+                        <span className="text-sm text-gray-500">+ variants</span>
+                      )}
+                    </div>
+
+                    {/* Stock Status */}
+                    {relatedProduct.hasStock ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="text-sm text-green-600 font-medium">In Stock</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                        <span className="text-sm text-red-600 font-medium">Out of Stock</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Loading state for related products */}
+        {relatedLoading && (
+          <div className="mt-16">
+            <h2 className="text-3xl font-bold text-gray-900 mb-8">You May Also Like</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="bg-white rounded-lg shadow-md animate-pulse">
+                  <div className="aspect-square bg-gray-200 rounded-t-lg"></div>
+                  <div className="p-4">
+                    <div className="h-6 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-4 bg-gray-200 rounded mb-3 w-3/4"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

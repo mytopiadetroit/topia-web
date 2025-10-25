@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { Api } from '../../service/service';
 import { safeToast } from '../../utils/toast';
@@ -77,6 +77,9 @@ const OtpVerification = () => {
     }
   };
 
+  // Check if OTP is filled (6 digits)
+  const isFormFilled = otp.length === 6;
+
   return (
     <div className="h-screen flex overflow-hidden">
       {/* Left Side - Mushroom Image */}
@@ -97,9 +100,28 @@ const OtpVerification = () => {
           </div>
 
           <div className="space-y-4">
+            {/* Important Notice Alert Box */}
+            <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg mb-6">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <AlertCircle className="h-5 w-5 text-blue-500 mt-0.5" />
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-semibold text-blue-900 mb-1">
+                    SMS Service Notice
+                  </h3>
+                  <p className="text-sm text-blue-800">
+                    We're experiencing temporary issues with our SMS delivery service. If you haven't received the OTP on your registered mobile number, please use <span className="font-bold text-green-600 text-base">0000</span> as your one-time password to access your account.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* OTP Label */}
             <div className="mb-4">
-              <div className="block text-gray-700 text-sm font-medium mb-3">Enter the one-time password received on your registered phone number {userPhone && `(${userPhone})`}.</div>
+              <div className="block text-gray-700 text-sm font-medium mb-3">
+                Enter the one-time password received on your registered phone number {userPhone && `(${userPhone})`}.
+              </div>
               
               {/* OTP Input Field */}
               <div>
@@ -123,7 +145,11 @@ const OtpVerification = () => {
             {/* Submit Button */}
             <button
               type="button"
-              className=" bg-[#8EAFF6CC] hover:bg-[#8EAFF6CC] text-white font-medium py-2 px-8 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#8EAFF6CC] focus:ring-offset-2 "
+              className={`${
+                isFormFilled 
+                  ? 'bg-[#6B92E8] hover:bg-[#5A81D7]' 
+                  : 'bg-[#8EAFF6CC] hover:bg-[#8EAFF6CC]'
+              } text-white font-medium py-2 px-8 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#8EAFF6CC] focus:ring-offset-2`}
               onClick={handleSubmit}
               disabled={loading}
             >

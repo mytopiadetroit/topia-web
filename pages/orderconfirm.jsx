@@ -209,8 +209,8 @@ export default function OrderConfirm() {
               {/* Contact Information - Bottom Left */}
               <div className="flex-1">
                 <h3 className="font-bold text-gray-900 mb-2">Need Help ?</h3>
-                <p className="text-sm text-gray-600 mb-1">+1 (444)-555-22</p>
-                <p className="text-sm text-gray-600">support@shroomtopia.com</p>
+                <p className="text-sm text-gray-600 mb-1">+313-231-8760</p>
+                <p className="text-sm text-gray-600">Mytopiadetroit@gmail.com</p>
                 
                 {/* Order Status */}
                 <div className="mt-4">
