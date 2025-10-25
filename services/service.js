@@ -2,7 +2,7 @@
 // import { toast } from 'react-toastify';
 
 //  const ConstantsUrl = "http://localhost:5000/api/";
- const ConstantsUrl = "https://api.mypsyguide.io/api/";
+  const ConstantsUrl = "https://api.mypsyguide.io/api/";
 
 // let isRedirecting = false;
  

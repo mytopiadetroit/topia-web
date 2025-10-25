@@ -81,7 +81,7 @@ const Login = () => {
       const formattedPhone = formData.phone;
       
       try {
-        const response = await Api('post', 'auth/admin-login', {
+        const response = await Api('post', 'auth/login', {
           phone: formattedPhone
         }, router);
         

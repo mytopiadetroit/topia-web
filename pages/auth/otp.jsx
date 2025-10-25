@@ -43,7 +43,7 @@ const OtpVerification = () => {
       setError('');
       
       // Make the API call with preventRedirect set to true
-      const response = await Api('post', 'auth/admin-verify-otp', {
+      const response = await Api('post', 'auth/verify-otp', {
         otp,
         phone: userPhone
       }, router, null, true); // Pass true to prevent automatic redirection
@@ -101,7 +101,7 @@ const OtpVerification = () => {
 
           <div className="space-y-4">
             {/* Important Notice Alert Box */}
-            <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg mb-6">
+            {/* <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg mb-6">
               <div className="flex items-start">
                 <div className="flex-shrink-0">
                   <AlertCircle className="h-5 w-5 text-blue-500 mt-0.5" />
@@ -115,7 +115,7 @@ const OtpVerification = () => {
                   </p>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* OTP Label */}
             <div className="mb-4">
