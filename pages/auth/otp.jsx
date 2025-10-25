@@ -43,7 +43,7 @@ const OtpVerification = () => {
       setError('');
       
       // Make the API call with preventRedirect set to true
-      const response = await Api('post', 'auth/verify-otp', {
+      const response = await Api('post', 'auth/admin-verify-otp', {
         otp,
         phone: userPhone
       }, router, null, true); // Pass true to prevent automatic redirection

@@ -137,65 +137,69 @@ const RewardsPage = () => {
     );
   };
 
-  return (
+  // Check if there are any tasks
+  const hasTasks = rewardTasks.length > 0;
+  
+  // Check if there are any visible tasks
+  const hasVisibleTasks = hasTasks && rewardTasks.some(task => task.isVisible);
 
+  return (
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-3xl mx-auto px-4">
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">Reward Center</h1>
-            {rewardTasks.length > 0 ? (
-              <p className="text-lg text-gray-600">
-                Earn $15 for Every Stamp Collected and $1 for Each Check-in or Shared Experience!
-              </p>
-            ) : (
-              <p className="text-lg text-gray-600">
-                Your gateway to exciting rewards and exclusive benefits
-              </p>
-            )}
-          </div>
+            <p className="text-lg text-gray-600">
+              {rewardTasks.length > 0 
+                ? "Earn $15 for Every Stamp Collected and $1 for Each Check-in or Shared Experience!"
+                : "Your gateway to exciting rewards and exclusive benefits"
+              }
+            </p>
 
-          {/* Tabs */}
-          <div className="flex justify-center mb-8">
-            <div className="bg-white rounded-lg p-1 shadow-sm">
-              <button
-                onClick={() => setActiveTab('claim')}
-                className={`px-6 py-2 rounded-md font-medium transition-colors ${
-                  activeTab === 'claim'
-                    ? 'bg-[#80A6F7] text-white'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Claim Rewards
-              </button>
-              <button
-                onClick={() => setActiveTab('history')}
-                className={`px-6 py-2 rounded-md font-medium transition-colors ${
-                  activeTab === 'history'
-                    ? 'bg-[#80A6F7] text-white'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Reward History
-              </button>
-              <button
-                onClick={() => setActiveTab('requests')}
-                className={`px-6 py-2 rounded-md font-medium transition-colors ${
-                  activeTab === 'requests'
-                    ? 'bg-[#80A6F7] text-white'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Reward Requests
-              </button>
-            </div>
+            {/* Tabs - Only shown when there are visible tasks */}
+            {rewardTasks.length > 0 && (
+              <div className="flex justify-center mt-6">
+                <div className="bg-white rounded-lg p-1 shadow-sm">
+                  <button
+                    onClick={() => setActiveTab('claim')}
+                    className={`px-6 py-2 rounded-md font-medium transition-colors ${
+                      activeTab === 'claim'
+                        ? 'bg-[#80A6F7] text-white'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Claim Rewards
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('history')}
+                    className={`px-6 py-2 rounded-md font-medium transition-colors ${
+                      activeTab === 'history'
+                        ? 'bg-[#80A6F7] text-white'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Reward History
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('requests')}
+                    className={`px-6 py-2 rounded-md font-medium transition-colors ${
+                      activeTab === 'requests'
+                        ? 'bg-[#80A6F7] text-white'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Reward Requests
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Content */}
           {activeTab === 'claim' && (
             rewardTasks.length === 0 ? (
               // Coming Soon Screen - Enhanced
-              <div className="flex flex-col items-center justify-center py-20 px-4">
+              <div className="flex flex-col items-center justify-center  py-20 px-4">
                 <div className="text-center max-w-2xl relative">
                   {/* Animated Background Elements */}
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse"></div>
