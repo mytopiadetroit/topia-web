@@ -124,7 +124,26 @@ export default function MyHistory() {
 
         <div className="space-y-4">
           {isLoading && <div className="text-center text-gray-600">Loading...</div>}
-          {!isLoading && orders.map((order, orderIndex) => {
+          {!isLoading && orders.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-16 px-4">
+              <div className="bg-gray-100 rounded-full p-6 mb-6">
+                <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">No Orders Yet</h2>
+              <p className="text-gray-600 text-center mb-8 max-w-md">
+                You haven't placed any orders yet. Start exploring our menu and discover amazing products!
+              </p>
+              <button
+                onClick={() => router.push('/menu')}
+                className="bg-[#536690] text-white px-8 py-3 rounded-lg font-medium hover:bg-[#4a5a7f] transition-colors"
+              >
+                Continue Shopping
+              </button>
+            </div>
+          )}
+          {!isLoading && orders.length > 0 && orders.map((order, orderIndex) => {
             const isOpen = !!expandedByOrder[order.id];
             const productsToShow = isOpen ? order.products : order.products.slice(0, 1);
             return (

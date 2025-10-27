@@ -6,7 +6,7 @@ import axios from "axios";
 let isRedirecting = false;
 
 // Api function for making API calls
-function Api(method, url, data, router, params) {
+function Api(method, url, data, router, params, preventRedirect = false) {
   return new Promise(function (resolve, reject) {
     if (isRedirecting) {
       resolve({ success: false, redirect: true });
@@ -22,7 +22,10 @@ function Api(method, url, data, router, params) {
       method,
       url: ConstantsUrl + url,
       data,
-      headers: { Authorization: `jwt ${token}` },
+      headers: { 
+        Authorization: `jwt ${token}`,
+        'X-Prevent-Redirect': preventRedirect ? 'true' : 'false'  // Add this header
+      },
       params
     }).then(
       (res) => {
@@ -31,12 +34,15 @@ function Api(method, url, data, router, params) {
       (err) => {
         if (err.response) {
           if (err?.response?.status === 401) {
-            if (typeof window !== "undefined") {
+            if (typeof window !== "undefined" && !preventRedirect) {
               handleTokenExpiration(router);
               return resolve({ success: false, redirect: true });
+            } else if (preventRedirect) {
+              // Don't redirect, just reject with error
+              return reject(err);
             }
           }
-          reject(err.response.data);
+          reject(err);
         } else {
           reject(err);
         }
@@ -92,14 +98,23 @@ function ApiFormData(method, url, data, router, params) {
 axios.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Check if redirect should be prevented
+    const preventRedirect = error.config?.headers?.['X-Prevent-Redirect'] === 'true';
+    
     if (error.response && error.response.status === 401 && typeof window !== "undefined") {
+      // Agar preventRedirect true hai, to seedha error return karo without redirect
+      if (preventRedirect) {
+        return Promise.reject(error);
+      }
+      
+      // Otherwise normal redirect logic
       if (!isRedirecting) {
         isRedirecting = true;
         
         if (typeof window !== "undefined") {
           localStorage.removeItem("userDetail");
           localStorage.removeItem("token");
-           window.location.href = "/";
+          window.location.href = "/";
           window.dispatchEvent(new Event('storage'));
           document.dispatchEvent(new Event('auth-state-changed'));
           

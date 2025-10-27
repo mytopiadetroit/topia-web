@@ -81,16 +81,17 @@ const Login = () => {
       const formattedPhone = formData.phone;
       
       try {
-        const response = await Api('post', 'auth/admin-login', {
+        // Add preventRedirect: true to prevent automatic redirection on 401
+        const response = await Api('post', 'auth/login', {
           phone: formattedPhone
-        }, router);
+        }, null, null, true); // Added preventRedirect: true
         
         console.log('Login API Response:', response);
         
-        if (response.success) {
+        if (response?.success) {
           // Check user status before proceeding
           console.log('User status:', response.user?.status);
-          if (response.user && response.user.status === 'suspended') {
+          if (response.user?.status === 'suspended') {
             console.log('Suspended user detected, redirecting to /suspend');
             safeToast.error('Your account has been suspended. Please contact support.');
             setTimeout(() => {
@@ -99,23 +100,20 @@ const Login = () => {
             return;
           }
           
-          
           if (response.user && response.token) {
             localStorage.setItem('topiaDetail', JSON.stringify(response.user));
             localStorage.setItem('token', response.token);
+            
+            // Only redirect to OTP page if login is successful
+            safeToast.success('OTP has been sent! Please enter your OTP.');
+            setTimeout(() => {
+              router.push('/auth/otp');
+            }, 1000);
           }
-          
-        
-          safeToast.success('OTP has been sent! Please enter your OTP.');
-          
-         
-          setTimeout(() => {
-            router.push('/auth/otp');
-          }, 1000);
         } else {
           console.log('Login failed, checking for suspension error');
         
-          if (response.message && response.message.includes('suspended')) {
+          if (response?.message?.includes('suspended')) {
             console.log('Suspension error in response, redirecting to /suspend');
             safeToast.error(response.message);
             setTimeout(() => {
@@ -124,29 +122,53 @@ const Login = () => {
             return;
           }
           
-          safeToast.error(response.message || 'Login failed. Please try again.');
-          setError(response.message || 'Login failed. Please try again.');
+          // Show error message without redirecting
+          const errorMsg = response?.message || 'Login failed. Please try again.';
+          safeToast.error(errorMsg);
+          setError(errorMsg);
+          
+          // Keep the user on the login page
+          return;
         }
       } catch (apiError) {
-        // Handle API rejection (403, 500, etc.)
         console.log('API Error caught:', apiError);
         
-        if (apiError.message && apiError.message.includes('suspended')) {
-          console.log('Suspension error in catch, redirecting to /suspend');
-          safeToast.error(apiError.message);
+        // Handle 400 Bad Request errors (including our custom validation errors)
+        if (apiError.response?.status === 400) {
+          const errorMessage = apiError.response.data?.message || 'Invalid request. Please check your input.';
+          console.log('Validation error:', errorMessage);
+          safeToast.error(errorMessage);
+          setError(errorMessage);
+          return;
+        }
+        
+        // Handle suspension
+        if (apiError.message?.includes('suspended') || apiError.response?.data?.message?.includes('suspended')) {
+          const message = apiError.message || apiError.response?.data?.message;
+          console.log('Suspension error, redirecting to /suspend');
+          safeToast.error(message);
           setTimeout(() => {
             router.push('/suspend');
           }, 1000);
           return;
         }
         
-        // Re-throw to be caught by outer catch
-        throw apiError;
+        // Handle other errors
+        const errorMessage = apiError.response?.data?.message || 
+                           apiError.message || 
+                           'An error occurred during login. Please try again.';
+        console.log('Login error:', errorMessage);
+        safeToast.error(errorMessage);
+        setError(errorMessage);
+        return;
       }
     } catch (err) {
       console.error('Login error:', err);
-      safeToast.error('An error occurred during login. Please try again.');
-      setError(err.message || 'Something went wrong. Please try again.');
+      const errorMessage = err.response?.data?.message || 
+                         err.response?.data?.error || 
+                         'An error occurred during login. Please try again.';
+      safeToast.error(errorMessage);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

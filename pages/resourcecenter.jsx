@@ -346,7 +346,7 @@ const openContentModal = async (contentId) => {
                 >
                   {/* Main Image Display */}
                   <div 
-  className="relative overflow-hidden rounded-2xl shadow-2xl aspect-video bg-white/10 cursor-pointer"
+ className="relative overflow-hidden rounded-2xl shadow-2xl bg-white/10 cursor-pointer h-[500px] md:h-[1100px]"
   onMouseEnter={() => setIsPaused(true)}
   onMouseLeave={() => setIsPaused(false)}
   onClick={() => handleImageClick(galleryImages[currentImageIndex], currentImageIndex)} // Move onClick here
@@ -362,7 +362,7 @@ const openContentModal = async (contentId) => {
       <img
         src={image.imageUrl.startsWith('http') ? image.imageUrl : `http://localhost:5000${image.imageUrl}`}
         alt={image.title}
-        className="w-full h-full object-cover"
+      className="w-full h-full object-contain"
       />
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
                           <h3 className="text-white text-xl font-semibold">{image.title}</h3>
@@ -374,20 +374,27 @@ const openContentModal = async (contentId) => {
                     ))}
                   </div>
 
-                  {/* Carousel Indicators */}
-                  <div className="flex justify-center gap-2 mt-4">
-                    {galleryImages.map((_, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setCurrentImageIndex(index)}
-                        className={`h-2 rounded-full transition-all ${
-                          index === currentImageIndex 
-                            ? 'bg-white w-8' 
-                            : 'bg-white/40 w-2 hover:bg-white/60'
-                        }`}
-                      />
-                    ))}
-                  </div>
+               {/* Image Thumbnails */}
+<div className="flex justify-center gap-3 mt-6 flex-wrap px-4">
+  {galleryImages.map((image, index) => (
+    <button
+      key={image._id}
+      onClick={() => setCurrentImageIndex(index)}
+      className={`relative overflow-hidden rounded-lg transition-all ${
+        index === currentImageIndex 
+          ? 'ring-4 ring-white scale-105' 
+          : 'opacity-60 hover:opacity-100'
+      }`}
+      style={{ width: '120px', height: '80px' }}
+    >
+      <img
+        src={image.imageUrl.startsWith('http') ? image.imageUrl : `http://localhost:5000${image.imageUrl}`}
+        alt={image.title}
+        className="w-full h-full object-cover"
+      />
+    </button>
+  ))}
+</div>
 
                   {/* Navigation Arrows */}
                  {galleryImages.length > 1 && (
@@ -702,9 +709,9 @@ const openContentModal = async (contentId) => {
         )}
 
         {/* Fullscreen Image Modal */}
-      {showFullscreen && fullscreenImage && (
+    {showFullscreen && fullscreenImage && (
   <div 
-    className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4"
+    className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center"
     onClick={closeFullscreen}
   >
     <button
@@ -713,24 +720,61 @@ const openContentModal = async (contentId) => {
     >
       ×
     </button>
-    <div className="relative max-w-7xl w-full h-full flex flex-col items-center justify-center">
-      {console.log('RENDERING fullscreenImage:', fullscreenImage.title, fullscreenImage._id)}
-      <img
-        src={fullscreenImage.imageUrl.startsWith('http') ? fullscreenImage.imageUrl : `http://localhost:5000${fullscreenImage.imageUrl}`}
-        alt={fullscreenImage.title}
-        className="max-w-full max-h-[85vh] object-contain"
-        onClick={(e) => e.stopPropagation()}
-      />
-      <div className="mt-6 text-center">
-        <h3 className="text-white text-2xl font-semibold mb-2">{fullscreenImage.title}</h3>
-        {/* <p className="text-red-500">ID: {fullscreenImage._id}</p> */}
-                {fullscreenImage.description && (
-                  <p className="text-white/80 text-lg">{fullscreenImage.description}</p>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
+    
+    {/* Previous Button */}
+    {galleryImages.length > 1 && (
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          const newIndex = currentImageIndex === 0 ? galleryImages.length - 1 : currentImageIndex - 1;
+          setCurrentImageIndex(newIndex);
+          setFullscreenImage(galleryImages[newIndex]);
+        }}
+        className="absolute left-4 md:left-40 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-4 rounded-full backdrop-blur-sm transition-all z-10 text-2xl"
+      >
+        ❮
+      </button>
+    )}
+
+    {/* Next Button */}
+    {galleryImages.length > 1 && (
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          const newIndex = (currentImageIndex + 1) % galleryImages.length;
+          setCurrentImageIndex(newIndex);
+          setFullscreenImage(galleryImages[newIndex]);
+        }}
+        className="absolute right-4 md:right-40 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-4 rounded-full backdrop-blur-sm transition-all z-10 text-2xl"
+      >
+        ❯
+      </button>
+    )}
+
+ <div className="relative w-full h-full overflow-y-auto overflow-x-hidden p-8">
+  <div className="flex flex-col items-center min-h-full">
+<img
+  src={fullscreenImage.imageUrl.startsWith('http') ? fullscreenImage.imageUrl : `http://localhost:5000${fullscreenImage.imageUrl}`}
+  alt={fullscreenImage.title}
+  className="w-full lg:w-auto"
+  onClick={(e) => e.stopPropagation()}
+  style={{ 
+    height: window.innerWidth <= 768 ? 'auto' : 'auto',
+    minHeight: window.innerWidth <= 768 ? '80vh' : 'auto',
+    minWidth: window.innerWidth > 1024 ? '900px' : 'auto',
+    maxWidth: window.innerWidth > 1024 ? '1400px' : '100%'
+  }}
+/>
+    <div className="mt-6 text-center max-w-3xl pb-8">
+      <h3 className="text-white text-xl md:text-2xl font-semibold mb-2">{fullscreenImage.title}</h3>
+      {fullscreenImage.description && (
+        <p className="text-white/80 text-sm md:text-base">{fullscreenImage.description}</p>
+      )}
+    </div>
+  </div>
+</div>
+  </div>
+)}
       </div>
     </>
   );

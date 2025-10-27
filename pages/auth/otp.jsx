@@ -38,43 +38,44 @@ const OtpVerification = () => {
       return;
     }
 
-    try {
-      setLoading(true);
-      setError('');
-      
-      // Make the API call with preventRedirect set to true
-      const response = await Api('post', 'auth/admin-verify-otp', {
-        otp,
-        phone: userPhone
-      }, router, null, true); // Pass true to prevent automatic redirection
-      
-      if (response && response.success) {
-        // Use the login function from UserContext
-        if (response.token && response.user) {
-          login(response.user, response.token);
-          
-          // Show success toast message
-          safeToast.success('Login successful!');
-          
-          // Only redirect on successful login
-          setTimeout(() => {
-            router.push('/');
-          }, 1500);
-        }
-      } else {
-        const errorMessage = response?.message || 'OTP verification failed. Please try again.';
-        safeToast.error(errorMessage);
-        setError(errorMessage);
-      }
-    } catch (err) {
-      console.error('OTP verification error:', err);
-      // Handle the error message from the API response
-      const errorMessage = err?.message || 'An error occurred during OTP verification. Please try again.';
-      safeToast.error(errorMessage);
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
+ try {
+  setLoading(true);
+  setError('');
+  
+  const response = await Api('post', 'auth/verify-otp', {
+    otp,
+    phone: userPhone
+  }, router, null, true);
+  
+  if (response && response.success) {
+    if (response.token && response.user) {
+      login(response.user, response.token);
+      safeToast.success('Login successful!');
+      setTimeout(() => {
+        router.push('/');
+      }, 1500);
     }
+  } else {
+    const errorMessage = response?.message || 'OTP verification failed. Please try again.';
+    safeToast.error(errorMessage);
+    setError(errorMessage);
+  }
+} catch (err) {
+  if (err?.response?.data?.message) {
+    const errorMessage = err.response.data.message;
+    safeToast.error(errorMessage);
+    setError(errorMessage);
+  } else {
+    safeToast.error('An error occurred during OTP verification. Please try again.');
+    setError('An error occurred during OTP verification. Please try again.');
+  }
+  
+  if (process.env.NODE_ENV === 'development') {
+    console.error('OTP verification error:', err.message);
+  }
+} finally {
+  setLoading(false);  // YE LINE ZAROORI HAI
+}
   };
 
   // Check if OTP is filled (6 digits)

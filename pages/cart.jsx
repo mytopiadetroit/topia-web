@@ -43,17 +43,17 @@ const Cart = () => {
   const tax = subtotal * 0.07; // 7% tax
   const grandTotal = subtotal + tax;
 
-  const handleQuantityChange = (productId, newQuantity) => {
+  const handleQuantityChange = (productId, newQuantity, variant = null, flavor = null) => {
     if (newQuantity <= 0) {
-      removeFromCart(productId);
+      removeFromCart(productId, variant, flavor);
       toast.success('Item removed from cart');
     } else {
-      updateCartItemQuantity(productId, newQuantity);
+      updateCartItemQuantity(productId, newQuantity, variant, flavor);
     }
   };
 
-  const handleRemoveItem = (productId) => {
-    removeFromCart(productId);
+  const handleRemoveItem = (productId, variant = null, flavor = null) => {
+    removeFromCart(productId, variant, flavor);
     toast.success('Item removed from cart');
   };
 
@@ -158,7 +158,9 @@ const Cart = () => {
             {/* Cart Items */}
             <div className="space-y-4">
               {cart.map((item) => {
-                const stock = Number(item.stock || 0);
+                const stock = Number((item.selectedVariant && item.selectedVariant.stock != null)
+                  ? item.selectedVariant.stock
+                  : (item.stock || 0));
                 const isOutOfStock = stock <= 0;
                 const isAtMaxStock = stock > 0 && item.quantity >= stock;
                 
@@ -190,11 +192,11 @@ const Cart = () => {
                         {item.selectedFlavor && (
                           <p className="text-sm text-gray-600">
                             Flavor: {item.selectedFlavor.name}
-                            {item.selectedFlavor.price > 0 && (
+                            {/* {item.selectedFlavor.price > 0 && (
                               <span className="text-green-600 ml-1">
                                 (+${Number(item.selectedFlavor.price).toFixed(2)})
                               </span>
-                            )}
+                            )} */}
                           </p>
                         )}
                         <p className="text-gray-500 text-sm mt-1">Quantity: {item.quantity}</p>
@@ -204,21 +206,21 @@ const Cart = () => {
                         {!isOutOfStock && stock < 5 && (
                           <p className="text-orange-500 text-sm mt-1">Only {stock} left</p>
                         )}
-                        <p className="font-semibold text-lg text-gray-900 mt-2">
+                        {/* <p className="font-semibold text-lg text-gray-900 mt-2">
                           ${Number(item.price || 0).toFixed(2)}
                           {item.quantity > 1 && (
                             <span className="text-sm text-gray-500 ml-2">
                               (${(Number(item.price || 0) / item.quantity).toFixed(2)} each)
                             </span>
                           )}
-                        </p>
+                        </p> */}
                       </div>
                       {/* Quantity Controls and Delete */}
                       <div className="flex items-end mt-14 gap-3 mr-4">
                         {/* Quantity Controls */}
                         <div className="flex items-center border bg-[#BABABA80] border-gray-300 rounded-full">
                           <button 
-                            onClick={() => handleQuantityChange(item._id || item.id, item.quantity - 1)}
+                            onClick={() => handleQuantityChange(item._id || item.id, item.quantity - 1, item.selectedVariant || null, item.selectedFlavor || null)}
                             className="p-2 hover:bg-gray-50 rounded-l-full"
                           >
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="w-4 h-4 text-gray-800 hover:text-black" stroke="currentColor" strokeWidth="2">
@@ -227,7 +229,7 @@ const Cart = () => {
                           </button>
                           <span className="px-3 py-1 text-sm text-gray-800 font-medium">{item.quantity}</span>
                           <button 
-                            onClick={() => handleQuantityChange(item._id || item.id, item.quantity + 1)}
+                            onClick={() => handleQuantityChange(item._id || item.id, item.quantity + 1, item.selectedVariant || null, item.selectedFlavor || null)}
                             disabled={isOutOfStock || isAtMaxStock}
                             className={`p-2 rounded-r-full ${
                               isOutOfStock || isAtMaxStock 
@@ -246,7 +248,7 @@ const Cart = () => {
                         </div>
                         {/* Delete Button */}
                         <button 
-                          onClick={() => handleRemoveItem(item._id || item.id)}
+                          onClick={() => handleRemoveItem(item._id || item.id, item.selectedVariant || null, item.selectedFlavor || null)}
                           className="p-2 text-gray-400 hover:text-red-500 transition-colors"
                         >
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

@@ -205,7 +205,7 @@ const RewardsPage = () => {
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse"></div>
                   
                   {/* Main Content */}
-                  <div className="relative z-10">
+                  <div className="relative  z-10">
                     {/* Animated Icon */}
                     <div className="mb-8 relative">
                       <div className="inline-block relative">

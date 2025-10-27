@@ -16,25 +16,117 @@ export default function Home() {
   const [shopSettings, setShopSettings] = useState(null);
   const [todayTiming, setTodayTiming] = useState(null);
   const [showAllHours, setShowAllHours] = useState(false);
+  const [homepageSettings, setHomepageSettings] = useState({
+    rewardsSectionVisible: true,
+    feedbackSectionVisible: true
+  });
+
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('token');
+    return {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    };
+  };
+
+  const refreshHomepageSettings = async () => {
+    try {
+      const timestamp = Date.now();
+      const response = await fetch(`https://api.mypsyguide.io/api/homepage-settings?_t=${timestamp}`, {
+        headers: getAuthHeaders()
+      });
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          console.warn('Not authenticated, loading public settings');
+          return { success: true, data: { rewardsSectionVisible: false, feedbackSectionVisible: false } };
+        }
+        throw new Error('Failed to fetch homepage settings');
+      }
+      
+      const data = await response.json();
+      console.log('Homepage settings refreshed:', data);
+      if (data.success) {
+        setHomepageSettings(data.data);
+      }
+      return data;
+    } catch (err) {
+      console.error('Failed to refresh homepage settings:', err);
+      // Return default values in case of error
+      return { 
+        success: true, 
+        data: { 
+          rewardsSectionVisible: false, 
+          feedbackSectionVisible: false 
+        } 
+      };
+    }
+  };
 
   useEffect(() => {
-    const loadShopSettings = async () => {
+    const loadInitialData = async () => {
       try {
-        const response = await fetch('https://api.mypsyguide.io/api/shop-settings');
-        const data = await response.json();
-        if (data.success) {
-          setShopSettings(data.data);
+        // Load both shop settings and homepage settings in parallel
+        const timestamp = Date.now();
+        const [shopResponse, homepageResponse] = await Promise.all([
+          fetch(`https://api.mypsyguide.io/api/shop-settings?_t=${timestamp}`, {
+            headers: getAuthHeaders()
+          }),
+          fetch(`https://api.mypsyguide.io/api/homepage-settings?_t=${timestamp}`, {
+            headers: getAuthHeaders()
+          })
+        ]);
+        
+        const shopData = await shopResponse.json();
+        const homepageData = await homepageResponse.json();
+        
+        if (shopData.success) {
+          setShopSettings(shopData.data);
           // Get today's timing
           const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
           const today = days[new Date().getDay()];
-          const timing = data.data.timings.find(t => t.day.toLowerCase() === today);
-          setTodayTiming(timing);
+          if (shopData.data.timings) {
+            const timing = shopData.data.timings.find(t => t.day && t.day.toLowerCase() === today);
+            if (timing) {
+              setTodayTiming(timing);
+            }
+          }
+        }
+        
+        if (homepageData.success) {
+          setHomepageSettings(homepageData.data);
         }
       } catch (err) {
-        console.error('Failed to load shop settings:', err);
+        console.error('Failed to load data:', err);
       }
     };
-    loadShopSettings();
+    
+    loadInitialData();
+  }, []);
+
+  // Listen for storage changes to refresh settings (in case admin makes changes)
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === 'homepage-settings-updated') {
+        console.log('Homepage settings updated, refreshing...');
+        refreshHomepageSettings();
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        // Page became visible, refresh settings in case they were updated
+        refreshHomepageSettings();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   const formatTime = (time) => {
@@ -176,7 +268,12 @@ export default function Home() {
         <p className="text-white text-base md:text-lg lg:text-xl leading-relaxed max-w-4xl mx-auto">
           At SHROOMTOPIA, we are dedicated to enhancing your wellness journey through the power of therapeutic mushrooms. We believe in blending nature&apos;s gifts with modern lifestyles to promote creativity, relaxation, and enjoyment.
         </p>
+         <button  onClick={() => router.push('/resourcecenter')} className="bg-gray-900 mt-8 border-white border mx-auto hover:bg-gray-800 text-white px-6 py-3 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2">
+        <span>Access The Resource Centre</span>
+        <ChevronRight className="w-5 h-5" />
+      </button>
       </div>
+      
     </div>
   </div>
 </section>
@@ -208,10 +305,7 @@ export default function Home() {
       <p className="text-lg text-[#2E2E2E] mb-8 leading-relaxed">
        Delve into audio, guides, videos, and more <br /> curated to inspire learning, growth, and vitality..
       </p>
-      <button  onClick={() => router.push('/resourcecenter')} className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2">
-        <span>Access The Resource Centre</span>
-        <ChevronRight className="w-5 h-5" />
-      </button>
+     
     </div>
 
     {/* Right Image - Circular */}
@@ -293,6 +387,7 @@ export default function Home() {
           </div>
 
           {/* Third Row */}
+          {homepageSettings.rewardsSectionVisible && (
           <div className="grid relative lg:grid-cols-2 gap-12  items-center">
               <div className="absolute inset-0 z-0 flex justify-center items-center pointer-events-none">
    <div className="w-screen h-[350px] bg-[url('/images/over.png')] bg-no-repeat bg-center bg-cover -mx-36"></div>
@@ -328,12 +423,14 @@ export default function Home() {
              <Image src='/images/star.png' alt="Rewards star graphic"  width={400} height={400} />
             </div>
           </div>
+          )}
         </div>
       </section>
 
        <section className="py-20 px-4 ">
         <div className="max-w-7xl mx-auto">
           {/* Feedback Card */}
+          {homepageSettings.feedbackSectionVisible && (
           <div
   className="rounded-3xl p-12 mb-16 border-[#8EAFF6] border-1 relative overflow-hidden"
   style={{
@@ -362,6 +459,7 @@ export default function Home() {
               </button>
             </div>
           </div>
+          )}
 
           {/* Community Story Section */}
           {/* <div className="text-center">

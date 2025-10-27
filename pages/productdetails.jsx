@@ -100,29 +100,31 @@ export default function ProductDetails() {
       setRelatedLoading(false);
     }
   };
-  const getFinalPrice = () => {
-    if (!product) return '0.00';
-    
-    let price = 0;
-    
-    // If a flavor is selected, use its price directly
-    if (selectedFlavor) {
-      console.log('Using flavor price directly:', selectedFlavor.price);
-      price = Number(selectedFlavor.price) || 0;
-    } 
-    // Otherwise, use variant price or base product price
-    else if (product?.hasVariants && selectedVariant) {
-      price = Number(selectedVariant.price || 0);
-      console.log('Using variant price:', price);
-    } else {
-      price = Number(product?.price || 0);
-      console.log('Using base product price:', price);
-    }
-    
-    const finalPrice = price.toFixed(2);
-    console.log('Final calculated price:', finalPrice);
-    return finalPrice;
-  };
+const getFinalPrice = () => {
+  if (!product) return '0.00';
+  
+  let price = 0;
+  
+  // Priority 1: If flavor is selected, use flavor price
+  if (selectedFlavor && selectedFlavor.price) {
+    price = Number(selectedFlavor.price) || 0;
+    console.log('Using flavor price:', price);
+  } 
+  // Priority 2: If variant is selected, use variant price
+  else if (product?.hasVariants && selectedVariant) {
+    price = Number(selectedVariant.price || 0);
+    console.log('Using variant price:', price);
+  } 
+  // Priority 3: Use base product price
+  else {
+    price = Number(product?.price || 0);
+    console.log('Using base product price:', price);
+  }
+  
+  const finalPrice = price.toFixed(2);
+  console.log('Final calculated price:', finalPrice);
+  return finalPrice;
+};
 
   // Update price display when variant or flavor changes
   const [displayPrice, setDisplayPrice] = useState('0.00');
@@ -334,19 +336,21 @@ export default function ProductDetails() {
           {/* Left Column - Images */}
           <div className="md:w-1/2">
             {/* Main Image */}
-            <div className="bg-gray-50 rounded-4xl overflow-hidden mb-4">
-              <img 
-                src={product.images && product.images.length > 0 
-                  ? (product.images[0].startsWith('http') ? product.images[0] : `http://localhost:5000${product.images[0]}`)
-                  : '/images/details.png'
-                } 
-                alt={product.name}
-                className="w-full h-auto object-cover"
-              />
-            </div>
+          <div className="bg-white rounded-2xl overflow-hidden mb-4 border-2 border-gray-100 shadow-lg p-4">
+    <div className="bg-gray-50 rounded-xl overflow-hidden">
+      <img 
+        src={product.images && product.images.length > 0 
+          ? (product.images[0].startsWith('http') ? product.images[0] : `http://localhost:5000${product.images[0]}`)
+          : '/images/details.png'
+        } 
+        alt={product.name}
+        className="w-full h-auto object-cover"
+      />
+    </div>
+  </div>
             
             {/* Thumbnail Images */}
-            <div className="grid grid-cols-3 gap-4">
+            {/* <div className="grid grid-cols-3 gap-4">
               {product.images && product.images.length > 1 ? (
                 product.images.slice(1, 4).map((image, index) => (
                   <div key={index} className="bg-gray-200 rounded-lg aspect-square overflow-hidden">
@@ -364,15 +368,67 @@ export default function ProductDetails() {
                   </div>
                 ))
               )}
-            </div>
+            </div> */}
           </div>
 
           {/* Right Column - Product Info */}
           <div className="md:w-1/2">
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">{product.name}</h1>
-            
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">{product.name}</h1>
+            {product.intensity && (
+  <div className="mt-4">
+    <div className="flex items-center">
+      <span className="text-sm font-medium text-gray-600 mr-3">Intensity:</span>
+      <span className={`text-sm px-3 py-1 rounded-full font-medium ${
+        product.intensity <= 3 ? 'bg-green-100 text-green-800' : 
+        product.intensity <= 7 ? 'bg-yellow-100 text-yellow-800' : 
+        'bg-red-100 text-red-800'
+      }`}>
+        {product.intensity <= 3 ? 'Mild' : product.intensity <= 7 ? 'Medium' : 'Strong'} ({product.intensity}/10)
+      </span>
+    </div>
+    <div className="w-[50%] bg-gray-200 rounded-full h-2 mt-2">
+      <div 
+        className="h-2 rounded-full transition-all duration-300"
+        style={{ 
+          width: `${(product.intensity / 10) * 100}%`,
+          backgroundColor: 
+            product.intensity <= 3 ? '#10B981' : 
+            product.intensity <= 7 ? '#F59E0B' : 
+            '#EF4444'
+        }}
+      ></div>
+    </div>
+  </div>
+)}
+
+
+{product.reviewTags && product.reviewTags.length > 0 && (
+  <div className="mt-6">
+    {/* <h3 className="text-sm font-medium text-gray-700 mb-3">Experience</h3> */}
+    <div className="flex flex-wrap gap-2">
+      {product.reviewTags.map((tag, idx) => {
+        const color = colors[Math.min(idx, colors.length - 1)];
+        const label = tag.label || '';
+        const match = label.match(/^[\p{Emoji}\p{Extended_Pictographic}]/u);
+        const emoji = match ? match[0] + ' ' : '';
+        const text = label.replace(/^[\p{Emoji}\p{Extended_Pictographic}]\s*/u, '');
+        
+        return (
+          <span 
+            key={tag._id} 
+            className="px-3 py-2 rounded-full text-sm font-medium flex items-center gap-1" 
+            style={{ backgroundColor: color.bg, color: color.color }}
+          >
+            <span className="text-sm">{emoji}</span>
+            {text}
+          </span>
+        );
+      })}
+    </div>
+  </div>
+)}
             {/* Description */}
-            <div className="mb-6">
+            <div className="mt-6">
               <h2 className="text-lg text-gray-700 font-semibold mb-2">Description</h2>
               <p className="text-gray-700 mb-4">{product.description?.main || 'No description available'}</p>
               {product.description?.details && (
@@ -380,60 +436,51 @@ export default function ProductDetails() {
               )}
             </div>
 
-            {/* Size Variant Selection */}
-            {product.hasVariants && product.variants && product.variants.length > 0 && (
-              <div className="mb-4">
-                <h3 className="text-sm text-gray-700 font-semibold mb-2">Select Size</h3>
-                <div className="flex flex-wrap gap-2">
-                  {product.variants.map((variant, index) => (
-                    <button
-                      key={index}
-                      onClick={() => {
-                        setSelectedVariant(variant);
-                        setQuantity(1); // Reset quantity when changing variant
-                        // Force price update when variant changes
-                        const newPrice = getFinalPrice();
-                        setDisplayPrice(newPrice);
-                      }}
-                      className={`px-3 py-2 border-2 rounded-lg transition-all text-left ${
-                        selectedVariant === variant
-                          ? 'border-[#536690] bg-blue-50'
-                          : 'border-gray-300 hover:border-gray-400'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-gray-900">
-                          {variant.size.value}{variant.size.unit}
-                        </span>
-                        <span className="text-sm text-[#536690] font-medium">
-                          ${Number(variant.price).toFixed(2)}
-                        </span>
-                      </div>
-                      <div className="text-xs text-gray-500 mt-0.5">
-                        Stock: {variant.stock}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
+           {/* Size Variant Selection */}
+{product.hasVariants && product.variants && product.variants.length > 0 && (
+  <div className="mb-6">
+    <h3 className="text-sm font-medium text-gray-700 mb-3">Select Size</h3>
+    <div className="flex flex-wrap gap-3">
+      {product.variants.map((variant, index) => (
+        <button
+          key={index}
+         onClick={() => {
+  setSelectedVariant(variant);
+  setSelectedFlavor(null); // Ye line add karo
+  setQuantity(1);
+}}
+          className={`px-6 py-3 border-2 rounded-lg transition-all ${
+            selectedVariant === variant
+              ? 'border-[#536690] bg-[#536690] text-white'
+              : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+          }`}
+        >
+          <div className="text-center">
+            <span className="text-lg font-bold">
+              {variant.size.value}{variant.size.unit === 'grams' ? 'G' : variant.size.unit}
+            </span>
+          </div>
+        </button>
+      ))}
+    </div>
+  </div>
+)}
             {/* Flavor Selection */}
             {product.flavors && product.flavors.length > 0 && (
-              <div className="mb-4">
+              <div className="mt-4">
                 <h3 className="text-sm text-gray-700 font-semibold mb-2">Select Flavor</h3>
                 <div className="flex flex-wrap gap-2">
                   {product.flavors.map((flavor, index) => (
                     <button
                       key={index}
-                      onClick={() => {
-                        console.log('Selected flavor:', flavor);
-                        // Update the selected flavor
-                        setSelectedFlavor({
-                          ...flavor,
-                          price: Number(flavor.price) // Ensure price is a number
-                        });
-                      }}
+                     onClick={() => {
+  console.log('Selected flavor:', flavor);
+  // Update the selected flavor
+  setSelectedFlavor({
+    ...flavor,
+    price: Number(flavor.price) // Ensure price is a number
+  });
+}}
                       className={`px-3 py-2 border-2 rounded-lg transition-all ${
                         selectedFlavor?._id === flavor._id
                           ? 'border-green-600 bg-green-50'
@@ -459,7 +506,7 @@ export default function ProductDetails() {
               <h2 className="text-lg text-gray-700 font-semibold mb-2">Final Price</h2>
               <div className="flex items-baseline gap-2">
                 <p className="text-3xl font-bold text-[#536690]">$ {displayPrice}</p>
-                {(selectedVariant || selectedFlavor) && (
+                {/* {(selectedVariant || selectedFlavor) && (
                   <div className="text-sm text-gray-500">
                     {selectedVariant && (
                       <span className="block">
@@ -473,7 +520,7 @@ export default function ProductDetails() {
                       </span>
                     )}
                   </div>
-                )}
+                )} */}
               </div>
             </div>
 
@@ -529,46 +576,10 @@ export default function ProductDetails() {
        <div className="mt-16">
   <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
     {/* Research Section - Left Side (now dynamic) */}
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Research</h2>
-        <span className="text-sm text-gray-500">
-          {product.reviewTags?.length || 0} Research 
-        </span>
-      </div>
-      
-      {product.reviewTags && product.reviewTags.length > 0 ? (
-        <div className="flex flex-wrap gap-3">
-          {product.reviewTags.map((tag, idx) => {
-            const color = colors[Math.min(idx, colors.length - 1)];
-            const label = tag.label || '';
-            const match = label.match(/^[\p{Emoji}\p{Extended_Pictographic}]/u);
-            const emoji = match ? match[0] + ' ' : '';
-            const text = label.replace(/^[\p{Emoji}\p{Extended_Pictographic}]\s*/u, '');
-            
-            return (
-              <span 
-                key={tag._id} 
-                className="px-4 py-3 rounded-full text-sm font-medium flex items-center gap-2" 
-                style={{ backgroundColor: color.bg, color: color.color }}
-              >
-                <span className="text-sm">{emoji}</span>
-                {text}
-              </span>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="text-center py-12">
-          <div className="text-gray-400 mb-4">
-            
-          </div>
-          <p className="text-sm text-gray-500">No research tags available </p>
-        </div>
-      )}
-    </div>
+    
 
     {/* Tags Section - Right Side (Customer Feedback - keep as is) */}
+     {false && (
     <div>
       <h3 className="text-2xl font-bold text-gray-900 mb-6">Customer Feedback</h3>
       <div className="flex flex-wrap gap-3">
@@ -593,6 +604,7 @@ export default function ProductDetails() {
         )}
       </div>
     </div>
+    )}
   </div>
 </div>
 
