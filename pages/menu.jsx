@@ -274,12 +274,50 @@ const ITEMS_PER_PAGE = 15;
     setTotalPages(Math.ceil(filtered.length / ITEMS_PER_PAGE));
     setCurrentPage(1); // Reset to first page when filters change
   }, [products, categoryFilters, primaryUseFilters, intensityFilters, selectedReviewTags, priceRange, reviewAggByProduct]);
+const isDriedProduct = (product) => {
+  if (!product.category) return false;
+  const categoryName = typeof product.category === 'object' 
+    ? product.category.category 
+    : '';
+  return categoryName.toUpperCase() === 'DRIED';
+};
 
-  const sortedProducts = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-    return filteredProducts.slice(startIndex, endIndex);
-  }, [filteredProducts, currentPage]);
+const isEdiblesProduct = (product) => {
+  if (!product.category) return false;
+  const categoryName = typeof product.category === 'object' 
+    ? product.category.category 
+    : '';
+  return categoryName.toUpperCase() === 'EDIBLES';
+};
+const sortedProducts = useMemo(() => {
+  // Separate DRIED, EDIBLES and other products
+  const driedProducts = filteredProducts.filter(p => isDriedProduct(p));
+  
+  // Only include EDIBLES that have active flavors
+  const ediblesProducts = filteredProducts.filter(p => {
+    const isEdible = isEdiblesProduct(p);
+    if (!isEdible) return false;
+    // Check if has active flavors
+    return p.flavors && p.flavors.length > 0 && p.flavors.some(f => f.isActive);
+  });
+  
+  // Other products: not DRIED and either not EDIBLES or EDIBLES without active flavors
+  const otherProducts = filteredProducts.filter(p => {
+    if (isDriedProduct(p)) return false;
+    if (isEdiblesProduct(p)) {
+      // Include EDIBLES without active flavors in "other" category
+      return !(p.flavors && p.flavors.length > 0 && p.flavors.some(f => f.isActive));
+    }
+    return true;
+  });
+  
+  // Combine: all DRIED together, then EDIBLES together, then others
+  const sorted = [...driedProducts, ...ediblesProducts, ...otherProducts];
+  
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  return sorted.slice(startIndex, endIndex);
+}, [filteredProducts, currentPage]);
 
   // memo for selected categories (for deciding view-all state)
   const selectedCategoriesMemo = useMemo(() => Object.keys(categoryFilters).filter((k) => categoryFilters[k]), [categoryFilters]);
@@ -439,13 +477,7 @@ const ITEMS_PER_PAGE = 15;
 
 
 
-const isDriedProduct = (product) => {
-  if (!product.category) return false;
-  const categoryName = typeof product.category === 'object' 
-    ? product.category.category 
-    : '';
-  return categoryName.toUpperCase() === 'DRIED';
-};
+
 
 
 
@@ -991,12 +1023,16 @@ const PaginationControls = () => {
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
     {sortedProducts.map((product) => {
       const isDried = isDriedProduct(product);
+       const isEdibles = isEdiblesProduct(product);
       const driedCat = categories.find(cat => cat.category.toUpperCase() === 'DRIED');
       const isDriedSelected = driedCat && categoryFilters[driedCat._id];
       
       // Special DRIED layout sirf DRIED products ke liye
-      const showDriedLayout = isDried && isDriedSelected && product.hasVariants && product.variants && product.variants.length > 0;
-  
+    const showDriedLayout = isDried && product.hasVariants && product.variants && product.variants.length > 0;
+  const showEdiblesLayout = isEdibles && 
+                          product.flavors && 
+                          product.flavors.length > 0 && 
+                          product.flavors.some(f => f.isActive);
       // DRIED products ke liye special UI - FULL WIDTH
       if (showDriedLayout) {
         return (
@@ -1231,6 +1267,238 @@ const PaginationControls = () => {
           </div>
         );
       }
+
+      if (showEdiblesLayout) {
+  return (
+    <div key={product._id} className="col-span-full">
+      <div
+        className="relative rounded-3xl border border-gray-200 hover:shadow-lg transition-shadow bg-white overflow-hidden w-full max-w-4xl mx-auto"
+        onClick={() => handleProductClick(product)}
+      >
+        <div className="flex flex-col lg:flex-row">
+          {/* Left side - Product Image */}
+          <div className="w-full lg:w-2/5 h-64 lg:h-80 bg-gray-100 relative">
+            {product.images && product.images.length > 0 ? (
+              <img
+                src={product.images[0].startsWith('http') ? product.images[0] : `http://localhost:5000${product.images[0]}`}
+                alt={product.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-200"></div>
+            )}
+            
+            {/* Stock Status Overlay */}
+         {(() => {
+  // Only show out of stock if ALL active flavors have 0 stock
+  const activeFlavors = product.flavors.filter(f => f.isActive);
+  const allFlavorsOutOfStock = activeFlavors.length > 0 && 
+                                activeFlavors.every(f => Number(f.stock || 0) <= 0);
+  if (allFlavorsOutOfStock) {
+    return (
+      <div className="absolute inset-0 flex items-center justify-center z-10">
+        <div className="text-2xl font-bold text-red-500 rotate-12 select-none text-center bg-white/90 px-4 py-2 rounded-lg">
+          Out of<br />Stock
+        </div>
+      </div>
+    );
+  }
+  return null;
+})()}
+          </div>
+          
+          {/* Right side - Product Details */}
+          <div className="w-full lg:w-3/5 p-6">
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h3>
+            
+            {/* Intensity Bar */}
+            {product.intensity && (
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm text-gray-600">Intensity</span>
+                  <span className={`text-sm font-bold ${
+                    product.intensity <= 3 ? 'text-green-600' : 
+                    product.intensity <= 7 ? 'text-yellow-600' : 
+                    'text-red-500'
+                  }`}>
+                    {product.intensity <= 3 ? 'Mild' : product.intensity <= 7 ? 'Medium' : 'Strong'} ({product.intensity}/10)
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="h-2 rounded-full transition-all duration-300"
+                    style={{ 
+                      width: `${(product.intensity / 10) * 100}%`,
+                      backgroundColor: 
+                        product.intensity <= 3 ? '#10B981' : 
+                        product.intensity <= 7 ? '#F59E0B' : 
+                        '#EF4444'
+                    }}
+                  ></div>
+                </div>
+              </div>
+            )}
+            
+            {/* Review Tags */}
+            <div className="flex flex-wrap gap-2 mb-4">
+              {(product.reviewTags || []).slice(0, 4).map((tag, idx) => {
+                const color = colors[idx % colors.length];
+                return (
+                  <span 
+                    key={tag._id} 
+                    className="px-3 py-1.5 text-sm rounded-full font-medium"
+                    style={{ backgroundColor: color.bg, color: color.color }}
+                  >
+                    {tag.label}
+                  </span>
+                );
+              })}
+            </div>
+            
+            {/* Flavors with pricing - INLINE STYLE */}
+            <div className="mt-4">
+              <div className="flex flex-wrap items-center gap-3">
+                {product.flavors.filter(f => f.isActive).map((flavor, idx) => {
+                  const cartItem = cart.find((i) => {
+                    const isSameProduct = (i.id || i._id) === product._id;
+                    const isSameFlavor = i.selectedFlavor?._id === flavor._id;
+                    return isSameProduct && isSameFlavor;
+                  });
+                  
+                  const isInCart = cartItem && cartItem.quantity > 0;
+                  const flavorStock = Number(flavor.stock || 0);
+                  const isOutOfStock = flavorStock <= 0;
+                  
+                  return (
+                    <div 
+                      key={flavor._id} 
+                      className="relative border-2 border-gray-900 rounded-2xl px-4 py-3 bg-white min-w-[120px]"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {/* Add to Cart Button - Top Right */}
+                      <div className="absolute -top-2 -right-2">
+                        {isInCart ? (
+                          <div className="flex items-center border-2 border-gray-900 rounded-full bg-white">
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateCartItemQuantity(product._id, cartItem.quantity - 1, null, flavor);
+                              }}
+                              className="p-1 hover:bg-gray-50 rounded-l-full transition-colors"
+                            >
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                                <path d="M5 12h14"/>
+                              </svg>
+                            </button>
+                            <span className="px-2 text-xs font-bold">
+                              {cartItem.quantity}
+                            </span>
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (cartItem.quantity < flavorStock) {
+                                  updateCartItemQuantity(product._id, cartItem.quantity + 1, null, flavor);
+                                } else {
+                                  toast.error(`Only ${flavorStock} available`);
+                                }
+                              }}
+                              disabled={cartItem.quantity >= flavorStock}
+                              className="p-1 hover:bg-gray-50 rounded-r-full transition-colors disabled:opacity-50"
+                            >
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                                <path d="M12 5v14M5 12h14"/>
+                              </svg>
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (!isOutOfStock) {
+                                addToCart({ ...product, selectedFlavor: flavor }, 1);
+                                toast.success(`${product.name} (${flavor.name}) added!`);
+                                setAddedSet(prev => ({ ...prev, [`${product._id}-${flavor._id}`]: true }));
+                              }
+                            }}
+                            disabled={isOutOfStock}
+                           className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-md ${
+  isOutOfStock 
+    ? 'bg-gray-300 cursor-not-allowed' 
+    : 'bg-gray-900 hover:bg-gray-800'
+}`}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                              <path d="M12 5v14M5 12h14"/>
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                      
+                      {/* Flavor Name and Price */}
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold text-gray-900">
+                          {flavor.name}
+                        </span>
+                        <span className="text-base font-bold text-gray-900">
+                          ${flavor.price}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+                
+                {/* Wishlist Button */}
+                <div 
+                  className="flex items-center space-x-2 cursor-pointer hover:text-red-500 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!isLoggedIn) {
+                      toast.error('Please login to manage your wishlist', {
+                        position: "bottom-left",
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                      });
+                      return;
+                    }
+                    const wasInWishlist = isInWishlist(product._id);
+                    toggle(product);
+                    toast.success(
+                      wasInWishlist ? 'Removed from wishlist' : 'Added to wishlist!',
+                      {
+                        position: "bottom-left",
+                        autoClose: 2000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                      }
+                    );
+                  }}
+                >
+                  <span className="text-sm font-medium">Wishlist</span>
+                  <svg 
+                    width="20" 
+                    height="20" 
+                    viewBox="0 0 24 24" 
+                    fill={isInWishlist(product._id) ? 'currentColor' : 'none'} 
+                    stroke="currentColor" 
+                    strokeWidth="2"
+                  >
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
   
       // Normal card UI for non-DRIED products
       return (
@@ -1308,25 +1576,22 @@ const PaginationControls = () => {
                   </div>
                 </div>
               )}
-              <div className="flex flex-wrap gap-1">
-                {(reviewAggByProduct[product._id] || []).map((agg, idx) => {
-                  const color = colors[Math.min(idx, colors.length - 1)];
-                  const label = agg.label || '';
-                  const match = label.match(/^[\p{Emoji}\p{Extended_Pictographic}]/u);
-                  const emoji = match ? match[0] + ' ' : '';
-                  const text = label.replace(/^[\p{Emoji}\p{Extended_Pictographic}]\s*/u, '');
-                  return (
-                    <span key={agg._id} className="px-2 py-1 text-xs rounded-full" style={{ backgroundColor: color.bg, color: color.color }}>
-                      {emoji}{text} ({agg.count})
-                    </span>
-                  );
-                })}
-                {(!reviewAggByProduct[product._id] || reviewAggByProduct[product._id].length === 0) && (
-                  <span className="px-2 py-1 text-xs rounded-full" style={{ backgroundColor: '#B3194275', color: 'white' }}>
-                    No reviews yet
-                  </span>
-                )}
-              </div>
+            <div className="flex flex-wrap gap-1">
+  {/* Show Review Tags instead of aggregates */}
+  {(product.reviewTags || []).slice(0, 3).map((tag, idx) => {
+    const color = colors[Math.min(idx, colors.length - 1)];
+    return (
+      <span key={tag._id} className="px-2 py-1 text-xs rounded-full" style={{ backgroundColor: color.bg, color: color.color }}>
+        {tag.label}
+      </span>
+    );
+  })}
+  {(!product.reviewTags || product.reviewTags.length === 0) && (
+    <span className="px-2 py-1 text-xs rounded-full" style={{ backgroundColor: '#B3194275', color: 'white' }}>
+      No tags
+    </span>
+  )}
+</div>
               <div className="flex justify-center mt-4">
                 {(() => {
                   const stock = Number(product.stock || 0);

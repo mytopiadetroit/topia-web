@@ -22,19 +22,21 @@ export const WishlistProvider = ({ children }) => {
     }
   }, [isLoggedIn]);
 
-  const fetchWishlist = async () => {
-    try {
-      setLoading(true);
-      const res = await Api('GET', 'wishlist', null, router);
-      if (res?.success) {
-        setItems(res.data || []);
-      }
-    } catch (e) {
-      // noop
-    } finally {
-      setLoading(false);
+const fetchWishlist = async () => {
+  try {
+    setLoading(true);
+    // ✅ Yahan populate add karo
+    const res = await Api('GET', 'wishlist?populate=category,reviewTags', null, router);
+    console.log("Wishlist fetch response:", res);
+    if (res?.success) {
+      setItems(res.data || []);
     }
-  };
+  } catch (e) {
+    // noop
+  } finally {
+    setLoading(false);
+  }
+};
 
   const add = async (productId) => {
     const res = await Api('POST', `wishlist/${productId}`, null, router);

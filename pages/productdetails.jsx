@@ -139,12 +139,29 @@ const getFinalPrice = () => {
   }, [selectedVariant, selectedFlavor, product, quantity]);
 
   // Get available stock based on selection
-  const getAvailableStock = () => {
-    if (product?.hasVariants && selectedVariant) {
-      return Number(selectedVariant.stock || 0);
-    }
-    return Number(product?.stock || 0);
-  };
+const getAvailableStock = () => {
+  // Priority 1: If flavor is selected, use flavor stock
+  if (selectedFlavor) {
+    return Number(selectedFlavor.stock || 0);
+  }
+  // Priority 2: If variant is selected, use variant stock
+  if (product?.hasVariants && selectedVariant) {
+    return Number(selectedVariant.stock || 0);
+  }
+  
+  // Priority 3: Check if product has flavors
+  if (product?.flavors && product.flavors.length > 0) {
+    // If flavors exist but none selected, check if ANY flavor has stock
+    const totalFlavorStock = product.flavors.reduce((sum, flavor) => {
+      return sum + Number(flavor.stock || 0);
+    }, 0);
+    // Return 0 if no flavors have stock (forces user to select a flavor)
+    return totalFlavorStock > 0 ? 0 : 0;
+  }
+  
+  // Priority 4: Use base product stock
+  return Number(product?.stock || 0);
+};
 
   const fetchProduct = async () => {
     try {
@@ -199,48 +216,52 @@ const getFinalPrice = () => {
     return next;
   });
   const decreaseQuantity = () => setQuantity(prev => prev > 1 ? prev - 1 : 1);
+const handleAddToCart = () => {
+  if (!isLoggedIn) {
+    toast.error('Please login to add items to cart');
+    router.push('/auth/login');
+    return;
+  }
 
-  // Handle add to cart
-  const handleAddToCart = () => {
-    if (!isLoggedIn) {
-      toast.error('Please login to add items to cart');
-      router.push('/auth/login');
-      return;
-    }
+  // ✅ Check stock before adding
+  const availableStock = getAvailableStock();
+  if (availableStock <= 0) {
+    toast.error('This item is out of stock');
+    return;
+  }
 
-    const qty = quantity;
-    const finalPrice = getFinalPrice();
-    
-    // Create a clean cart item with all necessary details
-    const cartItem = {
-      ...product,
-      // Ensure we're using the final calculated price
-      price: Number(finalPrice),
-      // Keep original price for reference
-      originalPrice: Number(product.price),
-      // Include selected variant and flavor
-      selectedVariant: selectedVariant,
-      selectedFlavor: selectedFlavor,
-      // Create a unique display name that includes variant and flavor
-      displayName: [
-        product.name,
-        selectedVariant && `(${selectedVariant.size.value}${selectedVariant.size.unit})`,
-        selectedFlavor && selectedFlavor.name
-      ].filter(Boolean).join(' ')
-    };
-    
-    // Add to cart with the updated item
-    addToCart(cartItem, qty);
-    
-    // Create success message
-    let message = [
+  if (quantity > availableStock) {
+    toast.error(`Only ${availableStock} items available`);
+    return;
+  }
+
+  const qty = quantity;
+  const finalPrice = getFinalPrice();
+  
+  // Create a clean cart item with all necessary details
+  const cartItem = {
+    ...product,
+    price: Number(finalPrice),
+    originalPrice: Number(product.price),
+    selectedVariant: selectedVariant,
+    selectedFlavor: selectedFlavor,
+    displayName: [
       product.name,
       selectedVariant && `(${selectedVariant.size.value}${selectedVariant.size.unit})`,
       selectedFlavor && selectedFlavor.name
-    ].filter(Boolean).join(' ');
-    
-    toast.success(`${message} added to cart!`);
+    ].filter(Boolean).join(' ')
   };
+  
+  addToCart(cartItem, qty);
+  
+  let message = [
+    product.name,
+    selectedVariant && `(${selectedVariant.size.value}${selectedVariant.size.unit})`,
+    selectedFlavor && selectedFlavor.name
+  ].filter(Boolean).join(' ');
+  
+  toast.success(`${message} added to cart!`);
+};
 
   // Helper function to generate display name with variant and flavor
   const generateDisplayName = (product, variant, flavor) => {
@@ -465,41 +486,55 @@ const getFinalPrice = () => {
     </div>
   </div>
 )}
-            {/* Flavor Selection */}
-            {product.flavors && product.flavors.length > 0 && (
-              <div className="mt-4">
-                <h3 className="text-sm text-gray-700 font-semibold mb-2">Select Flavor</h3>
-                <div className="flex flex-wrap gap-2">
-                  {product.flavors.map((flavor, index) => (
-                    <button
-                      key={index}
-                     onClick={() => {
-  console.log('Selected flavor:', flavor);
-  // Update the selected flavor
-  setSelectedFlavor({
-    ...flavor,
-    price: Number(flavor.price) // Ensure price is a number
-  });
-}}
-                      className={`px-3 py-2 border-2 rounded-lg transition-all ${
-                        selectedFlavor?._id === flavor._id
-                          ? 'border-green-600 bg-green-50'
-                          : 'border-gray-300 hover:border-gray-400'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-gray-900">
-                          {flavor.name}
-                        </span>
-                        <span className="text-sm text-green-600 font-medium">
-                          {Number(flavor.price) > 0 ? `+$${Number(flavor.price).toFixed(2)}` : 'Free'}
-                        </span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+           {/* Flavor Selection */}
+{product.flavors && product.flavors.length > 0 && (
+  <div className="mt-4">
+    <h3 className="text-sm text-gray-700 font-semibold mb-2">Select Flavor</h3>
+    <div className="flex flex-wrap gap-2">
+      {product.flavors.map((flavor, index) => {
+        const flavorStock = Number(flavor.stock || 0);
+        const isOutOfStock = flavorStock <= 0;
+        
+        return (
+          <button
+            key={index}
+            onClick={() => {
+              if (!isOutOfStock) {
+                console.log('Selected flavor:', flavor);
+                setSelectedFlavor({
+                  ...flavor,
+                  price: Number(flavor.price)
+                });
+                setQuantity(1); // Reset quantity when flavor changes
+              }
+            }}
+            disabled={isOutOfStock}
+            className={`px-3 py-2 border-2 rounded-lg transition-all ${
+              isOutOfStock 
+                ? 'border-gray-200 bg-gray-100 opacity-50 cursor-not-allowed'
+                : selectedFlavor?._id === flavor._id
+                  ? 'border-green-600 bg-green-50'
+                  : 'border-gray-300 hover:border-gray-400'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-gray-900">
+                {flavor.name}
+              </span>
+              {isOutOfStock ? (
+                <span className="text-xs text-red-600 font-medium">Out of Stock</span>
+              ) : (
+                <span className="text-sm text-green-600 font-medium">
+                  {Number(flavor.price) > 0 ? `+$${Number(flavor.price).toFixed(2)}` : 'Free'}
+                </span>
+              )}
+            </div>
+          </button>
+        );
+      })}
+    </div>
+  </div>
+)}
 
             {/* Price */}
             <div className="mb-6">
@@ -536,13 +571,17 @@ const getFinalPrice = () => {
                   <span className="text-gray-600  text-lg">-</span>
                 </button>
                 <span className="text-xl font-semibold text-gray-800 w-16 text-center">{quantity}</span>
-                <button 
-                  onClick={increaseQuantity}
-                  disabled={getAvailableStock() > 0 && quantity >= getAvailableStock()}
-                  className="w-10 h-10 rounded-full text-gray-600 border border-gray-300 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <span className="text-lg">+</span>
-                </button>
+              <button 
+  onClick={increaseQuantity}
+  disabled={
+    getAvailableStock() <= 0 || 
+    quantity >= getAvailableStock() ||
+    (product?.flavors && product.flavors.length > 0 && !selectedFlavor)
+  }
+  className="w-10 h-10 rounded-full text-gray-600 border border-gray-300 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+>
+  <span className="text-lg">+</span>
+</button>
               </div>
               {getAvailableStock() <= 0 ? (
                 <p className="mt-2 text-sm text-red-600">Out of stock</p>

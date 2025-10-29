@@ -286,16 +286,16 @@ export default function Home() {
       
         <div className="max-w-7xl mx-auto ">
           
-       <div className="relative mb-20   ">
+       <div className="relative    ">
   {/* Center Background Image */}
-  <div className="absolute inset-0 z-0 flex justify-center items-center pointer-events-none">
+  {/* <div className="absolute inset-0 z-0 flex justify-center items-center pointer-events-none">
     <div className="w-screen h-[350px] bg-[url('/images/over.png')] bg-no-repeat bg-center bg-cover -mx-36"></div>
-  </div>
+  </div> */}
 
   {/* Main Grid Content */}
-  <div className="relative z-10 grid lg:grid-cols-2 gap-12 items-center">
+  {/* <div className="relative z-10 grid lg:grid-cols-2 gap-12 items-center">
     
-    {/* Left Content */}
+ 
     <div>
       <h2 className="text-3xl lg:text-4xl font-bold text-[#2E2E2E] mb-6 leading-tight">
        Discover Resources to Elevate 
@@ -308,7 +308,7 @@ export default function Home() {
      
     </div>
 
-    {/* Right Image - Circular */}
+    
 <div className="flex justify-center lg:justify-end">
   <div className="overflow-hidden w-full max-w-[450px] h-[300px] sm:h-[400px] lg:h-[550px]">
     <Image 
@@ -323,12 +323,12 @@ export default function Home() {
 
 
 
-  </div>
+  </div> */}
 </div>
 
 
           {/* Second Row */}
-          <div className="grid relative lg:grid-cols-2 gap-12 items-center mb-20">
+          <div className="grid relative lg:grid-cols-2 gap-12 items-center ">
               {/* <div className="absolute inset-0 z-0 flex justify-center items-center pointer-events-none">
     <div className="w-full h-full bg-[url('/images/over.png')] bg-no-repeat bg-center bg-contain"></div>
   </div> */}

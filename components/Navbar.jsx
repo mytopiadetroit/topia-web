@@ -141,7 +141,7 @@ export default function Navbar() {
                   MENU
                 </a>
                 <a href="/resourcecenter" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
-               RESOURCE CENTER
+               RESOURCE CENTRE
 
                 </a>
                   {/* <a href="/myhistory" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
@@ -279,7 +279,7 @@ export default function Navbar() {
               <div className="flex items-center space-x-3">
                 <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-blue-200">
                   <img 
-                    src={user?.avatar || "/images/avatar.png"} 
+                    src={user?.avatar || "/images/pic1.png"} 
                     alt="Profile" 
                     className="w-full h-full object-cover" 
                   />
