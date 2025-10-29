@@ -33,12 +33,18 @@ export default function Home() {
     try {
       const timestamp = Date.now();
       const response = await fetch(`https://api.mypsyguide.io/api/homepage-settings?_t=${timestamp}`, {
-        headers: getAuthHeaders()
+        headers: getAuthHeaders(),
+        cache: 'no-store' // Prevent caching of the response
       });
       
       if (!response.ok) {
         if (response.status === 401) {
           console.warn('Not authenticated, loading public settings');
+          // For public access, show default state (hidden)
+          setHomepageSettings({
+            rewardsSectionVisible: false,
+            feedbackSectionVisible: false
+          });
           return { success: true, data: { rewardsSectionVisible: false, feedbackSectionVisible: false } };
         }
         throw new Error('Failed to fetch homepage settings');
@@ -47,14 +53,23 @@ export default function Home() {
       const data = await response.json();
       console.log('Homepage settings refreshed:', data);
       if (data.success) {
-        setHomepageSettings(data.data);
+        // Always update the state with the latest settings from the server
+        setHomepageSettings({
+          rewardsSectionVisible: data.data.rewardsSectionVisible ?? false,
+          feedbackSectionVisible: data.data.feedbackSectionVisible ?? false
+        });
       }
       return data;
     } catch (err) {
       console.error('Failed to refresh homepage settings:', err);
-      // Return default values in case of error
+      // In case of error, default to hidden
+      setHomepageSettings({
+        rewardsSectionVisible: false,
+        feedbackSectionVisible: false
+      });
       return { 
-        success: true, 
+        success: false, 
+        message: 'Failed to fetch homepage settings',
         data: { 
           rewardsSectionVisible: false, 
           feedbackSectionVisible: false 
@@ -66,46 +81,87 @@ export default function Home() {
   useEffect(() => {
     const loadInitialData = async () => {
       try {
-        // Load both shop settings and homepage settings in parallel
-        const timestamp = Date.now();
-        const [shopResponse, homepageResponse] = await Promise.all([
-          fetch(`https://api.mypsyguide.io/api/shop-settings?_t=${timestamp}`, {
-            headers: getAuthHeaders()
-          }),
-          fetch(`https://api.mypsyguide.io/api/homepage-settings?_t=${timestamp}`, {
-            headers: getAuthHeaders()
-          })
-        ]);
+        console.log('Loading initial data...');
         
-        const shopData = await shopResponse.json();
-        const homepageData = await homepageResponse.json();
-        
-        if (shopData.success) {
-          setShopSettings(shopData.data);
-          // Get today's timing
-          const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-          const today = days[new Date().getDay()];
-          if (shopData.data.timings) {
-            const timing = shopData.data.timings.find(t => t.day && t.day.toLowerCase() === today);
-            if (timing) {
-              setTodayTiming(timing);
+        // Load shop settings
+        try {
+          const shopResponse = await fetch(`https://api.mypsyguide.io/api/shop-settings`, {
+            headers: getAuthHeaders(),
+            cache: 'no-store'
+          });
+          
+          if (shopResponse.ok) {
+            const shopData = await shopResponse.json();
+            if (shopData.success) {
+              setShopSettings(shopData.data);
+              // Get today's timing
+              const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+              const today = days[new Date().getDay()];
+              if (shopData.data.timings) {
+                const timing = shopData.data.timings.find(t => t.day && t.day.toLowerCase() === today);
+                if (timing) {
+                  setTodayTiming(timing);
+                }
+              }
             }
+          } else {
+            console.error('Failed to load shop settings:', shopResponse.status);
           }
+        } catch (shopErr) {
+          console.error('Error loading shop settings:', shopErr);
         }
         
-        if (homepageData.success) {
-          setHomepageSettings(homepageData.data);
+        // Load homepage settings separately with error handling
+        try {
+          const response = await fetch('https://api.mypsyguide.io/api/homepage-settings', {
+            headers: getAuthHeaders(),
+            cache: 'no-store'
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            console.log('Homepage settings loaded:', data);
+            if (data.success && data.data) {
+              setHomepageSettings({
+                rewardsSectionVisible: data.data.rewardsSectionVisible ?? false,
+                feedbackSectionVisible: data.data.feedbackSectionVisible ?? false
+              });
+            } else {
+              console.warn('Invalid homepage settings response format:', data);
+              // Set default values if response format is invalid
+              setHomepageSettings({
+                rewardsSectionVisible: false,
+                feedbackSectionVisible: false
+              });
+            }
+          } else {
+            console.error('Failed to load homepage settings:', response.status);
+            // Set default values if request fails
+            setHomepageSettings({
+              rewardsSectionVisible: false,
+              feedbackSectionVisible: false
+            });
+          }
+        } catch (err) {
+          console.error('Error loading homepage settings:', err);
+          // Set default values on error
+          setHomepageSettings({
+            rewardsSectionVisible: false,
+            feedbackSectionVisible: false
+          });
         }
       } catch (err) {
-        console.error('Failed to load data:', err);
+        console.error('Error in loadInitialData:', err);
       }
     };
     
     loadInitialData();
   }, []);
 
-  // Listen for storage changes to refresh settings (in case admin makes changes)
+  // Listen for storage changes and implement polling for settings
   useEffect(() => {
+    let pollInterval;
+    
     const handleStorageChange = (e) => {
       if (e.key === 'homepage-settings-updated') {
         console.log('Homepage settings updated, refreshing...');
@@ -115,17 +171,34 @@ export default function Home() {
 
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        // Page became visible, refresh settings in case they were updated
+        // Page became visible, refresh settings
         refreshHomepageSettings();
       }
     };
 
+    // Set up polling to check for updates every 30 seconds
+    const setupPolling = () => {
+      // Clear any existing interval
+      if (pollInterval) clearInterval(pollInterval);
+      
+      // Set up new polling
+      pollInterval = setInterval(() => {
+        refreshHomepageSettings();
+      }, 30000); // 30 seconds
+    };
+
+    // Set up event listeners
     window.addEventListener('storage', handleStorageChange);
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Initial setup
+    setupPolling();
 
+    // Cleanup
     return () => {
+      if (pollInterval) clearInterval(pollInterval);
       window.removeEventListener('storage', handleStorageChange);
-      document.addEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
 
