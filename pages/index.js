@@ -16,9 +16,10 @@ export default function Home() {
   const [shopSettings, setShopSettings] = useState(null);
   const [todayTiming, setTodayTiming] = useState(null);
   const [showAllHours, setShowAllHours] = useState(false);
-  const [homepageSettings, setHomepageSettings] = useState({
-    rewardsSectionVisible: true,
-    feedbackSectionVisible: true
+  // Simple state to track section visibility
+  const [sections, setSections] = useState({
+    rewards: false,
+    feedback: false
   });
 
   const getAuthHeaders = () => {
@@ -29,52 +30,59 @@ export default function Home() {
     };
   };
 
-  const refreshHomepageSettings = async () => {
+  // Load homepage settings from the backend - public endpoint
+  const loadHomepageSettings = async () => {
+    console.log('Fetching homepage settings...');
     try {
-      const timestamp = Date.now();
-      const response = await fetch(`https://api.mypsyguide.io/api/homepage-settings?_t=${timestamp}`, {
-        headers: getAuthHeaders(),
-        cache: 'no-store' // Prevent caching of the response
+      const response = await fetch('https://api.mypsyguide.io/api/public/homepage-settings', {
+        method: 'GET',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        },
+        credentials: 'omit' // Don't send cookies for public endpoint
       });
       
-      if (!response.ok) {
-        if (response.status === 401) {
-          console.warn('Not authenticated, loading public settings');
-          // For public access, show default state (hidden)
-          setHomepageSettings({
-            rewardsSectionVisible: false,
-            feedbackSectionVisible: false
-          });
-          return { success: true, data: { rewardsSectionVisible: false, feedbackSectionVisible: false } };
-        }
-        throw new Error('Failed to fetch homepage settings');
-      }
+      console.log('Response status:', response.status);
       
-      const data = await response.json();
-      console.log('Homepage settings refreshed:', data);
-      if (data.success) {
-        // Always update the state with the latest settings from the server
-        setHomepageSettings({
-          rewardsSectionVisible: data.data.rewardsSectionVisible ?? false,
-          feedbackSectionVisible: data.data.feedbackSectionVisible ?? false
+      if (response.ok) {
+        const result = await response.json();
+        console.log('API Response:', JSON.stringify(result, null, 2));
+        
+        if (result.success && result.data) {
+          console.log('Setting sections with:', {
+            rewards: result.data.rewardsSectionVisible,
+            feedback: result.data.feedbackSectionVisible
+          });
+          
+          setSections({
+            rewards: result.data.rewardsSectionVisible ?? false,
+            feedback: result.data.feedbackSectionVisible ?? false
+          });
+        } else {
+          console.warn('Unexpected API response format, showing sections by default');
+          // Default to showing sections if API response is unexpected
+          setSections({
+            rewards: true,
+            feedback: true
+          });
+        }
+      } else {
+        console.warn('Failed to load homepage settings. Status:', response.status);
+        // Default to showing sections if API fails
+        setSections({
+          rewards: true,
+          feedback: true
         });
       }
-      return data;
-    } catch (err) {
-      console.error('Failed to refresh homepage settings:', err);
-      // In case of error, default to hidden
-      setHomepageSettings({
-        rewardsSectionVisible: false,
-        feedbackSectionVisible: false
+    } catch (error) {
+      console.error('Error loading homepage settings:', error);
+      setSections({
+        rewards: false,
+        feedback: false
       });
-      return { 
-        success: false, 
-        message: 'Failed to fetch homepage settings',
-        data: { 
-          rewardsSectionVisible: false, 
-          feedbackSectionVisible: false 
-        } 
-      };
     }
   };
 
@@ -122,32 +130,32 @@ export default function Home() {
             const data = await response.json();
             console.log('Homepage settings loaded:', data);
             if (data.success && data.data) {
-              setHomepageSettings({
-                rewardsSectionVisible: data.data.rewardsSectionVisible ?? false,
-                feedbackSectionVisible: data.data.feedbackSectionVisible ?? false
+              setSections({
+                rewards: data.data.rewardsSectionVisible ?? false,
+                feedback: data.data.feedbackSectionVisible ?? false
               });
             } else {
               console.warn('Invalid homepage settings response format:', data);
               // Set default values if response format is invalid
-              setHomepageSettings({
-                rewardsSectionVisible: false,
-                feedbackSectionVisible: false
+              setSections({
+                rewards: false,
+                feedback: false
               });
             }
           } else {
             console.error('Failed to load homepage settings:', response.status);
             // Set default values if request fails
-            setHomepageSettings({
-              rewardsSectionVisible: false,
-              feedbackSectionVisible: false
+            setSections({
+              rewards: false,
+              feedback: false
             });
           }
         } catch (err) {
           console.error('Error loading homepage settings:', err);
           // Set default values on error
-          setHomepageSettings({
-            rewardsSectionVisible: false,
-            feedbackSectionVisible: false
+          setSections({
+            rewards: false,
+            feedback: false
           });
         }
       } catch (err) {
@@ -158,48 +166,16 @@ export default function Home() {
     loadInitialData();
   }, []);
 
-  // Listen for storage changes and implement polling for settings
+  // Load settings when component mounts and set up polling
   useEffect(() => {
-    let pollInterval;
+    // Initial load
+    loadHomepageSettings();
     
-    const handleStorageChange = (e) => {
-      if (e.key === 'homepage-settings-updated') {
-        console.log('Homepage settings updated, refreshing...');
-        refreshHomepageSettings();
-      }
-    };
-
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        // Page became visible, refresh settings
-        refreshHomepageSettings();
-      }
-    };
-
-    // Set up polling to check for updates every 30 seconds
-    const setupPolling = () => {
-      // Clear any existing interval
-      if (pollInterval) clearInterval(pollInterval);
-      
-      // Set up new polling
-      pollInterval = setInterval(() => {
-        refreshHomepageSettings();
-      }, 30000); // 30 seconds
-    };
-
-    // Set up event listeners
-    window.addEventListener('storage', handleStorageChange);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    // Set up polling every 30 seconds
+    const intervalId = setInterval(loadHomepageSettings, 30000);
     
-    // Initial setup
-    setupPolling();
-
-    // Cleanup
-    return () => {
-      if (pollInterval) clearInterval(pollInterval);
-      window.removeEventListener('storage', handleStorageChange);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
+    // Clean up interval on unmount
+    return () => clearInterval(intervalId);
   }, []);
 
   const formatTime = (time) => {
@@ -453,14 +429,15 @@ export default function Home() {
                 </p>
                 
                 <button   onClick={() => router.push('/commingsoon')} className="bg-[#2E2E2E] hover:bg-[#2E2E2E] text-white px-8 py-4 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105">
-                  Comming Soon 
+                  Coming Soon 
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Third Row */}
-          {homepageSettings.rewardsSectionVisible && (
+          {/* Third Row - Rewards Section */}
+          {console.log('Rendering rewards section, visible:', sections.rewards)}
+          {sections.rewards && (
           <div className="grid relative lg:grid-cols-2 gap-12  items-center">
               <div className="absolute inset-0 z-0 flex justify-center items-center pointer-events-none">
    <div className="w-screen h-[350px] bg-[url('/images/over.png')] bg-no-repeat bg-center bg-cover -mx-36"></div>
@@ -502,8 +479,9 @@ export default function Home() {
 
        <section className="py-20 px-4 ">
         <div className="max-w-7xl mx-auto">
-          {/* Feedback Card */}
-          {homepageSettings.feedbackSectionVisible && (
+          {/* Fourth Row - Feedback Section */}
+          {console.log('Rendering feedback section, visible:', sections.feedback)}
+          {sections.feedback && (
           <div
   className="rounded-3xl p-12 mb-16 border-[#8EAFF6] border-1 relative overflow-hidden"
   style={{

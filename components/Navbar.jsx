@@ -141,7 +141,7 @@ export default function Navbar() {
                   MENU
                 </a>
                 <a href="/resourcecenter" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
-               RESOURCE CENTRE
+               RESOURCE CENTER
 
                 </a>
                   {/* <a href="/myhistory" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
@@ -327,7 +327,7 @@ export default function Navbar() {
                   className="flex items-center space-x-3 px-2 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 group"
                 >
                   <BookOpen className="w-5 h-5 group-hover:text-blue-600" />
-                  <span className="font-medium">Resource Centre</span>
+                  <span className="font-medium">Resource Center</span>
                 </a>
                 
                 {/* <a 
