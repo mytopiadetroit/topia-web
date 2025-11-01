@@ -318,7 +318,7 @@ export default function Home() {
           At SHROOMTOPIA, we are dedicated to enhancing your wellness journey through the power of therapeutic mushrooms. We believe in blending nature&apos;s gifts with modern lifestyles to promote creativity, relaxation, and enjoyment.
         </p>
          <button  onClick={() => router.push('/resourcecenter')} className="bg-gray-900 mt-8 border-white border mx-auto hover:bg-gray-800 text-white px-6 py-3 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2">
-        <span>Access The Resource Centre</span>
+        <span>Access The Resource Center</span>
         <ChevronRight className="w-5 h-5" />
       </button>
       </div>
