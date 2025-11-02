@@ -463,6 +463,33 @@ const sortedProducts = useMemo(() => {
   };
 
   const handleProductClick = (product) => {
+    // For products with variants, check if any variant is in stock
+    if (product.hasVariants && product.variants && product.variants.length > 0) {
+      const hasInStockVariant = product.variants.some(variant => {
+        const variantStock = Number(variant.stock || 0);
+        return variantStock > 0;
+      });
+      
+      if (hasInStockVariant) {
+        router.push(`/productdetails?id=${product._id}`);
+        return;
+      }
+    }
+    
+    // For products with flavors, check if any flavor is in stock
+    if (product.flavors && product.flavors.length > 0) {
+      const hasInStockFlavor = product.flavors.some(flavor => {
+        const flavorStock = Number(flavor.stock || 0);
+        return flavorStock > 0;
+      });
+      
+      if (hasInStockFlavor) {
+        router.push(`/productdetails?id=${product._id}`);
+        return;
+      }
+    }
+    
+    // For regular products, check the main stock
     const stock = Number(product.stock || 0);
     const isAvailable = product.hasStock && stock > 0;
     
@@ -1056,6 +1083,45 @@ const PaginationControls = () => {
                   
                   {/* Stock Status Overlay */}
                   {(() => {
+                    // For products with variants, check if all variants are out of stock
+                    if (product.hasVariants && product.variants && product.variants.length > 0) {
+                      const allVariantsOutOfStock = product.variants.every(variant => {
+                        const variantStock = Number(variant.stock || 0);
+                        return variantStock <= 0;
+                      });
+                      
+                      if (allVariantsOutOfStock) {
+                        return (
+                          <div className="absolute inset-0 flex items-center justify-center z-10">
+                            <div className="text-2xl font-bold text-red-500 rotate-12 select-none text-center bg-white/90 px-4 py-2 rounded-lg">
+                              Out of<br />Stock
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }
+                    
+                    // For products with flavors, check if all flavors are out of stock
+                    if (product.flavors && product.flavors.length > 0) {
+                      const allFlavorsOutOfStock = product.flavors.every(flavor => {
+                        const flavorStock = Number(flavor.stock || 0);
+                        return flavorStock <= 0;
+                      });
+                      
+                      if (allFlavorsOutOfStock) {
+                        return (
+                          <div className="absolute inset-0 flex items-center justify-center z-10">
+                            <div className="text-2xl font-bold text-red-500 rotate-12 select-none text-center bg-white/90 px-4 py-2 rounded-lg">
+                              Out of<br />Stock
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }
+                    
+                    // For products without variants or flavors, use the original stock check
                     const stock = Number(product.stock || 0);
                     const isOutOfStock = !product.hasStock || stock <= 0;
                     
@@ -1367,7 +1433,8 @@ const PaginationControls = () => {
                   
                   const isInCart = cartItem && cartItem.quantity > 0;
                   const flavorStock = Number(flavor.stock || 0);
-                  const isOutOfStock = flavorStock <= 0;
+                  // Flavor is out of stock if: product hasStock is false OR individual flavor stock is 0
+                  const isOutOfStock = !product.hasStock || flavorStock <= 0;
                   
                   return (
                     <div 
