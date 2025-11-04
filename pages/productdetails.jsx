@@ -140,26 +140,32 @@ const getFinalPrice = () => {
 
   // Get available stock based on selection
 const getAvailableStock = () => {
-  // Priority 1: If flavor is selected, use flavor stock
+ 
   if (selectedFlavor) {
     return Number(selectedFlavor.stock || 0);
   }
-  // Priority 2: If variant is selected, use variant stock
+
   if (product?.hasVariants && selectedVariant) {
     return Number(selectedVariant.stock || 0);
   }
   
-  // Priority 3: Check if product has flavors
+
   if (product?.flavors && product.flavors.length > 0) {
-    // If flavors exist but none selected, check if ANY flavor has stock
     const totalFlavorStock = product.flavors.reduce((sum, flavor) => {
       return sum + Number(flavor.stock || 0);
     }, 0);
-    // Return 0 if no flavors have stock (forces user to select a flavor)
-    return totalFlavorStock > 0 ? 0 : 0;
+    return totalFlavorStock;
   }
   
-  // Priority 4: Use base product stock
+ 
+  if (product?.hasVariants && product.variants && product.variants.length > 0) {
+    const totalVariantStock = product.variants.reduce((sum, variant) => {
+      return sum + Number(variant.stock || 0);
+    }, 0);
+    return totalVariantStock;
+  }
+  
+  // Priority 5: Use base product stock
   return Number(product?.stock || 0);
 };
 
@@ -592,16 +598,16 @@ const handleAddToCart = () => {
 
             {/* Add to Cart Section */}
             <div className="flex items-center gap-4 mb-8">
-              <button 
-                onClick={handleAddToCart}
-                disabled={!product.hasStock || getAvailableStock() <= 0}
-                className={`bg-[#536690] hover:bg-[#536690] text-white font-medium py-3 px-8 rounded-full flex items-center justify-center gap-2 flex-1 transition-colors ${
-                  (!product.hasStock || getAvailableStock() <= 0) ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-              >
-                <span>{(product.hasStock && getAvailableStock() > 0) ? 'Add to Cart' : 'Out of Stock'}</span>
-                {(product.hasStock && getAvailableStock() > 0) && <span className="text-xl">+</span>}
-              </button>
+             <button 
+  onClick={handleAddToCart}
+  disabled={getAvailableStock() <= 0}
+  className={`bg-[#536690] hover:bg-[#536690] text-white font-medium py-3 px-8 rounded-full flex items-center justify-center gap-2 flex-1 transition-colors ${
+    getAvailableStock() <= 0 ? 'opacity-50 cursor-not-allowed' : ''
+  }`}
+>
+  <span>{getAvailableStock() > 0 ? 'Add to Cart' : 'Out of Stock'}</span>
+  {getAvailableStock() > 0 && <span className="text-xl">+</span>}
+</button>
               
               <button onClick={handleToggleWishlist} className="border border-gray-300 bg-white text-gray-500 font-medium py-3 px-6 rounded-full hover:bg-gray-50 transition-colors flex items-center justify-center">
                 <span className="mr-2">{isWishlisted ? 'Wishlisted' : 'Wishlist'}</span>
