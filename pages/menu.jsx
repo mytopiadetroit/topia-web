@@ -19,10 +19,10 @@ const Menu = () => {
   const [primaryUseOpen, setPrimaryUseOpen] = useState(true);
   const [intensityOpen, setIntensityOpen] = useState(true);
   const [reviewTagsOpen, setReviewTagsOpen] = useState(true);
-  
+
   // Side drawer state
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  
+
   // State for dynamic data
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
@@ -30,14 +30,14 @@ const Menu = () => {
   const [loadingData, setLoadingData] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const { isInWishlist, toggle } = useWishlist();
-  
+
   // dynamic review aggregates cache: productId -> array of { _id, count, label, emoji }
   const [reviewAggByProduct, setReviewAggByProduct] = useState({});
-  
+
   // Review tags state
   const [reviewTags, setReviewTags] = useState([]);
   const [selectedReviewTags, setSelectedReviewTags] = useState({});
-  
+
   // Filter states
   const [categoryFilters, setCategoryFilters] = useState({});
   const [primaryUseFilters, setPrimaryUseFilters] = useState({
@@ -51,13 +51,13 @@ const Menu = () => {
   });
 
   // Price range filter state
- const [priceRange, setPriceRange] = useState([0, 0]);
-const [localPriceRange, setLocalPriceRange] = useState([0, 0]);
+  const [priceRange, setPriceRange] = useState([0, 0]);
+  const [localPriceRange, setLocalPriceRange] = useState([0, 0]);
   const [priceRangeOpen, setPriceRangeOpen] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-const [totalPages, setTotalPages] = useState(1);
-const [totalItems, setTotalItems] = useState(0);
-const ITEMS_PER_PAGE = 15;
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const ITEMS_PER_PAGE = 15;
 
   // Fetch review tags
   const fetchReviewTags = async () => {
@@ -99,7 +99,7 @@ const ITEMS_PER_PAGE = 15;
             borderRadius: '8px'
           }
         });
-        
+
         // Redirect to login page
         router.push('/auth/login');
       } else {
@@ -124,8 +124,8 @@ const ITEMS_PER_PAGE = 15;
   }, []);
 
   const handleHomeClick = () => {
-  router.push('/');
-};
+    router.push('/');
+  };
   // Fetch categories from backend
   const fetchCategories = async () => {
     try {
@@ -134,21 +134,21 @@ const ITEMS_PER_PAGE = 15;
       console.log('Categories API Response:', response);
       if (response.success) {
         setCategories(response.data);
-        
-      
+
+
         const { category, primaryUse } = router.query;
         const initialFilters = {};
-        
+
         response.data.forEach(cat => {
-       
-          initialFilters[cat._id] = category ? 
-            (Array.isArray(category) ? category.includes(cat._id) : category === cat._id) : 
+
+          initialFilters[cat._id] = category ?
+            (Array.isArray(category) ? category.includes(cat._id) : category === cat._id) :
             false;
         });
-        
+
         setCategoryFilters(initialFilters);
-        
-       
+
+
         if (primaryUse) {
           const selectedPrimaryUses = Array.isArray(primaryUse) ? primaryUse : [primaryUse];
           setPrimaryUseFilters({
@@ -163,7 +163,7 @@ const ITEMS_PER_PAGE = 15;
     }
   };
 
- 
+
   const fetchProducts = async () => {
     try {
       setLoadingData(true);
@@ -174,7 +174,7 @@ const ITEMS_PER_PAGE = 15;
         const allProducts = response.data || [];
         setProducts(allProducts);
         setFilteredProducts(allProducts);
-        
+
         // Calculate and set initial price range
         if (allProducts.length > 0) {
           const prices = allProducts.map(p => p.price);
@@ -183,7 +183,7 @@ const ITEMS_PER_PAGE = 15;
           setPriceRange([min, max]);
           setLocalPriceRange([min, max]);
         }
-        
+
         // Get aggregates for all products
         const ids = allProducts.map(p => p._id);
         fetchAggregatesForProducts(ids);
@@ -209,26 +209,26 @@ const ITEMS_PER_PAGE = 15;
   // State to track if any category is selected
   const [hasCategorySelected, setHasCategorySelected] = useState(false);
 
- 
+
   useEffect(() => {
     let filtered = [...products];
-  
+
     const selectedCategories = Object.keys(categoryFilters).filter(key => categoryFilters[key]);
     if (selectedCategories.length > 0) {
-      filtered = filtered.filter(product => 
+      filtered = filtered.filter(product =>
         product.category && selectedCategories.includes(
           typeof product.category === 'object' ? product.category._id : product.category
         )
       );
     }
-  
+
     const selectedPrimaryUses = Object.keys(primaryUseFilters).filter(key => primaryUseFilters[key]);
     if (selectedPrimaryUses.length > 0) {
-      filtered = filtered.filter(product => 
+      filtered = filtered.filter(product =>
         selectedPrimaryUses.includes(product.primaryUse)
       );
     }
-  
+
     // Filter by intensity
     const selectedIntensities = Object.keys(intensityFilters).filter(key => intensityFilters[key]);
     if (selectedIntensities.length > 0) {
@@ -243,7 +243,7 @@ const ITEMS_PER_PAGE = 15;
         });
       });
     }
-  
+
     // Filter by review tags
     const selectedTags = Object.keys(selectedReviewTags).filter(key => selectedReviewTags[key]);
     if (selectedTags.length > 0) {
@@ -252,14 +252,14 @@ const ITEMS_PER_PAGE = 15;
         if (!product.reviewTags || !Array.isArray(product.reviewTags)) {
           return false;
         }
-        
+
         // Check if product has all the selected review tags
-        return selectedTags.every(tagId => 
+        return selectedTags.every(tagId =>
           product.reviewTags.some(tag => tag._id === tagId)
         );
       });
     }
-  
+
     // Filter by price range
     filtered = filtered.filter(product => {
       const price = Number(product.price || 0);
@@ -268,56 +268,56 @@ const ITEMS_PER_PAGE = 15;
       }
       return price >= priceRange[0] && price <= priceRange[1];
     });
-  
+
     setFilteredProducts(filtered);
     setTotalItems(filtered.length);
     setTotalPages(Math.ceil(filtered.length / ITEMS_PER_PAGE));
     setCurrentPage(1); // Reset to first page when filters change
   }, [products, categoryFilters, primaryUseFilters, intensityFilters, selectedReviewTags, priceRange, reviewAggByProduct]);
-const isDriedProduct = (product) => {
-  if (!product.category) return false;
-  const categoryName = typeof product.category === 'object' 
-    ? product.category.category 
-    : '';
-  return categoryName.toUpperCase() === 'DRIED';
-};
+  const isDriedProduct = (product) => {
+    if (!product.category) return false;
+    const categoryName = typeof product.category === 'object'
+      ? product.category.category
+      : '';
+    return categoryName.toUpperCase() === 'DRIED';
+  };
 
-const isEdiblesProduct = (product) => {
-  if (!product.category) return false;
-  const categoryName = typeof product.category === 'object' 
-    ? product.category.category 
-    : '';
-  return categoryName.toUpperCase() === 'EDIBLES';
-};
-const sortedProducts = useMemo(() => {
-  // Separate DRIED, EDIBLES and other products
-  const driedProducts = filteredProducts.filter(p => isDriedProduct(p));
-  
-  // Only include EDIBLES that have active flavors
-  const ediblesProducts = filteredProducts.filter(p => {
-    const isEdible = isEdiblesProduct(p);
-    if (!isEdible) return false;
-    // Check if has active flavors
-    return p.flavors && p.flavors.length > 0 && p.flavors.some(f => f.isActive);
-  });
-  
-  // Other products: not DRIED and either not EDIBLES or EDIBLES without active flavors
-  const otherProducts = filteredProducts.filter(p => {
-    if (isDriedProduct(p)) return false;
-    if (isEdiblesProduct(p)) {
-      // Include EDIBLES without active flavors in "other" category
-      return !(p.flavors && p.flavors.length > 0 && p.flavors.some(f => f.isActive));
-    }
-    return true;
-  });
-  
-  // Combine: all DRIED together, then EDIBLES together, then others
-  const sorted = [...driedProducts, ...ediblesProducts, ...otherProducts];
-  
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  return sorted.slice(startIndex, endIndex);
-}, [filteredProducts, currentPage]);
+  const isEdiblesProduct = (product) => {
+    if (!product.category) return false;
+    const categoryName = typeof product.category === 'object'
+      ? product.category.category
+      : '';
+    return categoryName.toUpperCase() === 'EDIBLES';
+  };
+  const sortedProducts = useMemo(() => {
+    // Separate DRIED, EDIBLES and other products
+    const driedProducts = filteredProducts.filter(p => isDriedProduct(p));
+
+    // Only include EDIBLES that have active flavors
+    const ediblesProducts = filteredProducts.filter(p => {
+      const isEdible = isEdiblesProduct(p);
+      if (!isEdible) return false;
+      // Check if has active flavors
+      return p.flavors && p.flavors.length > 0 && p.flavors.some(f => f.isActive);
+    });
+
+    // Other products: not DRIED and either not EDIBLES or EDIBLES without active flavors
+    const otherProducts = filteredProducts.filter(p => {
+      if (isDriedProduct(p)) return false;
+      if (isEdiblesProduct(p)) {
+        // Include EDIBLES without active flavors in "other" category
+        return !(p.flavors && p.flavors.length > 0 && p.flavors.some(f => f.isActive));
+      }
+      return true;
+    });
+
+    // Combine: all DRIED together, then EDIBLES together, then others
+    const sorted = [...driedProducts, ...ediblesProducts, ...otherProducts];
+
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return sorted.slice(startIndex, endIndex);
+  }, [filteredProducts, currentPage]);
 
   // memo for selected categories (for deciding view-all state)
   const selectedCategoriesMemo = useMemo(() => Object.keys(categoryFilters).filter((k) => categoryFilters[k]), [categoryFilters]);
@@ -339,33 +339,33 @@ const sortedProducts = useMemo(() => {
   const updateURL = (newCategoryFilters, newPrimaryUseFilters, newIntensityFilters = null) => {
     const selectedCategories = Object.keys(newCategoryFilters).filter(key => newCategoryFilters[key]);
     const selectedPrimaryUses = Object.keys(newPrimaryUseFilters).filter(key => newPrimaryUseFilters[key]);
-    const selectedIntensities = newIntensityFilters ? 
-      Object.keys(newIntensityFilters).filter(key => newIntensityFilters[key]) : 
+    const selectedIntensities = newIntensityFilters ?
+      Object.keys(newIntensityFilters).filter(key => newIntensityFilters[key]) :
       [];
-    
+
     const query = { ...router.query };
-    
+
     // Update category in URL
     if (selectedCategories.length > 0) {
       query.category = selectedCategories;
     } else {
       delete query.category;
     }
-    
+
     // Update primary use in URL
     if (selectedPrimaryUses.length > 0) {
       query.primaryUse = selectedPrimaryUses;
     } else {
       delete query.primaryUse;
     }
-    
+
     // Update intensity in URL
     if (selectedIntensities.length > 0) {
       query.intensity = selectedIntensities;
     } else {
       delete query.intensity;
     }
-    
+
     router.push({
       pathname: router.pathname,
       query
@@ -420,14 +420,14 @@ const sortedProducts = useMemo(() => {
     setCategoryFilters(newCategoryFilters);
     setPrimaryUseFilters({ therapeutic: false, functional: false });
     setIntensityFilters({ mild: false, medium: false, strong: false });
-    
+
     // Reset review tags
     const resetTags = {};
     reviewTags.forEach(tag => {
       resetTags[tag._id] = false;
     });
     setSelectedReviewTags(resetTags);
-    
+
     updateURL({}, {}, {});
   };
 
@@ -435,7 +435,7 @@ const sortedProducts = useMemo(() => {
     e.stopPropagation(); // Prevent card click event
     const stock = Number(product.stock || 0);
     const isAvailable = product.hasStock && stock > 0;
-    
+
     if (isAvailable) {
       addToCart(product, 1);
       toast.success(`${product.name} added to cart!`);
@@ -449,7 +449,7 @@ const sortedProducts = useMemo(() => {
     e.stopPropagation(); // Prevent card click event
     const stock = Number(product.stock || 0);
     const productId = product._id || product.id;
-    
+
     if (newQuantity <= 0) {
       updateCartItemQuantity(productId, 0);
       setAddedSet(prev => ({ ...prev, [productId]: false }));
@@ -469,30 +469,30 @@ const sortedProducts = useMemo(() => {
         const variantStock = Number(variant.stock || 0);
         return variantStock > 0;
       });
-      
+
       if (hasInStockVariant) {
         router.push(`/productdetails?id=${product._id}`);
         return;
       }
     }
-    
+
     // For products with flavors, check if any flavor is in stock
     if (product.flavors && product.flavors.length > 0) {
       const hasInStockFlavor = product.flavors.some(flavor => {
         const flavorStock = Number(flavor.stock || 0);
         return flavorStock > 0;
       });
-      
+
       if (hasInStockFlavor) {
         router.push(`/productdetails?id=${product._id}`);
         return;
       }
     }
-    
+
     // For regular products, check the main stock
     const stock = Number(product.stock || 0);
     const isAvailable = product.hasStock && stock > 0;
-    
+
     if (isAvailable) {
       router.push(`/productdetails?id=${product._id}`);
     } else {
@@ -508,37 +508,37 @@ const sortedProducts = useMemo(() => {
 
 
 
-const isDriedFilterActive = () => {
-  const driedCategory = categories.find(cat => 
-    cat.category.toUpperCase() === 'DRIED'
-  );
-  
-  console.log('=== DEBUG ===');
-  console.log('Dried Category:', driedCategory);
-  console.log('Category Filters:', categoryFilters);
-  console.log('Is Dried Filter ON:', driedCategory && categoryFilters[driedCategory._id]);
-  console.log('Sorted Products:', sortedProducts);
-  console.log('============');
-  
-  return driedCategory && categoryFilters[driedCategory._id];
-};
+  const isDriedFilterActive = () => {
+    const driedCategory = categories.find(cat =>
+      cat.category.toUpperCase() === 'DRIED'
+    );
+
+    console.log('=== DEBUG ===');
+    console.log('Dried Category:', driedCategory);
+    console.log('Category Filters:', categoryFilters);
+    console.log('Is Dried Filter ON:', driedCategory && categoryFilters[driedCategory._id]);
+    console.log('Sorted Products:', sortedProducts);
+    console.log('============');
+
+    return driedCategory && categoryFilters[driedCategory._id];
+  };
 
 
 
 
-  
+
 
   const clearAllFilters = () => {
     const newCategoryFilters = {};
     const newPrimaryUseFilters = { therapeutic: false, functional: false };
     const newIntensityFilters = { mild: false, medium: false, strong: false };
-    
+
     setCategoryFilters(newCategoryFilters);
     setPrimaryUseFilters(newPrimaryUseFilters);
     setIntensityFilters(newIntensityFilters);
     setPriceRange([priceRangeLimits.min, priceRangeLimits.max]);
     setIsDrawerOpen(false);
-    
+
     // Clear URL parameters
     const query = { ...router.query };
     delete query.category;
@@ -546,7 +546,7 @@ const isDriedFilterActive = () => {
     delete query.intensity;
     delete query.minPrice;
     delete query.maxPrice;
-    
+
     router.push({
       pathname: router.pathname,
       query
@@ -589,8 +589,8 @@ const isDriedFilterActive = () => {
     const primaryUseCount = Object.values(primaryUseFilters).filter(Boolean).length;
     const intensityCount = Object.values(intensityFilters).filter(Boolean).length;
     const reviewTagCount = Object.values(selectedReviewTags).filter(Boolean).length;
-    const priceFilterActive = priceRange[0] > priceRangeLimits.min || 
-                            priceRange[1] < priceRangeLimits.max;
+    const priceFilterActive = priceRange[0] > priceRangeLimits.min ||
+      priceRange[1] < priceRangeLimits.max;
     return categoryCount + primaryUseCount + intensityCount + reviewTagCount + (priceFilterActive ? 1 : 0);
   }, [categoryFilters, primaryUseFilters, intensityFilters, selectedReviewTags, priceRange, priceRangeLimits]);
 
@@ -643,7 +643,7 @@ const isDriedFilterActive = () => {
           Category
           {categoryOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </button>
-        
+
         {categoryOpen && (
           <div className="space-y-3">
             {categories.map((category) => (
@@ -657,8 +657,8 @@ const isDriedFilterActive = () => {
                   />
                   {category.image && (
                     <div className="ml-3 w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
-                      <img 
-                        src={category.image} 
+                      <img
+                        src={category.image}
                         alt={category.category}
                         className="w-full h-full object-cover"
                         onError={(e) => {
@@ -686,7 +686,7 @@ const isDriedFilterActive = () => {
           Primary Use
           {primaryUseOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </button>
-        
+
         {primaryUseOpen && (
           <div className="space-y-3">
             <label className="flex items-center cursor-pointer group">
@@ -724,7 +724,7 @@ const isDriedFilterActive = () => {
           Intensity
           {intensityOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </button>
-        
+
         {intensityOpen && (
           <div className="space-y-3">
             {[
@@ -760,7 +760,7 @@ const isDriedFilterActive = () => {
           </span>
           {reviewTagsOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </button>
-        
+
         {reviewTagsOpen && (
           <div className="space-y-3">
             {reviewTags.length > 0 ? (
@@ -795,7 +795,7 @@ const isDriedFilterActive = () => {
           Price Range
           {priceRangeOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </button>
-        
+
         {priceRangeOpen && (
           <div className="space-y-3">
             {[
@@ -805,9 +805,9 @@ const isDriedFilterActive = () => {
               { id: '80', label: '$60 - $80', range: [60, 80] },
               { id: '80+', label: 'Over $80', range: [80, 9999] }
             ].map((priceOption) => {
-              const isActive = priceRange[0] === priceOption.range[0] && 
-                             priceRange[1] === priceOption.range[1];
-              
+              const isActive = priceRange[0] === priceOption.range[0] &&
+                priceRange[1] === priceOption.range[1];
+
               return (
                 <label key={priceOption.id} className="flex items-center cursor-pointer group">
                   <input
@@ -836,114 +836,111 @@ const isDriedFilterActive = () => {
     </div>
   );
 
- 
-const PaginationControls = () => {
-  const maxVisiblePages = 5;
-  
-  const handlePageChange = (pageNum) => {
-    setCurrentPage(pageNum);
-    // Scroll to top smoothly
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-  
-  const getPageNumbers = () => {
-    const pages = [];
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-    
-    if (endPage - startPage < maxVisiblePages - 1) {
-      startPage = Math.max(1, endPage - maxVisiblePages + 1);
-    }
-    
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
-    
-    return pages;
-  };
-  
-  if (totalPages <= 1) return null;
-  
-  return (
-    <div className="flex items-center justify-center space-x-2 mt-8 mb-6">
-      <button
-        onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-        disabled={currentPage === 1}
-        className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-          currentPage === 1
+
+  const PaginationControls = () => {
+    const maxVisiblePages = 5;
+
+    const handlePageChange = (pageNum) => {
+      setCurrentPage(pageNum);
+      // Scroll to top smoothly
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const getPageNumbers = () => {
+      const pages = [];
+      let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+      let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+      if (endPage - startPage < maxVisiblePages - 1) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+
+      return pages;
+    };
+
+    if (totalPages <= 1) return null;
+
+    return (
+      <div className="flex items-center justify-center space-x-2 mt-8 mb-6">
+        <button
+          onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+          disabled={currentPage === 1}
+          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${currentPage === 1
             ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
             : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-        }`}
-      >
-        Previous
-      </button>
-      
-      {currentPage > 3 && (
-        <>
+            }`}
+        >
+          Previous
+        </button>
+
+        {currentPage > 3 && (
+          <>
+            <button
+              onClick={() => handlePageChange(1)}
+              className="px-3 py-2 rounded-lg text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+            >
+              1
+            </button>
+            {currentPage > 4 && <span className="text-gray-400">...</span>}
+          </>
+        )}
+
+        {getPageNumbers().map(pageNum => (
           <button
-            onClick={() => handlePageChange(1)}
-            className="px-3 py-2 rounded-lg text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
-          >
-            1
-          </button>
-          {currentPage > 4 && <span className="text-gray-400">...</span>}
-        </>
-      )}
-      
-      {getPageNumbers().map(pageNum => (
-        <button
-          key={pageNum}
-          onClick={() => handlePageChange(pageNum)}
-          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-            currentPage === pageNum
+            key={pageNum}
+            onClick={() => handlePageChange(pageNum)}
+            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${currentPage === pageNum
               ? 'bg-[#536690] text-white'
               : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-          }`}
-        >
-          {pageNum}
-        </button>
-      ))}
-      
-      {currentPage < totalPages - 2 && (
-        <>
-          {currentPage < totalPages - 3 && <span className="text-gray-400">...</span>}
-          <button
-            onClick={() => handlePageChange(totalPages)}
-            className="px-3 py-2 rounded-lg text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+              }`}
           >
-            {totalPages}
+            {pageNum}
           </button>
-        </>
-      )}
-      
-      <button
-        onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-        disabled={currentPage === totalPages}
-        className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-          currentPage === totalPages
+        ))}
+
+        {currentPage < totalPages - 2 && (
+          <>
+            {currentPage < totalPages - 3 && <span className="text-gray-400">...</span>}
+            <button
+              onClick={() => handlePageChange(totalPages)}
+              className="px-3 py-2 rounded-lg text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+            >
+              {totalPages}
+            </button>
+          </>
+        )}
+
+        <button
+          onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+          disabled={currentPage === totalPages}
+          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${currentPage === totalPages
             ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
             : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-        }`}
-      >
-        Next
-      </button>
-    </div>
-  );
-};
+            }`}
+        >
+          Next
+        </button>
+      </div>
+    );
+  };
 
-<div className="mb-6">
-  <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
-    Menu
-  </h1>
-  <p className="text-gray-600 mt-1">
-    {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} available
-    {totalPages > 1 && (
-      <span className="text-gray-500">
-        {' '}• Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} - {Math.min(currentPage * ITEMS_PER_PAGE, filteredProducts.length)} of {filteredProducts.length}
-      </span>
-    )}
-  </p>
-</div>
+  <div className="mb-6">
+    <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
+      Menu
+    </h1>
+    <p className="text-gray-600 mt-1">
+      {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} available
+      {totalPages > 1 && (
+        <span className="text-gray-500">
+          {' '}• Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} - {Math.min(currentPage * ITEMS_PER_PAGE, filteredProducts.length)} of {filteredProducts.length}
+        </span>
+      )}
+    </p>
+  </div>
 
   if (loadingData) {
     return (
@@ -962,7 +959,7 @@ const PaginationControls = () => {
       <nav className="bg-white border-b border-gray-200 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4 text-sm text-gray-600">
-            <span 
+            <span
               className="hover:text-gray-900 cursor-pointer"
               onClick={handleHomeClick}
             >
@@ -971,7 +968,7 @@ const PaginationControls = () => {
             <span className="text-gray-400">/</span>
             <span className="text-gray-900 font-medium">Menu</span>
           </div>
-          
+
           {/* Mobile filter button */}
           <button
             onClick={() => setIsDrawerOpen(true)}
@@ -996,16 +993,15 @@ const PaginationControls = () => {
 
         {/* Mobile Drawer Overlay */}
         {isDrawerOpen && (
-          <div 
+          <div
             className="lg:hidden fixed inset-0 bg-black/50 bg-opacity-50 z-40 transition-opacity"
             onClick={() => setIsDrawerOpen(false)}
           />
         )}
 
         {/* Mobile Drawer */}
-        <div className={`lg:hidden fixed inset-y-0 left-0 w-80 max-w-[85vw] bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out ${
-          isDrawerOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}>
+        <div className={`lg:hidden fixed inset-y-0 left-0 w-80 max-w-[85vw] bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out ${isDrawerOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}>
           <FilterSidebar />
         </div>
 
@@ -1043,695 +1039,688 @@ const PaginationControls = () => {
             </p>
           </div>
 
-          
-        {/* All Products */}
-{/* All Products */}
-<div className="mb-6">
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
-    {sortedProducts.map((product) => {
-      const isDried = isDriedProduct(product);
-       const isEdibles = isEdiblesProduct(product);
-      const driedCat = categories.find(cat => cat.category.toUpperCase() === 'DRIED');
-      const isDriedSelected = driedCat && categoryFilters[driedCat._id];
-      
-      // Special DRIED layout sirf DRIED products ke liye
-    const showDriedLayout = isDried && product.hasVariants && product.variants && product.variants.length > 0;
-  const showEdiblesLayout = isEdibles && 
-                          product.flavors && 
-                          product.flavors.length > 0 && 
-                          product.flavors.some(f => f.isActive);
-      // DRIED products ke liye special UI - FULL WIDTH
-      if (showDriedLayout) {
-        return (
-          <div key={product._id} className="col-span-full">
-            <div
-              className="relative rounded-3xl border border-gray-200 hover:shadow-lg transition-shadow bg-white overflow-hidden w-full max-w-4xl mx-auto"
-              onClick={() => handleProductClick(product)}
-            >
-              {/* Left side - Product Image */}
-              <div className="flex flex-col lg:flex-row">
-                <div className="w-full lg:w-2/5 h-64 lg:h-80 bg-gray-100 relative">
-                  {product.images && product.images.length > 0 ? (
-                    <img
-                      src={product.images[0].startsWith('http') ? product.images[0] : `http://localhost:5000${product.images[0]}`}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gray-200"></div>
-                  )}
-                  
-                  {/* Stock Status Overlay */}
-                  {(() => {
-                    // For products with variants, check if all variants are out of stock
-                    if (product.hasVariants && product.variants && product.variants.length > 0) {
-                      const allVariantsOutOfStock = product.variants.every(variant => {
-                        const variantStock = Number(variant.stock || 0);
-                        return variantStock <= 0;
-                      });
-                      
-                      if (allVariantsOutOfStock) {
-                        return (
-                          <div className="absolute inset-0 flex items-center justify-center z-10">
-                            <div className="text-2xl font-bold text-red-500 rotate-12 select-none text-center bg-white/90 px-4 py-2 rounded-lg">
-                              Out of<br />Stock
-                            </div>
+
+          {/* All Products */}
+          {/* All Products */}
+          <div className="mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+              {sortedProducts.map((product) => {
+                const isDried = isDriedProduct(product);
+                const isEdibles = isEdiblesProduct(product);
+                const driedCat = categories.find(cat => cat.category.toUpperCase() === 'DRIED');
+                const isDriedSelected = driedCat && categoryFilters[driedCat._id];
+
+                // Special DRIED layout sirf DRIED products ke liye
+                const showDriedLayout = isDried && product.hasVariants && product.variants && product.variants.length > 0;
+                const showEdiblesLayout = isEdibles &&
+                  product.flavors &&
+                  product.flavors.length > 0 &&
+                  product.flavors.some(f => f.isActive);
+                // DRIED products ke liye special UI - FULL WIDTH
+                if (showDriedLayout) {
+                  return (
+                    <div key={product._id} className="col-span-full">
+                      <div
+                        className="relative rounded-3xl border border-gray-200 hover:shadow-lg transition-shadow bg-white overflow-hidden w-full max-w-4xl mx-auto"
+                        onClick={() => handleProductClick(product)}
+                      >
+                        {/* Left side - Product Image */}
+                        <div className="flex flex-col lg:flex-row">
+                          <div className="w-full lg:w-2/5 h-64 lg:h-80 bg-gray-100 relative">
+                            {product.images && product.images.length > 0 ? (
+                              <img
+                                src={product.images[0].startsWith('http') ? product.images[0] : `http://localhost:5000${product.images[0]}`}
+                                alt={product.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gray-200"></div>
+                            )}
+
+                            {/* Stock Status Overlay */}
+                            {(() => {
+                              // For products with variants, check if all variants are out of stock
+                              if (product.hasVariants && product.variants && product.variants.length > 0) {
+                                const allVariantsOutOfStock = product.variants.every(variant => {
+                                  const variantStock = Number(variant.stock || 0);
+                                  return variantStock <= 0;
+                                });
+
+                                if (allVariantsOutOfStock) {
+                                  return (
+                                    <div className="absolute inset-0 flex items-center justify-center z-10">
+                                      <div className="text-2xl font-bold text-red-500 rotate-12 select-none text-center bg-white/90 px-4 py-2 rounded-lg">
+                                        Out of<br />Stock
+                                      </div>
+                                    </div>
+                                  );
+                                }
+                                return null;
+                              }
+
+                              // For products with flavors, check if all flavors are out of stock
+                              if (product.flavors && product.flavors.length > 0) {
+                                const allFlavorsOutOfStock = product.flavors.every(flavor => {
+                                  const flavorStock = Number(flavor.stock || 0);
+                                  return flavorStock <= 0;
+                                });
+
+                                if (allFlavorsOutOfStock) {
+                                  return (
+                                    <div className="absolute inset-0 flex items-center justify-center z-10">
+                                      <div className="text-2xl font-bold text-red-500 rotate-12 select-none text-center bg-white/90 px-4 py-2 rounded-lg">
+                                        Out of<br />Stock
+                                      </div>
+                                    </div>
+                                  );
+                                }
+                                return null;
+                              }
+
+                              // For products without variants or flavors, use the original stock check
+                              const stock = Number(product.stock || 0);
+                              const isOutOfStock = !product.hasStock || stock <= 0;
+
+                              if (isOutOfStock) {
+                                return (
+                                  <div className="absolute inset-0 flex items-center justify-center z-10">
+                                    <div className="text-2xl font-bold text-red-500 rotate-12 select-none text-center bg-white/90 px-4 py-2 rounded-lg">
+                                      Out of<br />Stock
+                                    </div>
+                                  </div>
+                                );
+                              }
+                              return null;
+                            })()}
                           </div>
-                        );
-                      }
-                      return null;
-                    }
-                    
-                    // For products with flavors, check if all flavors are out of stock
-                    if (product.flavors && product.flavors.length > 0) {
-                      const allFlavorsOutOfStock = product.flavors.every(flavor => {
-                        const flavorStock = Number(flavor.stock || 0);
-                        return flavorStock <= 0;
-                      });
-                      
-                      if (allFlavorsOutOfStock) {
-                        return (
-                          <div className="absolute inset-0 flex items-center justify-center z-10">
-                            <div className="text-2xl font-bold text-red-500 rotate-12 select-none text-center bg-white/90 px-4 py-2 rounded-lg">
-                              Out of<br />Stock
-                            </div>
-                          </div>
-                        );
-                      }
-                      return null;
-                    }
-                    
-                    // For products without variants or flavors, use the original stock check
-                    const stock = Number(product.stock || 0);
-                    const isOutOfStock = !product.hasStock || stock <= 0;
-                    
-                    if (isOutOfStock) {
-                      return (
-                        <div className="absolute inset-0 flex items-center justify-center z-10">
-                          <div className="text-2xl font-bold text-red-500 rotate-12 select-none text-center bg-white/90 px-4 py-2 rounded-lg">
-                            Out of<br />Stock
-                          </div>
-                        </div>
-                      );
-                    }
-                    return null;
-                  })()}
-                </div>
-                
-                {/* Right side - Product Details */}
-                <div className="w-full md:w-3/5 p-6">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h3>
-                  
-                  {/* Intensity Bar */}
-                  {product.intensity && (
-                    <div className="mb-4">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm text-gray-600">Intensity</span>
-                        <span className={`text-sm font-bold ${
-                          product.intensity <= 3 ? 'text-green-600' : 
-                          product.intensity <= 7 ? 'text-yellow-600' : 
-                          'text-red-500'
-                        }`}>
-                          {product.intensity <= 3 ? 'Mild' : product.intensity <= 7 ? 'Medium' : 'Strong'} ({product.intensity}/10)
-                        </span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="h-2 rounded-full transition-all duration-300"
-                          style={{ 
-                            width: `${(product.intensity / 10) * 100}%`,
-                            backgroundColor: 
-                              product.intensity <= 3 ? '#10B981' : 
-                              product.intensity <= 7 ? '#F59E0B' : 
-                              '#EF4444'
-                          }}
-                        ></div>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Review Tags */}
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {(product.reviewTags || []).slice(0, 4).map((tag, idx) => {
-                      const color = colors[idx % colors.length];
-                      return (
-                        <span 
-                          key={tag._id} 
-                          className="px-3 py-1.5 text-sm rounded-full font-medium"
-                          style={{ backgroundColor: color.bg, color: color.color }}
-                        >
-                          {tag.label}
-                        </span>
-                      );
-                    })}
-                  </div>
-                  
-                  {/* Variants with pricing - INLINE STYLE */}
-                  <div className="mt-4">
-                    <div className="flex flex-wrap items-center gap-3">
-                      {product.variants.map((variant, idx) => {
-                      
- const cartItem = cart.find((i) => {
-  const isSameProduct = (i.id || i._id) === product._id;
-  const isSameVariant = i.selectedVariant?._id === variant._id;
-  return isSameProduct && isSameVariant;
-});
-  
-  const isInCart = cartItem && cartItem.quantity > 0;
-  const variantStock = Number(variant.stock || 0);
-  const isOutOfStock = variantStock <= 0;
-                      // const cartItem = cart.find((i) => (i.id || i._id) === product._id && i.selectedVariant?._id === variant._id);
-                    
-                        
-                        return (
-                          <div 
-                            key={variant._id} 
-                            className="relative border-2 border-gray-900 rounded-2xl px-4 py-3 bg-white min-w-[120px]"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            {/* Add to Cart Button - Top Right */}
-                            <div className="absolute -top-2 -right-2">
-                              {isInCart ? (
-                                <div className="flex items-center border-2 border-gray-900 rounded-full bg-white">
-                                 <button 
- onClick={(e) => {
-  e.stopPropagation();
-  updateCartItemQuantity(product._id, cartItem.quantity - 1, variant);
-}}
-  className="p-1 hover:bg-gray-50 rounded-l-full transition-colors"
->
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                                      <path d="M5 12h14"/>
-                                    </svg>
-                                  </button>
-                                  <span className="px-2 text-xs font-bold">
-                                    {cartItem.quantity}
+
+                          {/* Right side - Product Details */}
+                          <div className="w-full md:w-3/5 p-6">
+                            <h3 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h3>
+
+                            {/* Intensity Bar */}
+                            {product.intensity && (
+                              <div className="mb-4">
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="text-sm text-gray-600">Intensity</span>
+                                  <span className={`text-sm font-bold ${product.intensity <= 3 ? 'text-green-600' :
+                                    product.intensity <= 7 ? 'text-yellow-600' :
+                                      'text-red-500'
+                                    }`}>
+                                    {product.intensity <= 3 ? 'Mild' : product.intensity <= 7 ? 'Medium' : 'Strong'} ({product.intensity}/10)
                                   </span>
-                                 <button 
-  onClick={(e) => {
-  e.stopPropagation();
-  if (cartItem.quantity < variantStock) {
-    updateCartItemQuantity(product._id, cartItem.quantity + 1, variant);
-  } else {
-    toast.error(`Only ${variantStock} available`);
-  }
-}}
-  disabled={cartItem.quantity >= variantStock}
-  className="p-1 hover:bg-gray-50 rounded-r-full transition-colors disabled:opacity-50"
->
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                                      <path d="M12 5v14M5 12h14"/>
-                                    </svg>
-                                  </button>
                                 </div>
-                              ) : (
-                                <button
+                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                  <div
+                                    className="h-2 rounded-full transition-all duration-300"
+                                    style={{
+                                      width: `${(product.intensity / 10) * 100}%`,
+                                      backgroundColor:
+                                        product.intensity <= 3 ? '#10B981' :
+                                          product.intensity <= 7 ? '#F59E0B' :
+                                            '#EF4444'
+                                    }}
+                                  ></div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Review Tags */}
+                            <div className="flex flex-wrap gap-2 mb-4">
+                              {(product.reviewTags || []).slice(0, 4).map((tag, idx) => {
+                                const color = colors[idx % colors.length];
+                                return (
+                                  <span
+                                    key={tag._id}
+                                    className="px-3 py-1.5 text-sm rounded-full font-medium"
+                                    style={{ backgroundColor: color.bg, color: color.color }}
+                                  >
+                                    {tag.label}
+                                  </span>
+                                );
+                              })}
+                            </div>
+
+                            {/* Variants with pricing - INLINE STYLE */}
+                            <div className="mt-4">
+                              <div className="flex flex-wrap items-center gap-3">
+                                {product.variants.map((variant, idx) => {
+
+                                  const cartItem = cart.find((i) => {
+                                    const isSameProduct = (i.id || i._id) === product._id;
+                                    const isSameVariant = i.selectedVariant?._id === variant._id;
+                                    return isSameProduct && isSameVariant;
+                                  });
+
+                                  const isInCart = cartItem && cartItem.quantity > 0;
+                                  const variantStock = Number(variant.stock || 0);
+                                  const isOutOfStock = variantStock <= 0;
+                                  // const cartItem = cart.find((i) => (i.id || i._id) === product._id && i.selectedVariant?._id === variant._id);
+
+
+                                  return (
+                                    <div
+                                      key={variant._id}
+                                      className="relative border-2 border-gray-900 rounded-2xl px-4 py-3 bg-white min-w-[120px]"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      {/* Add to Cart Button - Top Right */}
+                                      <div className="absolute -top-2 -right-2">
+                                        {isInCart ? (
+                                          <div className="flex items-center border-2 border-gray-900 rounded-full bg-white">
+                                            <button
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                updateCartItemQuantity(product._id, cartItem.quantity - 1, variant);
+                                              }}
+                                              className="p-1 hover:bg-gray-50 rounded-l-full transition-colors"
+                                            >
+                                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                                                <path d="M5 12h14" />
+                                              </svg>
+                                            </button>
+                                            <span className="px-2 text-xs font-bold">
+                                              {cartItem.quantity}
+                                            </span>
+                                            <button
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                if (cartItem.quantity < variantStock) {
+                                                  updateCartItemQuantity(product._id, cartItem.quantity + 1, variant);
+                                                } else {
+                                                  toast.error(`Only ${variantStock} available`);
+                                                }
+                                              }}
+                                              disabled={cartItem.quantity >= variantStock}
+                                              className="p-1 hover:bg-gray-50 rounded-r-full transition-colors disabled:opacity-50"
+                                            >
+                                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                                                <path d="M12 5v14M5 12h14" />
+                                              </svg>
+                                            </button>
+                                          </div>
+                                        ) : (
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              if (!isOutOfStock) {
+                                                addToCart({ ...product, selectedVariant: variant }, 1);
+                                                toast.success(`${product.name} (${variant.size.value}${variant.size.unit}) added!`);
+                                                setAddedSet(prev => ({ ...prev, [`${product._id}-${variant._id}`]: true }));
+                                              }
+                                            }}
+                                            disabled={isOutOfStock}
+                                            className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-md ${isOutOfStock
+                                              ? 'bg-gray-300 cursor-not-allowed'
+                                              : 'bg-gray-900 hover:bg-gray-800'
+                                              }`}
+                                          >
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                                              <path d="M12 5v14M5 12h14" />
+                                            </svg>
+                                          </button>
+                                        )}
+                                      </div>
+
+                                      {/* Size and Price */}
+                                      <div className="flex flex-col">
+                                        <span className="text-sm font-bold text-gray-900">
+                                          {variant.size.value}{variant.size.unit === 'grams' ? 'G' : variant.size.unit}
+                                        </span>
+                                        <span className="text-base font-bold text-gray-900">
+                                          ${variant.price}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+
+                                {/* Wishlist Button */}
+                                <div
+                                  className="flex items-center space-x-2 cursor-pointer hover:text-red-500 transition-colors"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    if (!isOutOfStock) {
-                                      addToCart({ ...product, selectedVariant: variant }, 1);
-                                      toast.success(`${product.name} (${variant.size.value}${variant.size.unit}) added!`);
-                                      setAddedSet(prev => ({ ...prev, [`${product._id}-${variant._id}`]: true }));
+                                    if (!isLoggedIn) {
+                                      toast.error('Please login to manage your wishlist', {
+                                        position: "bottom-left",
+                                        autoClose: 3000,
+                                        hideProgressBar: false,
+                                        closeOnClick: true,
+                                        pauseOnHover: true,
+                                        draggable: true,
+                                        progress: undefined,
+                                      });
+                                      return;
                                     }
+                                    const wasInWishlist = isInWishlist(product._id);
+                                    toggle(product);
+                                    toast.success(
+                                      wasInWishlist ? 'Removed from wishlist' : 'Added to wishlist!',
+                                      {
+                                        position: "bottom-left",
+                                        autoClose: 2000,
+                                        hideProgressBar: false,
+                                        closeOnClick: true,
+                                        pauseOnHover: true,
+                                        draggable: true,
+                                      }
+                                    );
                                   }}
-                                  disabled={isOutOfStock}
-                                  className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-md ${
-                                    isOutOfStock 
-                                      ? 'bg-gray-300 cursor-not-allowed' 
-                                      : 'bg-gray-900 hover:bg-gray-800'
-                                  }`}
                                 >
-                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
-                                    <path d="M12 5v14M5 12h14"/>
+                                  <span className="text-sm font-medium">Wishlist</span>
+                                  <svg
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill={isInWishlist(product._id) ? 'currentColor' : 'none'}
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                  >
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                                   </svg>
-                                </button>
-                              )}
-                            </div>
-                            
-                            {/* Size and Price */}
-                            <div className="flex flex-col">
-                              <span className="text-sm font-bold text-gray-900">
-                                {variant.size.value}{variant.size.unit === 'grams' ? 'G' : variant.size.unit}
-                              </span>
-                              <span className="text-base font-bold text-gray-900">
-                                ${variant.price}
-                              </span>
+                                </div>
+                              </div>
                             </div>
                           </div>
-                        );
-                      })}
-                      
-                      {/* Wishlist Button */}
-                      <div 
-                        className="flex items-center space-x-2 cursor-pointer hover:text-red-500 transition-colors"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (!isLoggedIn) {
-                            toast.error('Please login to manage your wishlist', {
-                              position: "bottom-left",
-                              autoClose: 3000,
-                              hideProgressBar: false,
-                              closeOnClick: true,
-                              pauseOnHover: true,
-                              draggable: true,
-                              progress: undefined,
-                            });
-                            return;
-                          }
-                          const wasInWishlist = isInWishlist(product._id);
-                          toggle(product);
-                          toast.success(
-                            wasInWishlist ? 'Removed from wishlist' : 'Added to wishlist!',
-                            {
-                              position: "bottom-left",
-                              autoClose: 2000,
-                              hideProgressBar: false,
-                              closeOnClick: true,
-                              pauseOnHover: true,
-                              draggable: true,
-                            }
-                          );
-                        }}
-                      >
-                        <span className="text-sm font-medium">Wishlist</span>
-                        <svg 
-                          width="20" 
-                          height="20" 
-                          viewBox="0 0 24 24" 
-                          fill={isInWishlist(product._id) ? 'currentColor' : 'none'} 
-                          stroke="currentColor" 
-                          strokeWidth="2"
-                        >
-                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      }
-
-      if (showEdiblesLayout) {
-  return (
-    <div key={product._id} className="col-span-full">
-      <div
-        className="relative rounded-3xl border border-gray-200 hover:shadow-lg transition-shadow bg-white overflow-hidden w-full max-w-4xl mx-auto"
-        onClick={() => handleProductClick(product)}
-      >
-        <div className="flex flex-col lg:flex-row">
-          {/* Left side - Product Image */}
-          <div className="w-full lg:w-2/5 h-64 lg:h-80 bg-gray-100 relative">
-            {product.images && product.images.length > 0 ? (
-              <img
-                src={product.images[0].startsWith('http') ? product.images[0] : `http://localhost:5000${product.images[0]}`}
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-gray-200"></div>
-            )}
-            
-            {/* Stock Status Overlay */}
-         {(() => {
-  // Only show out of stock if ALL active flavors have 0 stock
-  const activeFlavors = product.flavors.filter(f => f.isActive);
-  const allFlavorsOutOfStock = activeFlavors.length > 0 && 
-                                activeFlavors.every(f => Number(f.stock || 0) <= 0);
-  if (allFlavorsOutOfStock) {
-    return (
-      <div className="absolute inset-0 flex items-center justify-center z-10">
-        <div className="text-2xl font-bold text-red-500 rotate-12 select-none text-center bg-white/90 px-4 py-2 rounded-lg">
-          Out of<br />Stock
-        </div>
-      </div>
-    );
-  }
-  return null;
-})()}
-          </div>
-          
-          {/* Right side - Product Details */}
-          <div className="w-full lg:w-3/5 p-6">
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h3>
-            
-            {/* Intensity Bar */}
-            {product.intensity && (
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm text-gray-600">Intensity</span>
-                  <span className={`text-sm font-bold ${
-                    product.intensity <= 3 ? 'text-green-600' : 
-                    product.intensity <= 7 ? 'text-yellow-600' : 
-                    'text-red-500'
-                  }`}>
-                    {product.intensity <= 3 ? 'Mild' : product.intensity <= 7 ? 'Medium' : 'Strong'} ({product.intensity}/10)
-                  </span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="h-2 rounded-full transition-all duration-300"
-                    style={{ 
-                      width: `${(product.intensity / 10) * 100}%`,
-                      backgroundColor: 
-                        product.intensity <= 3 ? '#10B981' : 
-                        product.intensity <= 7 ? '#F59E0B' : 
-                        '#EF4444'
-                    }}
-                  ></div>
-                </div>
-              </div>
-            )}
-            
-            {/* Review Tags */}
-            <div className="flex flex-wrap gap-2 mb-4">
-              {(product.reviewTags || []).slice(0, 4).map((tag, idx) => {
-                const color = colors[idx % colors.length];
-                return (
-                  <span 
-                    key={tag._id} 
-                    className="px-3 py-1.5 text-sm rounded-full font-medium"
-                    style={{ backgroundColor: color.bg, color: color.color }}
-                  >
-                    {tag.label}
-                  </span>
-                );
-              })}
-            </div>
-            
-            {/* Flavors with pricing - INLINE STYLE */}
-            <div className="mt-4">
-              <div className="flex flex-wrap items-center gap-3">
-                {product.flavors.filter(f => f.isActive).map((flavor, idx) => {
-                  const cartItem = cart.find((i) => {
-                    const isSameProduct = (i.id || i._id) === product._id;
-                    const isSameFlavor = i.selectedFlavor?._id === flavor._id;
-                    return isSameProduct && isSameFlavor;
-                  });
-                  
-                  const isInCart = cartItem && cartItem.quantity > 0;
-                  const flavorStock = Number(flavor.stock || 0);
-                  // Flavor is out of stock if: product hasStock is false OR individual flavor stock is 0
-                  const isOutOfStock = !product.hasStock || flavorStock <= 0;
-                  
-                  return (
-                    <div 
-                      key={flavor._id} 
-                      className="relative border-2 border-gray-900 rounded-2xl px-4 py-3 bg-white min-w-[120px]"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {/* Add to Cart Button - Top Right */}
-                      <div className="absolute -top-2 -right-2">
-                        {isInCart ? (
-                          <div className="flex items-center border-2 border-gray-900 rounded-full bg-white">
-                            <button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                updateCartItemQuantity(product._id, cartItem.quantity - 1, null, flavor);
-                              }}
-                              className="p-1 hover:bg-gray-50 rounded-l-full transition-colors"
-                            >
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                                <path d="M5 12h14"/>
-                              </svg>
-                            </button>
-                            <span className="px-2 text-xs font-bold">
-                              {cartItem.quantity}
-                            </span>
-                            <button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (cartItem.quantity < flavorStock) {
-                                  updateCartItemQuantity(product._id, cartItem.quantity + 1, null, flavor);
-                                } else {
-                                  toast.error(`Only ${flavorStock} available`);
-                                }
-                              }}
-                              disabled={cartItem.quantity >= flavorStock}
-                              className="p-1 hover:bg-gray-50 rounded-r-full transition-colors disabled:opacity-50"
-                            >
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                                <path d="M12 5v14M5 12h14"/>
-                              </svg>
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (!isOutOfStock) {
-                                addToCart({ ...product, selectedFlavor: flavor }, 1);
-                                toast.success(`${product.name} (${flavor.name}) added!`);
-                                setAddedSet(prev => ({ ...prev, [`${product._id}-${flavor._id}`]: true }));
-                              }
-                            }}
-                            disabled={isOutOfStock}
-                           className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-md ${
-  isOutOfStock 
-    ? 'bg-gray-300 cursor-not-allowed' 
-    : 'bg-gray-900 hover:bg-gray-800'
-}`}
-                          >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
-                              <path d="M12 5v14M5 12h14"/>
-                            </svg>
-                          </button>
-                        )}
-                      </div>
-                      
-                      {/* Flavor Name and Price */}
-                      <div className="flex flex-col">
-                        <span className="text-sm font-bold text-gray-900">
-                          {flavor.name}
-                        </span>
-                        <span className="text-base font-bold text-gray-900">
-                          ${flavor.price}
-                        </span>
+                        </div>
                       </div>
                     </div>
                   );
-                })}
-                
-                {/* Wishlist Button */}
-                <div 
-                  className="flex items-center space-x-2 cursor-pointer hover:text-red-500 transition-colors"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (!isLoggedIn) {
-                      toast.error('Please login to manage your wishlist', {
-                        position: "bottom-left",
-                        autoClose: 3000,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-                        progress: undefined,
-                      });
-                      return;
-                    }
-                    const wasInWishlist = isInWishlist(product._id);
-                    toggle(product);
-                    toast.success(
-                      wasInWishlist ? 'Removed from wishlist' : 'Added to wishlist!',
-                      {
-                        position: "bottom-left",
-                        autoClose: 2000,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-                      }
-                    );
-                  }}
-                >
-                  <span className="text-sm font-medium">Wishlist</span>
-                  <svg 
-                    width="20" 
-                    height="20" 
-                    viewBox="0 0 24 24" 
-                    fill={isInWishlist(product._id) ? 'currentColor' : 'none'} 
-                    stroke="currentColor" 
-                    strokeWidth="2"
-                  >
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-  
-      // Normal card UI for non-DRIED products
-      return (
-        <div
-          key={product._id}
-          className="relative rounded-4xl border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
-          style={{ backgroundColor: '#8EAFF633' }}
-          onClick={() => handleProductClick(product)}
-        >
-          {/* Product Image */}
-          <div className="w-full h-64 bg-gray-100 rounded-t-4xl overflow-hidden relative">
-            {product.images && product.images.length > 0 ? (
-              <img
-                src={product.images[0].startsWith('http') ? product.images[0] : `http://localhost:5000${product.images[0]}`}
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-gray-200"></div>
-            )}
-            {(() => {
-              const stock = Number(product.stock || 0);
-              const isOutOfStock = !product.hasStock || stock <= 0;
-              const isLowStock = stock > 0 && stock < 5;
-              
-              if (isOutOfStock) {
-                return (
-                  <div className="absolute inset-0 flex items-center justify-center z-10">
-                    <div className="text-2xl font-bold text-red-500 rotate-12 select-none text-center bg-white/90 px-4 py-2 rounded-lg">
-                      Out of<br />Stock
-                    </div>
-                  </div>
-                );
-              } else if (isLowStock) {
-                return (
-                  <div className="absolute top-2 right-2 z-10">
-                    <div className="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                      Only {stock} left
-                    </div>
-                  </div>
-                );
-              }
-              return null;
-            })()}
-          </div>
-          
-          {/* Card Content */}
-          <div className="p-4">
-            <div className="space-y-3">
-              <h3 className="font-medium text-gray-900 text-sm">{product.name}</h3>
-              <p className="text-lg font-semibold text-gray-900">$ {product.price}</p>
-              {product.intensity && (
-                <div className="mt-1">
-                  <div className="flex items-center">
-                    <span className="text-xs font-medium text-gray-500 mr-2">Intensity:</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${
-                      product.intensity <= 3 ? 'bg-green-100 text-green-800' : 
-                      product.intensity <= 7 ? 'bg-yellow-100 text-yellow-800' : 
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {product.intensity <= 3 ? 'Mild' : product.intensity <= 7 ? 'Medium' : 'Strong'} ({product.intensity}/10)
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
-                    <div 
-                      className="h-1.5 rounded-full transition-all duration-300"
-                      style={{ 
-                        width: `${(product.intensity / 10) * 100}%`,
-                        backgroundColor: 
-                          product.intensity <= 3 ? '#10B981' : 
-                          product.intensity <= 7 ? '#F59E0B' : 
-                          '#EF4444'
-                      }}
-                    ></div>
-                  </div>
-                </div>
-              )}
-            <div className="flex flex-wrap gap-1">
-  {/* Show Review Tags instead of aggregates */}
-  {(product.reviewTags || []).slice(0, 3).map((tag, idx) => {
-    const color = colors[Math.min(idx, colors.length - 1)];
-    return (
-      <span key={tag._id} className="px-2 py-1 text-xs rounded-full" style={{ backgroundColor: color.bg, color: color.color }}>
-        {tag.label}
-      </span>
-    );
-  })}
-  {(!product.reviewTags || product.reviewTags.length === 0) && (
-    <span className="px-2 py-1 text-xs rounded-full" style={{ backgroundColor: '#B3194275', color: 'white' }}>
-      No tags
-    </span>
-  )}
-</div>
-              <div className="flex justify-center mt-4">
-                {(() => {
-                  const stock = Number(product.stock || 0);
-                  const isOutOfStock = !product.hasStock || stock <= 0;
-                  const cartItem = cart.find((i) => (i.id || i._id) === product._id);
-                  const isInCart = addedSet[product._id] || cartItem;
-                  
-                  if (isInCart && cartItem) {
-                    return (
-                      <div className="flex items-center space-x-3">
-                        <div className="flex items-center border border-gray-300 rounded-full bg-white">
-                          <button 
-                            onClick={(e) => handleQuantityChange(product, cartItem.quantity - 1, e)}
-                            className="p-2 hover:bg-gray-50 rounded-l-full transition-colors"
-                          >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="w-4 h-4 text-gray-600 hover:text-black" stroke="currentColor" strokeWidth="2">
-                              <path d="M5 12h14"/>
-                            </svg>
-                          </button>
-                          <span className="px-3 py-1 text-sm text-gray-800 font-medium min-w-[2rem] text-center">
-                            {cartItem.quantity}
-                          </span>
-                          <button 
-                            onClick={(e) => handleQuantityChange(product, cartItem.quantity + 1, e)}
-                            disabled={isOutOfStock || (stock > 0 && cartItem.quantity >= stock)}
-                            className={`p-2 rounded-r-full transition-colors ${
-                              isOutOfStock || (stock > 0 && cartItem.quantity >= stock)
-                                ? 'opacity-50 cursor-not-allowed' 
-                                : 'hover:bg-gray-50'
-                            }`}
-                          >
-                            <svg width="16" height="16" viewBox="0 0 24 24" className={`w-4 h-4 ${
-                              isOutOfStock || (stock > 0 && cartItem.quantity >= stock)
-                                ? 'text-gray-400' 
-                                : 'text-gray-600 hover:text-black'
-                            }`} fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M12 5v14M5 12h14"/>
-                            </svg>
-                          </button>
+                }
+
+                if (showEdiblesLayout) {
+                  return (
+                    <div key={product._id} className="col-span-full">
+                      <div
+                        className="relative rounded-3xl border border-gray-200 hover:shadow-lg transition-shadow bg-white overflow-hidden w-full max-w-4xl mx-auto"
+                        onClick={() => handleProductClick(product)}
+                      >
+                        <div className="flex flex-col lg:flex-row">
+                          {/* Left side - Product Image */}
+                          <div className="w-full lg:w-2/5 h-64 lg:h-80 bg-gray-100 relative">
+                            {product.images && product.images.length > 0 ? (
+                              <img
+                                src={product.images[0].startsWith('http') ? product.images[0] : `http://localhost:5000${product.images[0]}`}
+                                alt={product.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gray-200"></div>
+                            )}
+
+                            {/* Stock Status Overlay */}
+                            {(() => {
+                              // Only show out of stock if ALL active flavors have 0 stock
+                              const activeFlavors = product.flavors.filter(f => f.isActive);
+                              const allFlavorsOutOfStock = activeFlavors.length > 0 &&
+                                activeFlavors.every(f => Number(f.stock || 0) <= 0);
+                              if (allFlavorsOutOfStock) {
+                                return (
+                                  <div className="absolute inset-0 flex items-center justify-center z-10">
+                                    <div className="text-2xl font-bold text-red-500 rotate-12 select-none text-center bg-white/90 px-4 py-2 rounded-lg">
+                                      Out of<br />Stock
+                                    </div>
+                                  </div>
+                                );
+                              }
+                              return null;
+                            })()}
+                          </div>
+
+                          {/* Right side - Product Details */}
+                          <div className="w-full lg:w-3/5 p-6">
+                            <h3 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h3>
+                            {product?.short_description && <p className="text-gray-700 -mt-1  mb-2">{product.short_description}</p>}
+                            {/* Intensity Bar */}
+                            {product.intensity && (
+                              <div className="mb-4">
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="text-sm text-gray-600">Intensity</span>
+                                  <span className={`text-sm font-bold ${product.intensity <= 3 ? 'text-green-600' :
+                                    product.intensity <= 7 ? 'text-yellow-600' :
+                                      'text-red-500'
+                                    }`}>
+                                    {product.intensity <= 3 ? 'Mild' : product.intensity <= 7 ? 'Medium' : 'Strong'} ({product.intensity}/10)
+                                  </span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                  <div
+                                    className="h-2 rounded-full transition-all duration-300"
+                                    style={{
+                                      width: `${(product.intensity / 10) * 100}%`,
+                                      backgroundColor:
+                                        product.intensity <= 3 ? '#10B981' :
+                                          product.intensity <= 7 ? '#F59E0B' :
+                                            '#EF4444'
+                                    }}
+                                  ></div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Review Tags */}
+                            <div className="flex flex-wrap gap-2 mb-4">
+                              {(product.reviewTags || []).slice(0, 4).map((tag, idx) => {
+                                const color = colors[idx % colors.length];
+                                return (
+                                  <span
+                                    key={tag._id}
+                                    className="px-3 py-1.5 text-sm rounded-full font-medium"
+                                    style={{ backgroundColor: color.bg, color: color.color }}
+                                  >
+                                    {tag.label}
+                                  </span>
+                                );
+                              })}
+                            </div>
+
+                            {/* Flavors with pricing - INLINE STYLE */}
+                            <div className="mt-4">
+                              <div className="flex flex-wrap items-center gap-3">
+                                {product.flavors.filter(f => f.isActive).map((flavor, idx) => {
+                                  const cartItem = cart.find((i) => {
+                                    const isSameProduct = (i.id || i._id) === product._id;
+                                    const isSameFlavor = i.selectedFlavor?._id === flavor._id;
+                                    return isSameProduct && isSameFlavor;
+                                  });
+
+                                  const isInCart = cartItem && cartItem.quantity > 0;
+                                  const flavorStock = Number(flavor.stock || 0);
+                                  // Flavor is out of stock if: product hasStock is false OR individual flavor stock is 0
+                                  const isOutOfStock = !product.hasStock || flavorStock <= 0;
+
+                                  return (
+                                    <div
+                                      key={flavor._id}
+                                      className="relative border-2 border-gray-900 rounded-2xl px-4 py-3 bg-white min-w-[120px]"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      {/* Add to Cart Button - Top Right */}
+                                      <div className="absolute -top-2 -right-2">
+                                        {isInCart ? (
+                                          <div className="flex items-center border-2 border-gray-900 rounded-full bg-white">
+                                            <button
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                updateCartItemQuantity(product._id, cartItem.quantity - 1, null, flavor);
+                                              }}
+                                              className="p-1 hover:bg-gray-50 rounded-l-full transition-colors"
+                                            >
+                                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                                                <path d="M5 12h14" />
+                                              </svg>
+                                            </button>
+                                            <span className="px-2 text-xs font-bold">
+                                              {cartItem.quantity}
+                                            </span>
+                                            <button
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                if (cartItem.quantity < flavorStock) {
+                                                  updateCartItemQuantity(product._id, cartItem.quantity + 1, null, flavor);
+                                                } else {
+                                                  toast.error(`Only ${flavorStock} available`);
+                                                }
+                                              }}
+                                              disabled={cartItem.quantity >= flavorStock}
+                                              className="p-1 hover:bg-gray-50 rounded-r-full transition-colors disabled:opacity-50"
+                                            >
+                                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                                                <path d="M12 5v14M5 12h14" />
+                                              </svg>
+                                            </button>
+                                          </div>
+                                        ) : (
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              if (!isOutOfStock) {
+                                                addToCart({ ...product, selectedFlavor: flavor }, 1);
+                                                toast.success(`${product.name} (${flavor.name}) added!`);
+                                                setAddedSet(prev => ({ ...prev, [`${product._id}-${flavor._id}`]: true }));
+                                              }
+                                            }}
+                                            disabled={isOutOfStock}
+                                            className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-md ${isOutOfStock
+                                              ? 'bg-gray-300 cursor-not-allowed'
+                                              : 'bg-gray-900 hover:bg-gray-800'
+                                              }`}
+                                          >
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                                              <path d="M12 5v14M5 12h14" />
+                                            </svg>
+                                          </button>
+                                        )}
+                                      </div>
+
+                                      {/* Flavor Name and Price */}
+                                      <div className="flex flex-col">
+                                        <span className="text-sm font-bold text-gray-900">
+                                          {flavor.name}
+                                        </span>
+                                        <span className="text-base font-bold text-gray-900">
+                                          ${flavor.price}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+
+                                {/* Wishlist Button */}
+                                <div
+                                  className="flex items-center space-x-2 cursor-pointer hover:text-red-500 transition-colors"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (!isLoggedIn) {
+                                      toast.error('Please login to manage your wishlist', {
+                                        position: "bottom-left",
+                                        autoClose: 3000,
+                                        hideProgressBar: false,
+                                        closeOnClick: true,
+                                        pauseOnHover: true,
+                                        draggable: true,
+                                        progress: undefined,
+                                      });
+                                      return;
+                                    }
+                                    const wasInWishlist = isInWishlist(product._id);
+                                    toggle(product);
+                                    toast.success(
+                                      wasInWishlist ? 'Removed from wishlist' : 'Added to wishlist!',
+                                      {
+                                        position: "bottom-left",
+                                        autoClose: 2000,
+                                        hideProgressBar: false,
+                                        closeOnClick: true,
+                                        pauseOnHover: true,
+                                        draggable: true,
+                                      }
+                                    );
+                                  }}
+                                >
+                                  <span className="text-sm font-medium">Wishlist</span>
+                                  <svg
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill={isInWishlist(product._id) ? 'currentColor' : 'none'}
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                  >
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                                  </svg>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    );
-                  } else if (isOutOfStock) {
-                    return (
-                      <button
-                        className="w-[40%] py-2 px-4 rounded-4xl text-sm font-medium bg-gray-400 text-white cursor-not-allowed"
-                        disabled={true}
-                      >
-                        Out of Stock
-                      </button>
-                    );
-                  } else {
-                    return (
-                      <button
-                        className="w-[40%] py-2 px-4 rounded-4xl text-sm font-medium transition-colors bg-[#536690] text-white hover:bg-[#536690]"
-                        onClick={(e) => handleAddToCart(product, e)}
-                      >
-                        Add to Cart
-                      </button>
-                    );
-                  }
-                })()}
-              </div>
+                    </div>
+                  );
+                }
+
+                // Normal card UI for non-DRIED products
+                return (
+                  <div
+                    key={product._id}
+                    className="relative rounded-4xl border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
+                    style={{ backgroundColor: '#8EAFF633' }}
+                    onClick={() => handleProductClick(product)}
+                  >
+                    {/* Product Image */}
+                    <div className="w-full h-64 bg-gray-100 rounded-t-4xl overflow-hidden relative">
+                      {product.images && product.images.length > 0 ? (
+                        <img
+                          src={product.images[0].startsWith('http') ? product.images[0] : `http://localhost:5000${product.images[0]}`}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-200"></div>
+                      )}
+                      {(() => {
+                        const stock = Number(product.stock || 0);
+                        const isOutOfStock = !product.hasStock || stock <= 0;
+                        const isLowStock = stock > 0 && stock < 5;
+
+                        if (isOutOfStock) {
+                          return (
+                            <div className="absolute inset-0 flex items-center justify-center z-10">
+                              <div className="text-2xl font-bold text-red-500 rotate-12 select-none text-center bg-white/90 px-4 py-2 rounded-lg">
+                                Out of<br />Stock
+                              </div>
+                            </div>
+                          );
+                        } else if (isLowStock) {
+                          return (
+                            <div className="absolute top-2 right-2 z-10">
+                              <div className="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                                Only {stock} left
+                              </div>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
+                    </div>
+
+                    {/* Card Content */}
+                    <div className="p-4">
+                      <div className="space-y-3">
+                        <h3 className="font-medium text-gray-900 text-sm">{product.name}</h3>
+                        <p className="text-lg font-semibold text-gray-900">$ {product.price}</p>
+                        {product.intensity && (
+                          <div className="mt-1">
+                            <div className="flex items-center">
+                              <span className="text-xs font-medium text-gray-500 mr-2">Intensity:</span>
+                              <span className={`text-xs px-2 py-0.5 rounded-full ${product.intensity <= 3 ? 'bg-green-100 text-green-800' :
+                                product.intensity <= 7 ? 'bg-yellow-100 text-yellow-800' :
+                                  'bg-red-100 text-red-800'
+                                }`}>
+                                {product.intensity <= 3 ? 'Mild' : product.intensity <= 7 ? 'Medium' : 'Strong'} ({product.intensity}/10)
+                              </span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                              <div
+                                className="h-1.5 rounded-full transition-all duration-300"
+                                style={{
+                                  width: `${(product.intensity / 10) * 100}%`,
+                                  backgroundColor:
+                                    product.intensity <= 3 ? '#10B981' :
+                                      product.intensity <= 7 ? '#F59E0B' :
+                                        '#EF4444'
+                                }}
+                              ></div>
+                            </div>
+                          </div>
+                        )}
+                        <div className="flex flex-wrap gap-1">
+                          {/* Show Review Tags instead of aggregates */}
+                          {(product.reviewTags || []).slice(0, 3).map((tag, idx) => {
+                            const color = colors[Math.min(idx, colors.length - 1)];
+                            return (
+                              <span key={tag._id} className="px-2 py-1 text-xs rounded-full" style={{ backgroundColor: color.bg, color: color.color }}>
+                                {tag.label}
+                              </span>
+                            );
+                          })}
+                          {(!product.reviewTags || product.reviewTags.length === 0) && (
+                            <span className="px-2 py-1 text-xs rounded-full" style={{ backgroundColor: '#B3194275', color: 'white' }}>
+                              No tags
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex justify-center mt-4">
+                          {(() => {
+                            const stock = Number(product.stock || 0);
+                            const isOutOfStock = !product.hasStock || stock <= 0;
+                            const cartItem = cart.find((i) => (i.id || i._id) === product._id);
+                            const isInCart = addedSet[product._id] || cartItem;
+
+                            if (isInCart && cartItem) {
+                              return (
+                                <div className="flex items-center space-x-3">
+                                  <div className="flex items-center border border-gray-300 rounded-full bg-white">
+                                    <button
+                                      onClick={(e) => handleQuantityChange(product, cartItem.quantity - 1, e)}
+                                      className="p-2 hover:bg-gray-50 rounded-l-full transition-colors"
+                                    >
+                                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="w-4 h-4 text-gray-600 hover:text-black" stroke="currentColor" strokeWidth="2">
+                                        <path d="M5 12h14" />
+                                      </svg>
+                                    </button>
+                                    <span className="px-3 py-1 text-sm text-gray-800 font-medium min-w-[2rem] text-center">
+                                      {cartItem.quantity}
+                                    </span>
+                                    <button
+                                      onClick={(e) => handleQuantityChange(product, cartItem.quantity + 1, e)}
+                                      disabled={isOutOfStock || (stock > 0 && cartItem.quantity >= stock)}
+                                      className={`p-2 rounded-r-full transition-colors ${isOutOfStock || (stock > 0 && cartItem.quantity >= stock)
+                                        ? 'opacity-50 cursor-not-allowed'
+                                        : 'hover:bg-gray-50'
+                                        }`}
+                                    >
+                                      <svg width="16" height="16" viewBox="0 0 24 24" className={`w-4 h-4 ${isOutOfStock || (stock > 0 && cartItem.quantity >= stock)
+                                        ? 'text-gray-400'
+                                        : 'text-gray-600 hover:text-black'
+                                        }`} fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M12 5v14M5 12h14" />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                </div>
+                              );
+                            } else if (isOutOfStock) {
+                              return (
+                                <button
+                                  className="w-[40%] py-2 px-4 rounded-4xl text-sm font-medium bg-gray-400 text-white cursor-not-allowed"
+                                  disabled={true}
+                                >
+                                  Out of Stock
+                                </button>
+                              );
+                            } else {
+                              return (
+                                <button
+                                  className="w-[40%] py-2 px-4 rounded-4xl text-sm font-medium transition-colors bg-[#536690] text-white hover:bg-[#536690]"
+                                  onClick={(e) => handleAddToCart(product, e)}
+                                >
+                                  Add to Cart
+                                </button>
+                              );
+                            }
+                          })()}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
+
+            {/* Pagination Controls */}
+            {filteredProducts.length > 0 && <PaginationControls />}
           </div>
-        </div>
-      );
-    })}
-  </div>
-  
-  {/* Pagination Controls */}
-  {filteredProducts.length > 0 && <PaginationControls />}
-</div>
 
           {/* No products message */}
           {filteredProducts.length === 0 && !loadingData && (
@@ -1744,7 +1733,7 @@ const PaginationControls = () => {
                 <p className="text-gray-500 text-sm lg:text-base mb-6">
                   No products match your current filters. Try adjusting your filter criteria.
                 </p>
-                <button 
+                <button
                   onClick={clearAllFilters}
                   className="px-4 py-2 bg-[#536690] text-white rounded-lg hover:bg-[#536690]/90 transition-colors"
                 >

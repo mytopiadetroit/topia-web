@@ -23,9 +23,9 @@ export default function Terms() {
   return (
     <div className="min-h-screen bg-white">
       {/* Top notification bar */}
-     
 
-    
+
+
 
       {/* Navigation Pills */}
       <section className="py-8 px-4 border-b border-gray-200">
@@ -40,11 +40,10 @@ export default function Terms() {
               <button
                 key={item.id}
                 onClick={() => scrollToSection(item.id)}
-                className={`flex items-center space-x-2 px-6 py-3 rounded-4xl font-semibold transition-all duration-300 ${
-                  activeSection === item.id 
-                    ? 'bg-[#2E2E2E] text-white' 
+                className={`flex items-center space-x-2 px-6 py-3 rounded-4xl font-semibold transition-all duration-300 ${activeSection === item.id
+                    ? 'bg-[#2E2E2E] text-white'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
+                  }`}
               >
                 <item.icon className="w-4 h-4" />
                 <span className="text-sm">{item.label}</span>
@@ -57,7 +56,7 @@ export default function Terms() {
       {/* Main Content */}
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
-          
+
           {/* Terms Overview */}
           <div id="terms" className="mb-16">
             <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-3xl p-8 lg:p-12 mb-12 border border-blue-100">
@@ -75,7 +74,7 @@ export default function Terms() {
                 <ul className="space-y-2 text-gray-600">
                   <li className="flex items-start">
                     <ChevronRight className="w-4 h-4 mt-1 mr-2 text-[#8EAFF6]" />
-                    You must be 18 years or older to use our services
+                    You must be 21 years or older to use our services
                   </li>
                   <li className="flex items-start">
                     <ChevronRight className="w-4 h-4 mt-1 mr-2 text-[#8EAFF6]" />

@@ -59,7 +59,7 @@ const ResourceCenter = () => {
   const [liked, setLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [viewsCount, setViewsCount] = useState(0);
-  
+
   // Gallery states
   const [galleryImages, setGalleryImages] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -73,15 +73,15 @@ const ResourceCenter = () => {
     loadGalleryImages();
   }, [filters]);
 
- useEffect(() => {
-  if (galleryImages.length === 0 || isPaused || showFullscreen) return; // Add showFullscreen check
-  
-  const interval = setInterval(() => {
-    setCurrentImageIndex((prev) => (prev + 1) % galleryImages.length);
-  }, 2000);
+  useEffect(() => {
+    if (galleryImages.length === 0 || isPaused || showFullscreen) return; // Add showFullscreen check
 
-  return () => clearInterval(interval);
-}, [galleryImages.length, isPaused, showFullscreen]);
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % galleryImages.length);
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [galleryImages.length, isPaused, showFullscreen]);
 
   const loadGalleryImages = async () => {
     try {
@@ -94,71 +94,71 @@ const ResourceCenter = () => {
     }
   };
 
-const handleImageClick = (image, index) => {
-  console.log('Clicked image index:', index);
-  console.log('Clicked image:', image.title);
-  
-  setIsPaused(true);
-  setShowFullscreen(false); // Add this
-  setFullscreenImage(null);  // Add this - reset first
-  
-  // Use setTimeout to ensure state updates
-  setTimeout(() => {
-    setCurrentImageIndex(index);
-    setFullscreenImage(image);
-    setShowFullscreen(true);
-    document.body.style.overflow = 'hidden';
-  }, 0);
-};
+  const handleImageClick = (image, index) => {
+    console.log('Clicked image index:', index);
+    console.log('Clicked image:', image.title);
+
+    setIsPaused(true);
+    setShowFullscreen(false); // Add this
+    setFullscreenImage(null);  // Add this - reset first
+
+    // Use setTimeout to ensure state updates
+    setTimeout(() => {
+      setCurrentImageIndex(index);
+      setFullscreenImage(image);
+      setShowFullscreen(true);
+      document.body.style.overflow = 'hidden';
+    }, 0);
+  };
 
   const closeFullscreen = () => {
     setShowFullscreen(false);
     setFullscreenImage(null);
-     setIsPaused(false);
+    setIsPaused(false);
     document.body.style.overflow = 'auto';
   };
 
-const loadContent = async () => {
-  try {
-    setLoading(true);
-    const queryParams = new URLSearchParams();
-    
-    Object.keys(filters).forEach(key => {
-      if (filters[key]) {
-        queryParams.append(key, filters[key]);
+  const loadContent = async () => {
+    try {
+      setLoading(true);
+      const queryParams = new URLSearchParams();
+
+      Object.keys(filters).forEach(key => {
+        if (filters[key]) {
+          queryParams.append(key, filters[key]);
+        }
+      });
+
+      const response = await fetch(`https://api.mypsyguide.io/api/content/public?${queryParams}`, {
+        headers: getAuthHeaders()
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        setContent(data.data);
+        setPagination(data.pagination);
       }
-    });
-
-    const response = await fetch(`https://api.mypsyguide.io/api/content/public?${queryParams}`, {
-      headers: getAuthHeaders()
-    });
-    const data = await response.json();
-    
-    if (data.success) {
-      setContent(data.data);
-      setPagination(data.pagination);
+    } catch (error) {
+      console.error('Error loading content:', error);
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error('Error loading content:', error);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
-const loadCategories = async () => {
-  try {
-    const response = await fetch('https://api.mypsyguide.io/api/content/categories', {
-      headers: getAuthHeaders()
-    });
-    const data = await response.json();
-    
-    if (data.success) {
-      setCategories(data.data);
+  const loadCategories = async () => {
+    try {
+      const response = await fetch('https://api.mypsyguide.io/api/content/categories', {
+        headers: getAuthHeaders()
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        setCategories(data.data);
+      }
+    } catch (error) {
+      console.error('Error loading categories:', error);
     }
-  } catch (error) {
-    console.error('Error loading categories:', error);
-  }
-};
+  };
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({
@@ -173,51 +173,51 @@ const loadCategories = async () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-const openContentModal = async (contentId) => {
-  try {
-    const response = await fetch(`https://api.mypsyguide.io/api/content/public/${contentId}`, {
-      headers: getAuthHeaders()
-    });
-    const data = await response.json();
-    
-    if (data.success) {
-      const detail = data.data;
-      setSelectedContent(detail);
-      setLikesCount(detail.likes || 0);
-      setViewsCount(detail.views || 0);
-      // determine liked if user is logged in and likedBy present
-      try {
-        const userDetail = JSON.parse(localStorage.getItem('userDetail') || 'null');
-        const userId = userDetail?._id || userDetail?.id;
-        const likedBy = detail.likedBy || [];
-        const hasLiked = userId ? likedBy.some((u) => String(u) === String(userId)) : false;
-        setLiked(!!hasLiked);
-      } catch {}
-      setShowModal(true);
-      document.body.style.overflow = 'hidden';
+  const openContentModal = async (contentId) => {
+    try {
+      const response = await fetch(`https://api.mypsyguide.io/api/content/public/${contentId}`, {
+        headers: getAuthHeaders()
+      });
+      const data = await response.json();
 
-      // Add unique view
-      const visitorId = getVisitorId();
-      if (visitorId) {
+      if (data.success) {
+        const detail = data.data;
+        setSelectedContent(detail);
+        setLikesCount(detail.likes || 0);
+        setViewsCount(detail.views || 0);
+        // determine liked if user is logged in and likedBy present
         try {
-          const vRes = await fetch(`https://api.mypsyguide.io/api/content/public/${contentId}/view`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-            body: JSON.stringify({ visitorId })
-          });
-          const vData = await vRes.json();
-          if (vData?.success && vData?.data?.views != null) {
-            setViewsCount(vData.data.views);
+          const userDetail = JSON.parse(localStorage.getItem('userDetail') || 'null');
+          const userId = userDetail?._id || userDetail?.id;
+          const likedBy = detail.likedBy || [];
+          const hasLiked = userId ? likedBy.some((u) => String(u) === String(userId)) : false;
+          setLiked(!!hasLiked);
+        } catch { }
+        setShowModal(true);
+        document.body.style.overflow = 'hidden';
+
+        // Add unique view
+        const visitorId = getVisitorId();
+        if (visitorId) {
+          try {
+            const vRes = await fetch(`https://api.mypsyguide.io/api/content/public/${contentId}/view`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+              body: JSON.stringify({ visitorId })
+            });
+            const vData = await vRes.json();
+            if (vData?.success && vData?.data?.views != null) {
+              setViewsCount(vData.data.views);
+            }
+          } catch (e) {
+            console.warn('View track failed', e);
           }
-        } catch (e) {
-          console.warn('View track failed', e);
         }
       }
+    } catch (error) {
+      console.error('Error loading content details:', error);
     }
-  } catch (error) {
-    console.error('Error loading content details:', error);
-  }
-};
+  };
 
   const closeModal = () => {
     setShowModal(false);
@@ -234,7 +234,7 @@ const openContentModal = async (contentId) => {
     try {
       const endpoint = isLiking ? 'like' : 'unlike';
       // "http://localhost:5000/api/";
-      const res = await fetch(`https://api.mypsyguide.io/api/content/public/${selectedContent._id}/${endpoint}` , {
+      const res = await fetch(`https://api.mypsyguide.io/api/content/public/${selectedContent._id}/${endpoint}`, {
         method: 'POST',
         headers: getAuthHeaders()
       });
@@ -278,21 +278,21 @@ const openContentModal = async (contentId) => {
 
   const getVideoEmbedUrl = (url) => {
     if (!url) return '';
-    
+
     // YouTube
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
-      const videoId = url.includes('youtu.be') 
+      const videoId = url.includes('youtu.be')
         ? url.split('youtu.be/')[1]?.split('?')[0]
         : url.split('v=')[1]?.split('&')[0];
       return `https://www.youtube.com/embed/${videoId}`;
     }
-    
+
     // Vimeo
     if (url.includes('vimeo.com')) {
       const videoId = url.split('vimeo.com/')[1]?.split('?')[0];
       return `https://player.vimeo.com/video/${videoId}`;
     }
-    
+
     return url;
   };
 
@@ -315,9 +315,9 @@ const openContentModal = async (contentId) => {
               <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
                 Discover the world of functional mushrooms through our curated collection of blogs, videos, and educational content
               </p>
-              
+
               {/* Search Bar */}
-              <div className="max-w-2xl border-white border-1 rounded-4xl mx-auto">
+              {/* <div className="max-w-2xl border-white border-1 rounded-4xl mx-auto">
                 <div className="relative">
                   <input
                     type="text"
@@ -330,7 +330,7 @@ const openContentModal = async (contentId) => {
                     Search
                   </button>
                 </div>
-              </div>
+              </div> */}
             </div>
 
             {/* Gallery Visual Guides Section */}
@@ -339,31 +339,30 @@ const openContentModal = async (contentId) => {
                 <h2 className="text-2xl md:text-3xl font-bold tracking-[0.5em] uppercase mb-6 text-center">
                   Visual Guides
                 </h2>
-                <div 
+                <div
                   className="relative max-w-4xl mx-auto"
                   onMouseEnter={() => setIsPaused(true)}
                   onMouseLeave={() => setIsPaused(false)}
                 >
                   {/* Main Image Display */}
-                  <div 
- className="relative overflow-hidden rounded-2xl shadow-2xl bg-white/10 cursor-pointer h-[500px] md:h-[1100px]"
-  onMouseEnter={() => setIsPaused(true)}
-  onMouseLeave={() => setIsPaused(false)}
-  onClick={() => handleImageClick(galleryImages[currentImageIndex], currentImageIndex)} // Move onClick here
->
-  {galleryImages.map((image, index) => (
-    <div
-      key={image._id}
-      className={`absolute inset-0 transition-opacity duration-1000 ${
-        index === currentImageIndex ? 'opacity-100' : 'opacity-0'
-      }`}
-      // Remove onClick from here
-    >
-      <img
-        src={image.imageUrl.startsWith('http') ? image.imageUrl : `http://localhost:5000${image.imageUrl}`}
-        alt={image.title}
-      className="w-full h-full object-contain"
-      />
+                  <div
+                    className="relative overflow-hidden rounded-2xl shadow-2xl bg-white/10 cursor-pointer h-[500px] md:h-[1100px]"
+                    onMouseEnter={() => setIsPaused(true)}
+                    onMouseLeave={() => setIsPaused(false)}
+                    onClick={() => handleImageClick(galleryImages[currentImageIndex], currentImageIndex)} // Move onClick here
+                  >
+                    {galleryImages.map((image, index) => (
+                      <div
+                        key={image._id}
+                        className={`absolute inset-0 transition-opacity duration-1000 ${index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+                          }`}
+                      // Remove onClick from here
+                      >
+                        <img
+                          src={image.imageUrl.startsWith('http') ? image.imageUrl : `http://localhost:5000${image.imageUrl}`}
+                          alt={image.title}
+                          className="w-full h-full object-contain"
+                        />
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
                           <h3 className="text-white text-xl font-semibold">{image.title}</h3>
                           {image.description && (
@@ -374,49 +373,48 @@ const openContentModal = async (contentId) => {
                     ))}
                   </div>
 
-               {/* Image Thumbnails */}
-<div className="flex justify-center gap-3 mt-6 flex-wrap px-4">
-  {galleryImages.map((image, index) => (
-    <button
-      key={image._id}
-      onClick={() => setCurrentImageIndex(index)}
-      className={`relative overflow-hidden rounded-lg transition-all ${
-        index === currentImageIndex 
-          ? 'ring-4 ring-white scale-105' 
-          : 'opacity-60 hover:opacity-100'
-      }`}
-      style={{ width: '120px', height: '80px' }}
-    >
-      <img
-        src={image.imageUrl.startsWith('http') ? image.imageUrl : `http://localhost:5000${image.imageUrl}`}
-        alt={image.title}
-        className="w-full h-full object-cover"
-      />
-    </button>
-  ))}
-</div>
+                  {/* Image Thumbnails */}
+                  <div className="flex justify-center gap-3 mt-6 flex-wrap px-4">
+                    {galleryImages.map((image, index) => (
+                      <button
+                        key={image._id}
+                        onClick={() => setCurrentImageIndex(index)}
+                        className={`relative overflow-hidden rounded-lg transition-all ${index === currentImageIndex
+                            ? 'ring-4 ring-white scale-105'
+                            : 'opacity-60 hover:opacity-100'
+                          }`}
+                        style={{ width: '120px', height: '80px' }}
+                      >
+                        <img
+                          src={image.imageUrl.startsWith('http') ? image.imageUrl : `http://localhost:5000${image.imageUrl}`}
+                          alt={image.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
 
                   {/* Navigation Arrows */}
-                 {galleryImages.length > 1 && (
-  <>
-    <button
-      onClick={() => setCurrentImageIndex((prev) => 
-        prev === 0 ? galleryImages.length - 1 : prev - 1
-      )}
-      className="absolute -left-3 md:left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-2 md:p-3 rounded-full backdrop-blur-sm transition-all"
-    >
-      ❮
-    </button>
-    <button
-      onClick={() => setCurrentImageIndex((prev) => 
-        (prev + 1) % galleryImages.length
-      )}
-      className="absolute -right-2 md:right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-2 md:p-3 rounded-full backdrop-blur-sm transition-all"
-    >
-      ❯
-    </button>
-  </>
-)}
+                  {galleryImages.length > 1 && (
+                    <>
+                      <button
+                        onClick={() => setCurrentImageIndex((prev) =>
+                          prev === 0 ? galleryImages.length - 1 : prev - 1
+                        )}
+                        className="absolute -left-3 md:left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-2 md:p-3 rounded-full backdrop-blur-sm transition-all"
+                      >
+                        ❮
+                      </button>
+                      <button
+                        onClick={() => setCurrentImageIndex((prev) =>
+                          (prev + 1) % galleryImages.length
+                        )}
+                        className="absolute -right-2 md:right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-2 md:p-3 rounded-full backdrop-blur-sm transition-all"
+                      >
+                        ❯
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             )}
@@ -437,7 +435,7 @@ const openContentModal = async (contentId) => {
                   <option value="blog">Blog Posts</option>
                   <option value="video">Videos</option>
                 </select>
-                
+
                 <select
                   value={filters.category}
                   onChange={(e) => handleFilterChange('category', e.target.value)}
@@ -451,7 +449,7 @@ const openContentModal = async (contentId) => {
                   ))}
                 </select>
               </div>
-              
+
               <div className="text-sm text-gray-600">
                 {pagination.totalItems || 0} results found
               </div>
@@ -479,25 +477,24 @@ const openContentModal = async (contentId) => {
                 >
                   {/* Image */}
                   <div className="relative h-48 bg-gray-200">
-                  {item.featuredImage ? (
-  <img
-    src={item.featuredImage}
-    alt={item.title}
-    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-  />
-) : (
-  <div className="w-full h-full flex items-center justify-center text-gray-400">
-    {item.type === 'video' ? '🎥' : '📝'}
-  </div>
-)}
-                    
+                    {item.featuredImage ? (
+                      <img
+                        src={item.featuredImage}
+                        alt={item.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        {item.type === 'video' ? '🎥' : '📝'}
+                      </div>
+                    )}
+
                     {/* Type Badge */}
                     <div className="absolute top-3 left-3">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                        item.type === 'video' 
-                          ? 'bg-red-100 text-red-800' 
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${item.type === 'video'
+                          ? 'bg-red-100 text-red-800'
                           : 'bg-blue-100 text-blue-800'
-                      }`}>
+                        }`}>
                         {item.type === 'video' ? 'Video' : 'Blog'}
                       </span>
                     </div>
@@ -519,11 +516,11 @@ const openContentModal = async (contentId) => {
                         {item.category}
                       </span>
                     </div>
-                    
+
                     <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-green-600 transition-colors">
                       {item.title}
                     </h3>
-                    
+
                     <p className="text-gray-600 text-sm mb-4 line-clamp-3">
                       {item.description}
                     </p>
@@ -571,26 +568,25 @@ const openContentModal = async (contentId) => {
                 >
                   Previous
                 </button>
-                
+
                 {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
                   const page = i + Math.max(1, pagination.currentPage - 2);
                   if (page > pagination.totalPages) return null;
-                  
+
                   return (
                     <button
                       key={page}
                       onClick={() => handlePageChange(page)}
-                      className={`px-4 py-2 text-sm font-medium rounded-lg ${
-                        page === pagination.currentPage
+                      className={`px-4 py-2 text-sm font-medium rounded-lg ${page === pagination.currentPage
                           ? 'bg-green-600 text-white'
                           : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
-                      }`}
+                        }`}
                     >
                       {page}
                     </button>
                   );
                 })}
-                
+
                 <button
                   onClick={() => handlePageChange(pagination.currentPage + 1)}
                   disabled={pagination.currentPage === pagination.totalPages}
@@ -610,11 +606,10 @@ const openContentModal = async (contentId) => {
               {/* Modal Header */}
               <div className="sticky top-0 bg-white border-b p-6 flex items-center justify-between z-10">
                 <div>
-                  <span className={`px-3 py-1 text-sm font-medium rounded-full ${
-                    selectedContent.type === 'video' 
-                      ? 'bg-red-100 text-red-800' 
+                  <span className={`px-3 py-1 text-sm font-medium rounded-full ${selectedContent.type === 'video'
+                      ? 'bg-red-100 text-red-800'
                       : 'bg-blue-100 text-blue-800'
-                  }`}>
+                    }`}>
                     {selectedContent.type === 'video' ? 'Video' : 'Blog Post'}
                   </span>
                   <span className="ml-3 text-sm text-green-600 font-medium">
@@ -655,15 +650,15 @@ const openContentModal = async (contentId) => {
                       allowFullScreen
                     ></iframe>
                   </div>
-               ) : selectedContent.featuredImage ? (
-  <div className="mb-6">
-    <img
-      src={selectedContent.featuredImage}
-      alt={selectedContent.title}
-      className="w-full h-auto rounded-lg"
-    />
-  </div>
-) : null}
+                ) : selectedContent.featuredImage ? (
+                  <div className="mb-6">
+                    <img
+                      src={selectedContent.featuredImage}
+                      alt={selectedContent.title}
+                      className="w-full h-auto rounded-lg"
+                    />
+                  </div>
+                ) : null}
 
                 {/* Description */}
                 <div className="mb-6">
@@ -674,7 +669,7 @@ const openContentModal = async (contentId) => {
 
                 {/* Content */}
                 <div className="prose prose-lg max-w-none mb-6">
-                  <div 
+                  <div
                     className="text-gray-800 leading-relaxed whitespace-pre-wrap"
                     dangerouslySetInnerHTML={{ __html: selectedContent.content.replace(/\n/g, '<br>') }}
                   />
@@ -709,72 +704,72 @@ const openContentModal = async (contentId) => {
         )}
 
         {/* Fullscreen Image Modal */}
-    {showFullscreen && fullscreenImage && (
-  <div 
-    className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center"
-    onClick={closeFullscreen}
-  >
-    <button
-      onClick={closeFullscreen}
-      className="absolute top-4 right-4 text-white text-4xl hover:text-gray-300 z-10"
-    >
-      ×
-    </button>
-    
-    {/* Previous Button */}
-    {galleryImages.length > 1 && (
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          const newIndex = currentImageIndex === 0 ? galleryImages.length - 1 : currentImageIndex - 1;
-          setCurrentImageIndex(newIndex);
-          setFullscreenImage(galleryImages[newIndex]);
-        }}
-        className="absolute left-4 md:left-40 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-4 rounded-full backdrop-blur-sm transition-all z-10 text-2xl"
-      >
-        ❮
-      </button>
-    )}
+        {showFullscreen && fullscreenImage && (
+          <div
+            className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center"
+            onClick={closeFullscreen}
+          >
+            <button
+              onClick={closeFullscreen}
+              className="absolute top-4 right-4 text-white text-4xl hover:text-gray-300 z-10"
+            >
+              ×
+            </button>
 
-    {/* Next Button */}
-    {galleryImages.length > 1 && (
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          const newIndex = (currentImageIndex + 1) % galleryImages.length;
-          setCurrentImageIndex(newIndex);
-          setFullscreenImage(galleryImages[newIndex]);
-        }}
-        className="absolute right-4 md:right-40 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-4 rounded-full backdrop-blur-sm transition-all z-10 text-2xl"
-      >
-        ❯
-      </button>
-    )}
+            {/* Previous Button */}
+            {galleryImages.length > 1 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const newIndex = currentImageIndex === 0 ? galleryImages.length - 1 : currentImageIndex - 1;
+                  setCurrentImageIndex(newIndex);
+                  setFullscreenImage(galleryImages[newIndex]);
+                }}
+                className="absolute left-4 md:left-40 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-4 rounded-full backdrop-blur-sm transition-all z-10 text-2xl"
+              >
+                ❮
+              </button>
+            )}
 
- <div className="relative w-full h-full overflow-y-auto overflow-x-hidden p-8">
-  <div className="flex flex-col items-center min-h-full">
-<img
-  src={fullscreenImage.imageUrl.startsWith('http') ? fullscreenImage.imageUrl : `http://localhost:5000${fullscreenImage.imageUrl}`}
-  alt={fullscreenImage.title}
-  className="w-full lg:w-auto"
-  onClick={(e) => e.stopPropagation()}
-  style={{ 
-    height: window.innerWidth <= 768 ? 'auto' : 'auto',
-    minHeight: window.innerWidth <= 768 ? '80vh' : 'auto',
-    minWidth: window.innerWidth > 1024 ? '900px' : 'auto',
-    maxWidth: window.innerWidth > 1024 ? '1400px' : '100%'
-  }}
-/>
-    <div className="mt-6 text-center max-w-3xl pb-8">
-      <h3 className="text-white text-xl md:text-2xl font-semibold mb-2">{fullscreenImage.title}</h3>
-      {fullscreenImage.description && (
-        <p className="text-white/80 text-sm md:text-base">{fullscreenImage.description}</p>
-      )}
-    </div>
-  </div>
-</div>
-  </div>
-)}
+            {/* Next Button */}
+            {galleryImages.length > 1 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const newIndex = (currentImageIndex + 1) % galleryImages.length;
+                  setCurrentImageIndex(newIndex);
+                  setFullscreenImage(galleryImages[newIndex]);
+                }}
+                className="absolute right-4 md:right-40 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-4 rounded-full backdrop-blur-sm transition-all z-10 text-2xl"
+              >
+                ❯
+              </button>
+            )}
+
+            <div className="relative w-full h-full overflow-y-auto overflow-x-hidden p-8">
+              <div className="flex flex-col items-center min-h-full">
+                <img
+                  src={fullscreenImage.imageUrl.startsWith('http') ? fullscreenImage.imageUrl : `http://localhost:5000${fullscreenImage.imageUrl}`}
+                  alt={fullscreenImage.title}
+                  className="w-full lg:w-auto"
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    height: window.innerWidth <= 768 ? 'auto' : 'auto',
+                    minHeight: window.innerWidth <= 768 ? '80vh' : 'auto',
+                    minWidth: window.innerWidth > 1024 ? '900px' : 'auto',
+                    maxWidth: window.innerWidth > 1024 ? '1400px' : '100%'
+                  }}
+                />
+                <div className="mt-6 text-center max-w-3xl pb-8">
+                  <h3 className="text-white text-xl md:text-2xl font-semibold mb-2">{fullscreenImage.title}</h3>
+                  {fullscreenImage.description && (
+                    <p className="text-white/80 text-sm md:text-base">{fullscreenImage.description}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

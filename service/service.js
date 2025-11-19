@@ -1,7 +1,7 @@
 import axios from "axios";
 
-//  const ConstantsUrl = "http://localhost:5000/api/";
-       const ConstantsUrl = "https://api.mypsyguide.io/api/";
+// export const ConstantsUrl = "http://localhost:5008/api/";
+export const ConstantsUrl = "https://api.mypsyguide.io/api/";
 
 let isRedirecting = false;
 
@@ -12,17 +12,17 @@ function Api(method, url, data, router, params, preventRedirect = false) {
       resolve({ success: false, redirect: true });
       return;
     }
-    
+
     let token = "";
     if (typeof window !== "undefined") {
       token = localStorage?.getItem("token") || "";
     }
-    
+
     axios({
       method,
       url: ConstantsUrl + url,
       data,
-      headers: { 
+      headers: {
         Authorization: `jwt ${token}`,
         'X-Prevent-Redirect': preventRedirect ? 'true' : 'false'  // Add this header
       },
@@ -58,17 +58,17 @@ function ApiFormData(method, url, data, router, params) {
       resolve({ success: false, redirect: true });
       return;
     }
-    
+
     let token = "";
     if (typeof window !== "undefined") {
       token = localStorage?.getItem("token") || "";
     }
-    
+
     axios({
       method,
       url: ConstantsUrl + url,
       data,
-      headers: { 
+      headers: {
         Authorization: `jwt ${token}`
         // Don't set Content-Type for FormData, let axios handle it
       },
@@ -100,36 +100,36 @@ axios.interceptors.response.use(
   (error) => {
     // Check if redirect should be prevented
     const preventRedirect = error.config?.headers?.['X-Prevent-Redirect'] === 'true';
-    
+
     if (error.response && error.response.status === 401 && typeof window !== "undefined") {
       // Agar preventRedirect true hai, to seedha error return karo without redirect
       if (preventRedirect) {
         return Promise.reject(error);
       }
-      
+
       // Otherwise normal redirect logic
       if (!isRedirecting) {
         isRedirecting = true;
-        
+
         if (typeof window !== "undefined") {
           localStorage.removeItem("userDetail");
           localStorage.removeItem("token");
           window.location.href = "/";
           window.dispatchEvent(new Event('storage'));
           document.dispatchEvent(new Event('auth-state-changed'));
-          
+
           if (window.router && !window.router.pathname.includes("login")) {
             window.router.push("/");
           } else {
             window.location.href = "/";
           }
         }
-        
+
         setTimeout(() => {
           isRedirecting = false;
         }, 2000);
       }
-      
+
       return Promise.resolve({
         data: { success: false, redirect: true }
       });
@@ -147,26 +147,26 @@ function notifyAuthChange() {
 
 const handleTokenExpiration = (router) => {
   if (isRedirecting) return true;
-  
+
   console.log("Token expired, logging out user...");
   isRedirecting = true;
-  
+
   try {
     if (typeof window !== "undefined") {
       localStorage.removeItem("userDetail");
       localStorage.removeItem("token");
-      
+
       notifyAuthChange();
-      
+
       if (router && !router.pathname.includes("login")) {
         router.push("/");
       }
     }
-    
+
     setTimeout(() => {
       isRedirecting = false;
     }, 2000);
-    
+
     return true;
   } catch (error) {
     console.error("Error during logout:", error);
@@ -447,19 +447,19 @@ const fetchGalleryImages = async (router) => {
   }
 };
 
-export { 
-  Api, 
-  timeSince, 
-  ApiFormData, 
-  setGlobalRouter, 
-  toast, 
-  setGlobalToast, 
-  fetchAllCategories, 
-  fetchProductsByCategory, 
-  createProduct, 
-  fetchAllUsers, 
-  fetchUserById, 
-  updateUser, 
+export {
+  Api,
+  timeSince,
+  ApiFormData,
+  setGlobalRouter,
+  toast,
+  setGlobalToast,
+  fetchAllCategories,
+  fetchProductsByCategory,
+  createProduct,
+  fetchAllUsers,
+  fetchUserById,
+  updateUser,
   deleteUser,
   fetchAllReviewTags,
   createReviewTagApi,

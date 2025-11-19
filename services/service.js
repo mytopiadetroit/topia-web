@@ -1,7 +1,7 @@
 // import axios from "axios";
 // import { toast } from 'react-toastify';
 
-//   const ConstantsUrl = "http://localhost:5000/api/";
+  // const ConstantsUrl = "http://localhost:5005/api/";
      const ConstantsUrl = "https://api.mypsyguide.io/api/";
 
 // let isRedirecting = false;
