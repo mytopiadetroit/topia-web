@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import { useUser } from '../context/UserContext';
 import { Api } from '../service/service';
+import { XCircle } from 'lucide-react';
 
 export default function MyOrders() {
   const router = useRouter();
@@ -40,45 +41,41 @@ export default function MyOrders() {
     }
   }, [isLoggedIn, loading, router]);
 
+  // Function to fetch orders
+  const fetchOrders = async () => {
+    if (!isLoggedIn) return;
+    try {
+      setIsLoading(true);
+      const res = await Api('get', 'orders', null, router);
+      console.log("API Response:", JSON.stringify(res, null, 2));
+      if (res.success) {
+        // Normalize to fields we use in UI
+        const mapped = (res.data || []).map(o => ({
+          id: o.orderNumber,  // Use orderNumber as the ID
+          _id: o._id,         // Keep the MongoDB _id as well
+          total: o.totalAmount,
+          status: o.status,
+          products: o.items.map(it => ({
+            id: it.product?._id || it.productId || (it.product && it.product.id) || null,
+            name: it.name,
+            amount: it.price * it.quantity,
+            image: it.image || (it.product?.images?.[0]) || ''
+          }))
+        }));
+        setOrders(mapped);
+      } else {
+        toast.error(res.message || 'Failed to load orders');
+      }
+    } catch (err) {
+      console.error('Load my orders error:', err);
+      toast.error('Failed to load orders');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Load user's orders from backend when logged in
   useEffect(() => {
-    const fetchOrders = async () => {
-      if (!isLoggedIn) return;
-      try {
-        setIsLoading(true);
-        const res = await Api('get', 'orders', null, router);
-        console.log("API Response:", JSON.stringify(res, null, 2));
-        if (res.success) {
-          // Normalize to fields we use in UI
-          const mapped = (res.data || []).map(o => ({
-            id: o.orderNumber,
-            total: o.totalAmount,
-            status: o.status, // backend statuses: pending, unfulfilled, fulfilled, incomplete
-            products: o.items.map(it => {
-              // Log the full item structure to understand what's available
-              console.log('Order item:', JSON.stringify(it, null, 2));
-              const productId = it.product?._id || it.productId || (it.product && it.product.id) || null;
-              console.log('Extracted product ID:', productId);
-              return {
-                id: productId,
-                originalItem: it, // Keep original item for debugging
-                name: it.name,
-                amount: it.price * it.quantity,
-                image: it.image || (it.product?.images?.[0]) || ''
-              };
-            })
-          }));
-          setOrders(mapped);
-        } else {
-          toast.error(res.message || 'Failed to load orders');
-        }
-      } catch (err) {
-        console.error('Load my orders error:', err);
-        toast.error('Failed to load orders');
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchOrders();
   }, [isLoggedIn, router]);
 
@@ -110,6 +107,31 @@ export default function MyOrders() {
 
   const toggleOrder = (orderId) => {
     setExpandedByOrder(prev => ({ ...prev, [orderId]: !prev[orderId] }));
+  };
+
+  const handleCancelOrder = async (orderId) => {
+    if (!window.confirm('Are you sure you want to cancel this order?')) {
+      return;
+    }
+
+    try {
+      const response = await Api('put', `orders/${orderId}/cancel`, null, router);
+      
+      if (response.success) {
+        toast.success('Order cancelled successfully');
+        // Refresh orders list
+        await fetchOrders();
+      } else {
+        throw new Error(response.message || 'Failed to cancel order');
+      }
+    } catch (error) {
+      console.error('Error cancelling order:', error);
+      toast.error(error.message || 'Error cancelling order');
+    }
+  };
+
+  const canCancelOrder = (order) => {
+    return ['pending', 'unfulfilled', 'incomplete'].includes(order.status?.toLowerCase());
   };
 
   return (
@@ -165,6 +187,18 @@ export default function MyOrders() {
                       <span>{isOpen ? 'Hide items' : 'Show all items'}</span>
                       <span>{isOpen ? '▲' : '▼'}</span>
                     </button>
+                    {canCancelOrder(order) && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCancelOrder(order.id);
+                        }}
+                        className="flex items-center text-red-600 hover:text-red-800 text-sm font-medium"
+                      >
+                        <XCircle className="w-4 h-4 mr-1" />
+                        Cancel Order
+                      </button>
+                    )}
                   </div>
                 </div>
 

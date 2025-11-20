@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Heart, Package } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -128,6 +128,9 @@ export default function ProductDetails() {
 
   // Update price display when variant or flavor changes
   const [displayPrice, setDisplayPrice] = useState('0.00');
+  const [showFullDescription, setShowFullDescription] = useState(false);
+  const [isDescriptionLong, setIsDescriptionLong] = useState(false);
+  const descriptionRef = useRef(null);
 
   // Update price whenever relevant state changes
   useEffect(() => {
@@ -137,6 +140,14 @@ export default function ProductDetails() {
       setDisplayPrice(newPrice);
     }
   }, [selectedVariant, selectedFlavor, product, quantity]);
+
+  // Check if description is long enough to need "Read More"
+  useEffect(() => {
+    if (descriptionRef.current) {
+      const isLong = descriptionRef.current.scrollHeight > descriptionRef.current.clientHeight;
+      setIsDescriptionLong(isLong);
+    }
+  }, [product?.description]);
 
   // Get available stock based on selection
   const getAvailableStock = () => {
@@ -149,14 +160,12 @@ export default function ProductDetails() {
       return Number(selectedVariant.stock || 0);
     }
 
-
     if (product?.flavors && product.flavors.length > 0) {
       const totalFlavorStock = product.flavors.reduce((sum, flavor) => {
         return sum + Number(flavor.stock || 0);
       }, 0);
       return totalFlavorStock;
     }
-
 
     if (product?.hasVariants && product.variants && product.variants.length > 0) {
       const totalVariantStock = product.variants.reduce((sum, variant) => {
@@ -229,7 +238,7 @@ export default function ProductDetails() {
       return;
     }
 
-    // ✅ Check stock before adding
+    // Check stock before adding
     const availableStock = getAvailableStock();
     if (availableStock <= 0) {
       toast.error('This item is out of stock');
@@ -457,10 +466,25 @@ export default function ProductDetails() {
             {/* Description */}
             <div className="mt-6">
               <h2 className="text-lg text-gray-700 font-semibold mb-2">Description</h2>
-              <p className="text-gray-700 mb-4">{product.description?.main || 'No description available'}</p>
-              {product.description?.details && (
-                <p className="text-gray-700">{product.description.details}</p>
-              )}
+              <div className="relative">
+                <div 
+                  ref={descriptionRef}
+                  className={`text-gray-700 mb-4 overflow-hidden transition-all duration-300 ${!showFullDescription && 'max-h-20'}`}
+                >
+                  {product.description?.main || 'No description available'}
+                  {product.description?.details && (
+                    <p className="mt-2">{product.description.details}</p>
+                  )}
+                </div>
+                {isDescriptionLong && (
+                  <button 
+                    onClick={() => setShowFullDescription(!showFullDescription)}
+                    className="text-[#536690] mb-6 underline text-sm font-medium hover:underline focus:outline-none"
+                  >
+                    {showFullDescription ? 'Show Less' : 'Read More'}
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Size Variant Selection */}
@@ -543,23 +567,27 @@ export default function ProductDetails() {
             {/* Price */}
             <div className="mb-6">
               <h2 className="text-lg text-gray-700 font-semibold mb-2">Final Price</h2>
-              <div className="flex items-baseline gap-2">
-                <p className="text-3xl font-bold text-[#536690]">$ {displayPrice}</p>
-                {/* {(selectedVariant || selectedFlavor) && (
-                  <div className="text-sm text-gray-500">
-                    {selectedVariant && (
-                      <span className="block">
-                        Size: {selectedVariant.size.value}{selectedVariant.size.unit} (${Number(selectedVariant.price).toFixed(2)})
-                      </span>
-                    )}
-                    {selectedFlavor && (
-                      <span className="block">
-                        Flavor: {selectedFlavor.name} 
-                        {selectedFlavor.price > 0 ? `(+$${Number(selectedFlavor.price).toFixed(2)})` : '(Free)'}
-                      </span>
-                    )}
+              <div className="flex flex-col gap-1">
+                <div className="flex items-baseline gap-2">
+                  <p className="text-3xl font-bold text-[#536690]">$ {displayPrice}</p>
+                </div>
+                {product?.allergenInfo?.tooltipText && (
+                  <div className="text-sm text-gray-500 mt-1">
+                   Allergen : {product.allergenInfo.tooltipText}
                   </div>
-                )} */}
+                )}
+                {/* <div className="flex flex-col gap-1 mt-2">
+                  {selectedVariant && (
+                    <div className="text-sm text-gray-600">
+                      Size: {selectedVariant.size.value}{selectedVariant.size.unit} (${Number(selectedVariant.price).toFixed(2)})
+                    </div>
+                  )}
+                  {selectedFlavor && (
+                    <div className="text-sm text-gray-600">
+                      Flavor: {selectedFlavor.name} {selectedFlavor.price > 0 ? `(+$${Number(selectedFlavor.price).toFixed(2)})` : '(Free)'}
+                    </div>
+                  )}
+                </div> */}
               </div>
             </div>
 

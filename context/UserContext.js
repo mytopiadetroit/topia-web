@@ -47,6 +47,42 @@ export const UserProvider = ({ children }) => {
     document.dispatchEvent(new Event('auth-state-changed'));
   }, []);
 
+  // Refresh user data from the server
+  const refreshUserData = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return null;
+
+      // Use the correct endpoint for fetching user profile
+      const response = await fetch('https://api.mypsyguide.io/api/auth/profile', {
+        headers: {
+          'Authorization': `jwt ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        if (userData.success && userData.user) {
+          setUser(userData.user);
+          localStorage.setItem('userDetail', JSON.stringify(userData.user));
+          setIsLoggedIn(true);
+          return userData.user;
+        } else if (userData.message === 'User not found' || userData.message === 'Invalid token') {
+          // Handle invalid or expired token
+          clearSession();
+        }
+      } else if (response.status === 401) {
+        // Handle unauthorized (token expired or invalid)
+        clearSession();
+      }
+      return null;
+    } catch (error) {
+      console.error('Error refreshing user data:', error);
+      return null;
+    }
+  }, [clearSession]);
+
   // Check if user is logged in on initial load
   useEffect(() => {
     const checkUserLoggedIn = () => {
@@ -183,7 +219,8 @@ export const UserProvider = ({ children }) => {
     loading,
     login,
     logout,
-    updateUser
+    updateUser,
+    refreshUserData  // Add refreshUserData to the context value
   };
 
   return (

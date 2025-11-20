@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { debounce } from 'lodash';
-import { ChevronDown, ChevronUp, Filter, X, Menu as MenuIcon, Tag } from 'lucide-react';
+import { ChevronDown, ChevronUp, Filter, X, Menu as MenuIcon, Tag, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import { useUser } from '../context/UserContext';
@@ -11,34 +10,24 @@ import { Api, fetchAllReviewTags } from '../service/service';
 
 const Menu = () => {
   const router = useRouter();
-  const { isLoggedIn, loading } = useUser();
+  const { isLoggedIn, loading, user, refreshUserData } = useUser();
   const { addToCart, cart, updateCartItemQuantity } = useApp();
   const [addedSet, setAddedSet] = useState({});
-  // const [collapsedByCategory, setCollapsedByCategory] = useState({});
   const [categoryOpen, setCategoryOpen] = useState(true);
   const [primaryUseOpen, setPrimaryUseOpen] = useState(true);
   const [intensityOpen, setIntensityOpen] = useState(true);
   const [reviewTagsOpen, setReviewTagsOpen] = useState(true);
-
-  // Side drawer state
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
-  // State for dynamic data
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [hoveredProductId, setHoveredProductId] = useState(null);
   const { isInWishlist, toggle } = useWishlist();
-
-  // dynamic review aggregates cache: productId -> array of { _id, count, label, emoji }
   const [reviewAggByProduct, setReviewAggByProduct] = useState({});
-
-  // Review tags state
   const [reviewTags, setReviewTags] = useState([]);
   const [selectedReviewTags, setSelectedReviewTags] = useState({});
-
-  // Filter states
   const [categoryFilters, setCategoryFilters] = useState({});
   const [primaryUseFilters, setPrimaryUseFilters] = useState({
     therapeutic: false,
@@ -49,23 +38,90 @@ const Menu = () => {
     medium: false,
     strong: false
   });
-
-  // Price range filter state
   const [priceRange, setPriceRange] = useState([0, 0]);
   const [localPriceRange, setLocalPriceRange] = useState([0, 0]);
   const [priceRangeOpen, setPriceRangeOpen] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [showPendingMessage, setShowPendingMessage] = useState(false);
   const ITEMS_PER_PAGE = 15;
+
+  // Debug logs
+  console.log('Auth State:', {
+    loading,
+    isLoggedIn,
+    user: user ? { ...user, status: user.status } : null,
+    currentTime: new Date().toISOString()
+  });
+
+  // Handle user status and loading state in useEffect
+  useEffect(() => {
+    const initializeUserData = async () => {
+      if (isLoggedIn) {
+        await refreshUserData();
+      }
+    };
+    initializeUserData();
+
+    const intervalId = setInterval(async () => {
+      if (isLoggedIn) {
+        await refreshUserData();
+      }
+    }, 30000);
+
+    return () => clearInterval(intervalId);
+  }, [isLoggedIn, refreshUserData]);
+
+  // Handle user status and products
+  useEffect(() => {
+    if (loading || (isLoggedIn && !user)) {
+      console.log('Loading or waiting for user data');
+      return;
+    }
+
+    if (isLoggedIn && user?.status === 'pending') {
+      console.log('User is pending verification, clearing products');
+      setProducts([]);
+      setFilteredProducts([]);
+      setShowPendingMessage(true);
+    } else {
+      setShowPendingMessage(false);
+    }
+  }, [loading, isLoggedIn, user]);
+
+  // Check user status before any data fetching
+  useEffect(() => {
+    console.log('useEffect - User status check:', {
+      loading,
+      isLoggedIn,
+      userStatus: user?.status,
+      hasUser: !!user,
+      currentTime: new Date().toISOString()
+    });
+    
+    if (!loading && isLoggedIn && user?.status === 'pending') {
+      console.log('Clearing product data due to pending status');
+      setProducts([]);
+      setFilteredProducts([]);
+      setLoadingData(false);
+      return;
+    }
+
+    if (!loading && !isLoggedIn) {
+      router.push('/auth/login');
+      return;
+    }
+  }, [loading, isLoggedIn, user, router]);
 
   // Fetch review tags
   const fetchReviewTags = async () => {
+    if (user?.status === 'pending') return;
+    
     try {
       const response = await fetchAllReviewTags(router);
       if (response.success) {
         setReviewTags(response.data || []);
-        // Initialize selected tags as false
         const initialTags = {};
         response.data.forEach(tag => {
           initialTags[tag._id] = false;
@@ -78,12 +134,10 @@ const Menu = () => {
     }
   };
 
+  // Main data fetching effect
   useEffect(() => {
-    // Only check after loading is complete
     if (!loading) {
-      // Check if user is logged in
       if (!isLoggedIn) {
-        // Show toast notification
         toast.error('Please login to access the menu', {
           position: "bottom-left",
           autoClose: 5000,
@@ -99,11 +153,8 @@ const Menu = () => {
             borderRadius: '8px'
           }
         });
-
-        // Redirect to login page
         router.push('/auth/login');
       } else {
-        // Fetch data if user is logged in
         fetchCategories();
         fetchProducts();
         fetchReviewTags();
@@ -111,10 +162,9 @@ const Menu = () => {
     }
   }, [isLoggedIn, loading, router]);
 
-
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 1024) { // lg breakpoint
+      if (window.innerWidth >= 1024) {
         setIsDrawerOpen(false);
       }
     };
@@ -126,6 +176,7 @@ const Menu = () => {
   const handleHomeClick = () => {
     router.push('/');
   };
+
   // Fetch categories from backend
   const fetchCategories = async () => {
     try {
@@ -135,19 +186,16 @@ const Menu = () => {
       if (response.success) {
         setCategories(response.data);
 
-
         const { category, primaryUse } = router.query;
         const initialFilters = {};
 
         response.data.forEach(cat => {
-
           initialFilters[cat._id] = category ?
             (Array.isArray(category) ? category.includes(cat._id) : category === cat._id) :
             false;
         });
 
         setCategoryFilters(initialFilters);
-
 
         if (primaryUse) {
           const selectedPrimaryUses = Array.isArray(primaryUse) ? primaryUse : [primaryUse];
@@ -163,11 +211,17 @@ const Menu = () => {
     }
   };
 
-
   const fetchProducts = async () => {
+    console.log('Fetching products - user status:', user?.status);
+    if (user?.status === 'pending') {
+      console.log('Skipping product fetch - user status is pending');
+      setProducts([]);
+      setFilteredProducts([]);
+      return;
+    }
+    
     try {
       setLoadingData(true);
-      // Fetch ALL products without pagination for filtering and include review tags
       const response = await Api('GET', 'products?limit=10000&populate=reviewTags', null, router);
       console.log('Products API Response:', response);
       if (response.success) {
@@ -175,7 +229,6 @@ const Menu = () => {
         setProducts(allProducts);
         setFilteredProducts(allProducts);
 
-        // Calculate and set initial price range
         if (allProducts.length > 0) {
           const prices = allProducts.map(p => p.price);
           const min = Math.floor(Math.min(...prices) / 20) * 20;
@@ -184,7 +237,6 @@ const Menu = () => {
           setLocalPriceRange([min, max]);
         }
 
-        // Get aggregates for all products
         const ids = allProducts.map(p => p._id);
         fetchAggregatesForProducts(ids);
       }
@@ -195,6 +247,7 @@ const Menu = () => {
       setLoadingData(false);
     }
   };
+
   const fetchAggregatesForProducts = async (ids) => {
     try {
       const results = await Promise.all(ids.map(id => Api('GET', `reviews/product/${id}/aggregate?limit=5`, null, router).then(r => ({ id, r }))))
@@ -206,9 +259,7 @@ const Menu = () => {
     }
   };
 
-  // State to track if any category is selected
   const [hasCategorySelected, setHasCategorySelected] = useState(false);
-
 
   useEffect(() => {
     let filtered = [...products];
@@ -229,7 +280,6 @@ const Menu = () => {
       );
     }
 
-    // Filter by intensity
     const selectedIntensities = Object.keys(intensityFilters).filter(key => intensityFilters[key]);
     if (selectedIntensities.length > 0) {
       filtered = filtered.filter(product => {
@@ -244,23 +294,18 @@ const Menu = () => {
       });
     }
 
-    // Filter by review tags
     const selectedTags = Object.keys(selectedReviewTags).filter(key => selectedReviewTags[key]);
     if (selectedTags.length > 0) {
       filtered = filtered.filter(product => {
-        // Check if product has reviewTags and it's an array
         if (!product.reviewTags || !Array.isArray(product.reviewTags)) {
           return false;
         }
-
-        // Check if product has all the selected review tags
         return selectedTags.every(tagId =>
           product.reviewTags.some(tag => tag._id === tagId)
         );
       });
     }
 
-    // Filter by price range
     filtered = filtered.filter(product => {
       const price = Number(product.price || 0);
       if (priceRange[1] >= 9999) {
@@ -272,8 +317,9 @@ const Menu = () => {
     setFilteredProducts(filtered);
     setTotalItems(filtered.length);
     setTotalPages(Math.ceil(filtered.length / ITEMS_PER_PAGE));
-    setCurrentPage(1); // Reset to first page when filters change
+    setCurrentPage(1);
   }, [products, categoryFilters, primaryUseFilters, intensityFilters, selectedReviewTags, priceRange, reviewAggByProduct]);
+
   const isDriedProduct = (product) => {
     if (!product.category) return false;
     const categoryName = typeof product.category === 'object'
@@ -289,29 +335,24 @@ const Menu = () => {
       : '';
     return categoryName.toUpperCase() === 'EDIBLES';
   };
+
   const sortedProducts = useMemo(() => {
-    // Separate DRIED, EDIBLES and other products
     const driedProducts = filteredProducts.filter(p => isDriedProduct(p));
 
-    // Only include EDIBLES that have active flavors
     const ediblesProducts = filteredProducts.filter(p => {
       const isEdible = isEdiblesProduct(p);
       if (!isEdible) return false;
-      // Check if has active flavors
       return p.flavors && p.flavors.length > 0 && p.flavors.some(f => f.isActive);
     });
 
-    // Other products: not DRIED and either not EDIBLES or EDIBLES without active flavors
     const otherProducts = filteredProducts.filter(p => {
       if (isDriedProduct(p)) return false;
       if (isEdiblesProduct(p)) {
-        // Include EDIBLES without active flavors in "other" category
         return !(p.flavors && p.flavors.length > 0 && p.flavors.some(f => f.isActive));
       }
       return true;
     });
 
-    // Combine: all DRIED together, then EDIBLES together, then others
     const sorted = [...driedProducts, ...ediblesProducts, ...otherProducts];
 
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -319,23 +360,8 @@ const Menu = () => {
     return sorted.slice(startIndex, endIndex);
   }, [filteredProducts, currentPage]);
 
-  // memo for selected categories (for deciding view-all state)
   const selectedCategoriesMemo = useMemo(() => Object.keys(categoryFilters).filter((k) => categoryFilters[k]), [categoryFilters]);
 
-  // const handleViewAllCategory = (catId) => {
-  //   // set only this category selected
-  //   const newCategoryFilters = Object.fromEntries(categories.map((c) => [c._id, c._id === catId]));
-  //   setCategoryFilters(newCategoryFilters);
-  //   updateURL(newCategoryFilters, primaryUseFilters);
-  //   // expand this category section and collapse others optionally
-  //   setCollapsedByCategory((prev) => ({ ...prev, [catId]: false }));
-  //   // scroll into view
-  //   if (typeof window !== 'undefined') {
-  //     window.scrollTo({ top: 0, behavior: 'smooth' });
-  //   }
-  // };
-
-  // Function to update URL with current filters
   const updateURL = (newCategoryFilters, newPrimaryUseFilters, newIntensityFilters = null) => {
     const selectedCategories = Object.keys(newCategoryFilters).filter(key => newCategoryFilters[key]);
     const selectedPrimaryUses = Object.keys(newPrimaryUseFilters).filter(key => newPrimaryUseFilters[key]);
@@ -345,21 +371,18 @@ const Menu = () => {
 
     const query = { ...router.query };
 
-    // Update category in URL
     if (selectedCategories.length > 0) {
       query.category = selectedCategories;
     } else {
       delete query.category;
     }
 
-    // Update primary use in URL
     if (selectedPrimaryUses.length > 0) {
       query.primaryUse = selectedPrimaryUses;
     } else {
       delete query.primaryUse;
     }
 
-    // Update intensity in URL
     if (selectedIntensities.length > 0) {
       query.intensity = selectedIntensities;
     } else {
@@ -371,10 +394,6 @@ const Menu = () => {
       query
     }, undefined, { shallow: true });
   };
-
-  // const toggleCategoryCollapse = (catId) => {
-  //   setCollapsedByCategory((prev) => ({ ...prev, [catId]: !prev[catId] }));
-  // };
 
   const handleCategoryChange = (categoryId) => {
     const newCategoryFilters = {
@@ -403,7 +422,6 @@ const Menu = () => {
     updateURL(categoryFilters, primaryUseFilters, newIntensityFilters);
   };
 
-  // Handle review tag toggle
   const handleReviewTagToggle = (tagId) => {
     setSelectedReviewTags(prev => ({
       ...prev,
@@ -411,7 +429,6 @@ const Menu = () => {
     }));
   };
 
-  // Reset all filters
   const resetAllFilters = () => {
     const newCategoryFilters = {};
     categories.forEach(cat => {
@@ -421,7 +438,6 @@ const Menu = () => {
     setPrimaryUseFilters({ therapeutic: false, functional: false });
     setIntensityFilters({ mild: false, medium: false, strong: false });
 
-    // Reset review tags
     const resetTags = {};
     reviewTags.forEach(tag => {
       resetTags[tag._id] = false;
@@ -432,7 +448,7 @@ const Menu = () => {
   };
 
   const handleAddToCart = (product, e) => {
-    e.stopPropagation(); // Prevent card click event
+    e.stopPropagation();
     const stock = Number(product.stock || 0);
     const isAvailable = product.hasStock && stock > 0;
 
@@ -446,24 +462,21 @@ const Menu = () => {
   };
 
   const handleQuantityChange = (product, newQuantity, e) => {
-    e.stopPropagation(); // Prevent card click event
+    e.stopPropagation();
     const stock = Number(product.stock || 0);
     const productId = product._id || product.id;
 
     if (newQuantity <= 0) {
       updateCartItemQuantity(productId, 0);
       setAddedSet(prev => ({ ...prev, [productId]: false }));
-      // toast.success('Item removed from cart');
     } else if (stock > 0 && newQuantity > stock) {
       toast.error(`Only ${stock} items available in stock`);
     } else {
       updateCartItemQuantity(productId, newQuantity);
-      // toast.success('Quantity updated');
     }
   };
 
   const handleProductClick = (product) => {
-    // For products with variants, check if any variant is in stock
     if (product.hasVariants && product.variants && product.variants.length > 0) {
       const hasInStockVariant = product.variants.some(variant => {
         const variantStock = Number(variant.stock || 0);
@@ -476,7 +489,6 @@ const Menu = () => {
       }
     }
 
-    // For products with flavors, check if any flavor is in stock
     if (product.flavors && product.flavors.length > 0) {
       const hasInStockFlavor = product.flavors.some(flavor => {
         const flavorStock = Number(flavor.stock || 0);
@@ -489,7 +501,6 @@ const Menu = () => {
       }
     }
 
-    // For regular products, check the main stock
     const stock = Number(product.stock || 0);
     const isAvailable = product.hasStock && stock > 0;
 
@@ -499,14 +510,6 @@ const Menu = () => {
       toast.error('Product is out of stock');
     }
   };
-
-
-
-
-
-
-
-
 
   const isDriedFilterActive = () => {
     const driedCategory = categories.find(cat =>
@@ -523,11 +526,6 @@ const Menu = () => {
     return driedCategory && categoryFilters[driedCategory._id];
   };
 
-
-
-
-
-
   const clearAllFilters = () => {
     const newCategoryFilters = {};
     const newPrimaryUseFilters = { therapeutic: false, functional: false };
@@ -539,7 +537,6 @@ const Menu = () => {
     setPriceRange([priceRangeLimits.min, priceRangeLimits.max]);
     setIsDrawerOpen(false);
 
-    // Clear URL parameters
     const query = { ...router.query };
     delete query.category;
     delete query.primaryUse;
@@ -553,37 +550,32 @@ const Menu = () => {
     }, undefined, { shallow: true });
   };
 
-  // Get min and max price from products
   const priceRangeLimits = useMemo(() => {
     if (!products || products.length === 0) return { min: 0, max: 100 };
     const prices = products.map(p => p.price);
-    const min = Math.floor(Math.min(...prices) / 20) * 20; // Round down to nearest 20
-    const max = Math.ceil(Math.max(...prices) / 20) * 20;   // Round up to nearest 20
+    const min = Math.floor(Math.min(...prices) / 20) * 20;
+    const max = Math.ceil(Math.max(...prices) / 20) * 20;
     return { min, max };
   }, [products]);
 
-  // Apply price range filter with debounce
   const applyPriceRange = useCallback(
     debounce((newRange) => {
       setPriceRange([...newRange]);
     }, 100),
-    [] // eslint-disable-line react-hooks/exhaustive-deps
+    []
   );
 
-  // Handle price range change
   const handlePriceRangeChange = useCallback((newRange) => {
     setLocalPriceRange(newRange);
     setPriceRange(newRange);
   }, []);
 
-  // Reset price range
   const resetPriceRange = useCallback(() => {
     const newRange = [priceRangeLimits.min, priceRangeLimits.max];
     setLocalPriceRange([...newRange]);
     setPriceRange([...newRange]);
   }, [priceRangeLimits]);
 
-  // Calculate active filter count
   const activeFilterCount = useMemo(() => {
     const categoryCount = Object.values(categoryFilters).filter(Boolean).length;
     const primaryUseCount = Object.values(primaryUseFilters).filter(Boolean).length;
@@ -594,7 +586,6 @@ const Menu = () => {
     return categoryCount + primaryUseCount + intensityCount + reviewTagCount + (priceFilterActive ? 1 : 0);
   }, [categoryFilters, primaryUseFilters, intensityFilters, selectedReviewTags, priceRange, priceRangeLimits]);
 
-  // Color presets for badges
   const colors = [
     { bg: '#B3194275', color: 'white' },
     { bg: '#8b5cf6', color: 'white' },
@@ -603,9 +594,161 @@ const Menu = () => {
     { bg: '#2E2E2E40', color: 'white' },
   ];
 
-  // Filter Sidebar Component
+  // Handle loading state
+  const isLoading = loading || (isLoggedIn && !user);
+  
+  if (isLoading) {
+    console.log('Showing loading state - waiting for user data');
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (isLoggedIn && user?.status === 'pending') {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-8 text-center">
+          <div className="flex justify-center mb-6">
+            <div className="bg-yellow-100 p-4 rounded-full">
+              <AlertCircle className="h-12 w-12 text-yellow-600" />
+            </div>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Account Under Review</h2>
+          <p className="text-gray-600 mb-6">
+            Thank you for signing up! Your account is currently under review by our team.
+            You'll be able to browse our menu once your account is verified.
+          </p>
+          <p className="text-gray-500 text-sm">
+            Please check back later or contact support if you have any questions.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Please Login</h2>
+          <p className="text-gray-600 mb-6">You need to be logged in to view the menu.</p>
+          <button
+            onClick={() => router.push('/auth/login')}
+            className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-lg transition-colors"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (loadingData) {
+    return (
+      <div className="min-h-screen lg:px-14 bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#536690] mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading menu...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const PaginationControls = () => {
+    const maxVisiblePages = 5;
+
+    const handlePageChange = (pageNum) => {
+      setCurrentPage(pageNum);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const getPageNumbers = () => {
+      const pages = [];
+      let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+      let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+      if (endPage - startPage < maxVisiblePages - 1) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+
+      return pages;
+    };
+
+    if (totalPages <= 1) return null;
+
+    return (
+      <div className="flex items-center justify-center space-x-2 mt-8 mb-6">
+        <button
+          onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+          disabled={currentPage === 1}
+          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${currentPage === 1
+            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+            }`}
+        >
+          Previous
+        </button>
+
+        {currentPage > 3 && (
+          <>
+            <button
+              onClick={() => handlePageChange(1)}
+              className="px-3 py-2 rounded-lg text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+            >
+              1
+            </button>
+            {currentPage > 4 && <span className="text-gray-400">...</span>}
+          </>
+        )}
+
+        {getPageNumbers().map(pageNum => (
+          <button
+            key={pageNum}
+            onClick={() => handlePageChange(pageNum)}
+            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${currentPage === pageNum
+              ? 'bg-[#536690] text-white'
+              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+          >
+            {pageNum}
+          </button>
+        ))}
+
+        {currentPage < totalPages - 2 && (
+          <>
+            {currentPage < totalPages - 3 && <span className="text-gray-400">...</span>}
+            <button
+              onClick={() => handlePageChange(totalPages)}
+              className="px-3 py-2 rounded-lg text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+            >
+              {totalPages}
+            </button>
+          </>
+        )}
+
+        <button
+          onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+          disabled={currentPage === totalPages}
+          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${currentPage === totalPages
+            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+            }`}
+        >
+          Next
+        </button>
+      </div>
+    );
+  };
+
+  
   const FilterSidebar = ({ className = "" }) => (
-    <div className={`bg-white p-6 ${className}`}>
+   <div className={`bg-white p-6 ${className} overflow-visible`}>
       {/* Header for mobile drawer */}
       <div className="flex items-center justify-between mb-6 lg:hidden">
         <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
@@ -837,96 +980,96 @@ const Menu = () => {
   );
 
 
-  const PaginationControls = () => {
-    const maxVisiblePages = 5;
+  // const PaginationControls = () => {
+  //   const maxVisiblePages = 5;
 
-    const handlePageChange = (pageNum) => {
-      setCurrentPage(pageNum);
-      // Scroll to top smoothly
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
+  //   const handlePageChange = (pageNum) => {
+  //     setCurrentPage(pageNum);
+  //     // Scroll to top smoothly
+  //     window.scrollTo({ top: 0, behavior: 'smooth' });
+  //   };
 
-    const getPageNumbers = () => {
-      const pages = [];
-      let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-      let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+  //   const getPageNumbers = () => {
+  //     const pages = [];
+  //     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+  //     let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
-      if (endPage - startPage < maxVisiblePages - 1) {
-        startPage = Math.max(1, endPage - maxVisiblePages + 1);
-      }
+  //     if (endPage - startPage < maxVisiblePages - 1) {
+  //       startPage = Math.max(1, endPage - maxVisiblePages + 1);
+  //     }
 
-      for (let i = startPage; i <= endPage; i++) {
-        pages.push(i);
-      }
+  //     for (let i = startPage; i <= endPage; i++) {
+  //       pages.push(i);
+  //     }
 
-      return pages;
-    };
+  //     return pages;
+  //   };
 
-    if (totalPages <= 1) return null;
+  //   if (totalPages <= 1) return null;
 
-    return (
-      <div className="flex items-center justify-center space-x-2 mt-8 mb-6">
-        <button
-          onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-          disabled={currentPage === 1}
-          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${currentPage === 1
-            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-            }`}
-        >
-          Previous
-        </button>
+  //   return (
+  //     <div className="flex items-center justify-center space-x-2 mt-8 mb-6">
+  //       <button
+  //         onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+  //         disabled={currentPage === 1}
+  //         className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${currentPage === 1
+  //           ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+  //           : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+  //           }`}
+  //       >
+  //         Previous
+  //       </button>
 
-        {currentPage > 3 && (
-          <>
-            <button
-              onClick={() => handlePageChange(1)}
-              className="px-3 py-2 rounded-lg text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
-            >
-              1
-            </button>
-            {currentPage > 4 && <span className="text-gray-400">...</span>}
-          </>
-        )}
+  //       {currentPage > 3 && (
+  //         <>
+  //           <button
+  //             onClick={() => handlePageChange(1)}
+  //             className="px-3 py-2 rounded-lg text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+  //           >
+  //             1
+  //           </button>
+  //           {currentPage > 4 && <span className="text-gray-400">...</span>}
+  //         </>
+  //       )}
 
-        {getPageNumbers().map(pageNum => (
-          <button
-            key={pageNum}
-            onClick={() => handlePageChange(pageNum)}
-            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${currentPage === pageNum
-              ? 'bg-[#536690] text-white'
-              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
-          >
-            {pageNum}
-          </button>
-        ))}
+  //       {getPageNumbers().map(pageNum => (
+  //         <button
+  //           key={pageNum}
+  //           onClick={() => handlePageChange(pageNum)}
+  //           className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${currentPage === pageNum
+  //             ? 'bg-[#536690] text-white'
+  //             : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+  //             }`}
+  //         >
+  //           {pageNum}
+  //         </button>
+  //       ))}
 
-        {currentPage < totalPages - 2 && (
-          <>
-            {currentPage < totalPages - 3 && <span className="text-gray-400">...</span>}
-            <button
-              onClick={() => handlePageChange(totalPages)}
-              className="px-3 py-2 rounded-lg text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
-            >
-              {totalPages}
-            </button>
-          </>
-        )}
+  //       {currentPage < totalPages - 2 && (
+  //         <>
+  //           {currentPage < totalPages - 3 && <span className="text-gray-400">...</span>}
+  //           <button
+  //             onClick={() => handlePageChange(totalPages)}
+  //             className="px-3 py-2 rounded-lg text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+  //           >
+  //             {totalPages}
+  //           </button>
+  //         </>
+  //       )}
 
-        <button
-          onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-          disabled={currentPage === totalPages}
-          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${currentPage === totalPages
-            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-            }`}
-        >
-          Next
-        </button>
-      </div>
-    );
-  };
+  //       <button
+  //         onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+  //         disabled={currentPage === totalPages}
+  //         className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${currentPage === totalPages
+  //           ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+  //           : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+  //           }`}
+  //       >
+  //         Next
+  //       </button>
+  //     </div>
+  //   );
+  // };
 
   <div className="mb-6">
     <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
@@ -949,6 +1092,15 @@ const Menu = () => {
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#536690] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading menu...</p>
         </div>
+      </div>
+    );
+  }
+
+  // Render loading state for data
+  if (loadingData) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
   }
@@ -1043,7 +1195,7 @@ const Menu = () => {
           {/* All Products */}
           {/* All Products */}
           <div className="mb-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 relative">
               {sortedProducts.map((product) => {
                 const isDried = isDriedProduct(product);
                 const isEdibles = isEdiblesProduct(product);
@@ -1059,7 +1211,12 @@ const Menu = () => {
                 // DRIED products ke liye special UI - FULL WIDTH
                 if (showDriedLayout) {
                   return (
-                    <div key={product._id} className="col-span-full">
+                    <div 
+                      key={product._id} 
+                      className="col-span-full"
+                      onMouseEnter={() => setHoveredProductId(product._id)}
+                      onMouseLeave={() => setHoveredProductId(null)}
+                    >
                       <div
                         className="relative rounded-3xl border border-gray-200 hover:shadow-lg transition-shadow bg-white overflow-hidden w-full max-w-4xl mx-auto"
                         onClick={() => handleProductClick(product)}
@@ -1068,11 +1225,33 @@ const Menu = () => {
                         <div className="flex flex-col lg:flex-row">
                           <div className="w-full lg:w-2/5 h-64 lg:h-80 bg-gray-100 relative">
                             {product.images && product.images.length > 0 ? (
-                              <img
-                                src={product.images[0].startsWith('http') ? product.images[0] : `http://localhost:5000${product.images[0]}`}
-                                alt={product.name}
-                                className="w-full h-full object-cover"
-                              />
+                              <>
+                                <img
+                                  src={product.images[0].startsWith('http') ? product.images[0] : `http://localhost:5000${product.images[0]}`}
+                                  alt={product.name}
+                                  className="w-full h-full object-cover"
+                                />
+                                {/* Allergen Icons */}
+                               {product.allergenInfo?.hasAllergens && product.allergenInfo.allergenImages?.length > 0 && (
+<div className="absolute bottom-2 left-2 right-2 flex flex-wrap gap-1 justify-center z-20">
+    {product.allergenInfo.allergenImages.map((img, idx) => (
+      <div key={idx} className="relative">
+        <img
+          src={img.startsWith('http') ? img : `http://localhost:5000${img}`}
+          alt="Allergen"
+          className="w-6 h-6 object-cover rounded-full border border-white shadow-sm"
+        />
+      </div>
+    ))}
+    {hoveredProductId === product._id && product.allergenInfo.tooltipText && (
+  <div className="absolute -top-8 left-2/3 transform -translate-x-1/2 z-30 bg-gray-900 text-white text-xs rounded py-1 px-2 whitespace-nowrap shadow-lg">
+        {product.allergenInfo.tooltipText}
+        <div className="absolute w-2 h-2 bg-gray-900 transform rotate-45 -bottom-1 left-1/2 -translate-x-1/2"></div>
+      </div>
+    )}
+  </div>
+)}
+                              </>
                             ) : (
                               <div className="w-full h-full bg-gray-200"></div>
                             )}
@@ -1330,7 +1509,12 @@ const Menu = () => {
 
                 if (showEdiblesLayout) {
                   return (
-                    <div key={product._id} className="col-span-full">
+                    <div 
+                      key={product._id} 
+                      className="col-span-full"
+                      onMouseEnter={() => setHoveredProductId(product._id)}
+                      onMouseLeave={() => setHoveredProductId(null)}
+                    >
                       <div
                         className="relative rounded-3xl border border-gray-200 hover:shadow-lg transition-shadow bg-white overflow-hidden w-full max-w-4xl mx-auto"
                         onClick={() => handleProductClick(product)}
@@ -1339,11 +1523,33 @@ const Menu = () => {
                           {/* Left side - Product Image */}
                           <div className="w-full lg:w-2/5 h-64 lg:h-80 bg-gray-100 relative">
                             {product.images && product.images.length > 0 ? (
-                              <img
-                                src={product.images[0].startsWith('http') ? product.images[0] : `http://localhost:5000${product.images[0]}`}
-                                alt={product.name}
-                                className="w-full h-full object-cover"
-                              />
+                              <>
+                                <img
+                                  src={product.images[0].startsWith('http') ? product.images[0] : `http://localhost:5000${product.images[0]}`}
+                                  alt={product.name}
+                                  className="w-full h-full object-cover"
+                                />
+                                {/* Allergen Icons */}
+                                {product.allergenInfo?.hasAllergens && product.allergenInfo.allergenImages?.length > 0 && (
+                                  <div className="absolute bottom-2 left-2 right-2 flex flex-wrap gap-1 justify-center">
+                                    {product.allergenInfo.allergenImages.map((img, idx) => (
+                                      <div key={idx} className="relative group">
+                                        <img
+                                          src={img.startsWith('http') ? img : `http://localhost:5000${img}`}
+                                          alt="Allergen"
+                                          className="w-6 h-6 object-cover rounded-full border border-white shadow-sm"
+                                        />
+                                        {product.allergenInfo.tooltipText && (
+                                          <div className="absolute z-10 hidden group-hover:block bg-gray-900 text-white text-xs rounded py-1 px-2 whitespace-nowrap bottom-full left-1/2 transform -translate-x-1/2 mb-1">
+                                            {product.allergenInfo.tooltipText}
+                                            <div className="absolute w-2 h-2 bg-gray-900 transform rotate-45 -bottom-1 left-1/2 -translate-x-1/2"></div>
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </>
                             ) : (
                               <div className="w-full h-full bg-gray-200"></div>
                             )}
@@ -1561,20 +1767,45 @@ const Menu = () => {
 
                 // Normal card UI for non-DRIED products
                 return (
-                  <div
-                    key={product._id}
-                    className="relative rounded-4xl border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
-                    style={{ backgroundColor: '#8EAFF633' }}
+                 <div
+  key={product._id}
+  className="relative rounded-4xl border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
+  style={{ backgroundColor: '#8EAFF633', overflow: 'visible' }}
                     onClick={() => handleProductClick(product)}
+                    onMouseEnter={() => setHoveredProductId(product._id)}
+                    onMouseLeave={() => setHoveredProductId(null)}
                   >
                     {/* Product Image */}
-                    <div className="w-full h-64 bg-gray-100 rounded-t-4xl overflow-hidden relative">
+                  <div className="w-full h-64 bg-gray-100 rounded-t-4xl relative" style={{ overflow: 'visible' }}>
                       {product.images && product.images.length > 0 ? (
-                        <img
-                          src={product.images[0].startsWith('http') ? product.images[0] : `http://localhost:5000${product.images[0]}`}
-                          alt={product.name}
-                          className="w-full h-full object-cover"
-                        />
+                        <>
+                          <img
+                            src={product.images[0].startsWith('http') ? product.images[0] : `http://localhost:5000${product.images[0]}`}
+                            alt={product.name}
+                            className="w-full h-full object-cover"
+                          />
+                          {/* Allergen Icons with Tooltip */}
+                          {product.allergenInfo?.hasAllergens && product.allergenInfo.allergenImages?.length > 0 && (
+                            <div className="absolute bottom-2 left-2 right-2 flex flex-wrap gap-1 justify-center">
+                              {product.allergenInfo.allergenImages.map((img, idx) => (
+                                <div key={idx} className="relative">
+                                  <img
+                                    src={img.startsWith('http') ? img : `http://localhost:5000${img}`}
+                                    alt="Allergen"
+                                    className="w-5 h-5 object-cover rounded-full border border-white shadow-sm"
+                                  />
+                                </div>
+                              ))}
+                      {hoveredProductId === product._id && product.allergenInfo.tooltipText && (
+  <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 z-30 bg-gray-900 text-white text-xs rounded py-1 px-2 whitespace-nowrap shadow-lg">
+                                  {product.allergenInfo.tooltipText}
+                                  <div className="absolute w-2 h-2 bg-gray-900 transform rotate-45 -bottom-1 left-1/2 -translate-x-1/2"></div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          <div className="absolute bottom-0 left-0 right-0 h-1/4 bg-gradient-to-t from-black/30 to-transparent pointer-events-none"></div>
+                        </>
                       ) : (
                         <div className="w-full h-full bg-gray-200"></div>
                       )}
@@ -1605,9 +1836,34 @@ const Menu = () => {
                     </div>
 
                     {/* Card Content */}
-                    <div className="p-4">
+                    <div className="p-4 relative">
+                      {product.allergenInfo?.tooltipText && (
+                        <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 z-10 hidden group-hover:block bg-gray-900 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                          {product.allergenInfo.tooltipText}
+                          <div className="absolute w-2 h-2 bg-gray-900 transform rotate-45 -bottom-1 left-1/2 -translate-x-1/2"></div>
+                        </div>
+                      )}
                       <div className="space-y-3">
-                        <h3 className="font-medium text-gray-900 text-sm">{product.name}</h3>
+                        <div className="flex justify-between items-start">
+                          <h3 className="font-medium text-gray-900 text-sm">{product.name}</h3>
+                          {product.allergenInfo?.hasAllergens && (
+                            <div className="relative group">
+                              <AlertCircle className="h-4 w-4 text-yellow-600" />
+                              <div className="absolute z-10 hidden group-hover:block w-48 bg-black text-white text-xs p-2 rounded shadow-lg -left-24 bottom-full mb-2">
+                                {product.allergenInfo.tooltipText}
+                                {product.allergenInfo.allergenImage && (
+                                  <img 
+                                    src={product.allergenInfo.allergenImage.startsWith('http') ? 
+                                      product.allergenInfo.allergenImage : 
+                                      `http://localhost:5000${product.allergenInfo.allergenImage}`} 
+                                    alt="Allergen information"
+                                    className="mt-2 rounded"
+                                  />
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
                         <p className="text-lg font-semibold text-gray-900">$ {product.price}</p>
                         {product.intensity && (
                           <div className="mt-1">

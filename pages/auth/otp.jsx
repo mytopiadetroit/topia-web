@@ -38,44 +38,59 @@ const OtpVerification = () => {
       return;
     }
 
- try {
-  setLoading(true);
-  setError('');
-  
-  const response = await Api('post', 'auth/verify-otp', {
-    otp,
-    phone: userPhone
-  }, router, null, true);
-  
-  if (response && response.success) {
-    if (response.token && response.user) {
-      login(response.user, response.token);
-      safeToast.success('Login successful!');
-      setTimeout(() => {
-        router.push('/');
-      }, 1500);
+    try {
+      setLoading(true);
+      setError('');
+      
+      const response = await Api('post', 'auth/verify-otp', {
+        otp,
+        phone: userPhone
+      }, router, null, true);
+      
+      console.log('OTP Verification Response:', response);
+      
+      if (response && response.success) {
+        if (response.token && response.user) {
+          // Ensure user object has status field
+          const userWithStatus = {
+            ...response.user,
+            status: response.user.status || 'pending' // Default to 'pending' if status is not set
+          };
+          
+          console.log('Logging in user with status:', userWithStatus.status);
+          
+          // Save the updated user object with status
+          login(userWithStatus, response.token);
+          
+          // Also update localStorage directly to ensure consistency
+          localStorage.setItem('userDetail', JSON.stringify(userWithStatus));
+          
+          safeToast.success('Login successful!');
+          setTimeout(() => {
+            router.push('/');
+          }, 1500);
+        }
+      } else {
+        const errorMessage = response?.message || 'OTP verification failed. Please try again.';
+        safeToast.error(errorMessage);
+        setError(errorMessage);
+      }
+    } catch (err) {
+      if (err?.response?.data?.message) {
+        const errorMessage = err.response.data.message;
+        safeToast.error(errorMessage);
+        setError(errorMessage);
+      } else {
+        safeToast.error('An error occurred during OTP verification. Please try again.');
+        setError('An error occurred during OTP verification. Please try again.');
+      }
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.error('OTP verification error:', err.message);
+      }
+    } finally {
+      setLoading(false);
     }
-  } else {
-    const errorMessage = response?.message || 'OTP verification failed. Please try again.';
-    safeToast.error(errorMessage);
-    setError(errorMessage);
-  }
-} catch (err) {
-  if (err?.response?.data?.message) {
-    const errorMessage = err.response.data.message;
-    safeToast.error(errorMessage);
-    setError(errorMessage);
-  } else {
-    safeToast.error('An error occurred during OTP verification. Please try again.');
-    setError('An error occurred during OTP verification. Please try again.');
-  }
-  
-  if (process.env.NODE_ENV === 'development') {
-    console.error('OTP verification error:', err.message);
-  }
-} finally {
-  setLoading(false);  // YE LINE ZAROORI HAI
-}
   };
 
   // Check if OTP is filled (6 digits)
