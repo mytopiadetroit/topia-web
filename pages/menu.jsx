@@ -56,12 +56,17 @@ const Menu = () => {
   });
 
   // Handle user status and loading state in useEffect
+  const [initialLoad, setInitialLoad] = useState(true);
+  const [userStatusChecked, setUserStatusChecked] = useState(false);
+
   useEffect(() => {
     const initializeUserData = async () => {
       if (isLoggedIn) {
         await refreshUserData();
       }
+      setInitialLoad(false);
     };
+    
     initializeUserData();
 
     const intervalId = setInterval(async () => {
@@ -75,20 +80,24 @@ const Menu = () => {
 
   // Handle user status and products
   useEffect(() => {
-    if (loading || (isLoggedIn && !user)) {
-      console.log('Loading or waiting for user data');
+    // Skip if still in initial load or user data isn't ready
+    if (initialLoad || (isLoggedIn && !user)) {
+      console.log('Initial load or waiting for user data');
       return;
     }
 
-    if (isLoggedIn && user?.status === 'pending') {
-      console.log('User is pending verification, clearing products');
+    // Only set showPendingMessage to true if we're certain about the user's status
+    if (isLoggedIn && (user?.status === 'pending' || user?.status === 'incomplete' || user?.status === 'suspend')) {
+      console.log('User status requires verification, clearing products');
       setProducts([]);
       setFilteredProducts([]);
       setShowPendingMessage(true);
+      setUserStatusChecked(true);
     } else {
       setShowPendingMessage(false);
+      setUserStatusChecked(true);
     }
-  }, [loading, isLoggedIn, user]);
+  }, [initialLoad, isLoggedIn, user]);
 
   // Check user status before any data fetching
   useEffect(() => {
@@ -606,7 +615,7 @@ const Menu = () => {
     );
   }
 
-  if (isLoggedIn && user?.status === 'pending') {
+if (isLoggedIn && (user?.status === 'pending' || user?.status === 'incomplete' || user?.status === 'suspend')) {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-8 text-center">
@@ -1765,212 +1774,433 @@ const Menu = () => {
                   );
                 }
 
-                // Normal card UI for non-DRIED products
-                return (
-                 <div
-  key={product._id}
-  className="relative rounded-4xl border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
-  style={{ backgroundColor: '#8EAFF633', overflow: 'visible' }}
-                    onClick={() => handleProductClick(product)}
-                    onMouseEnter={() => setHoveredProductId(product._id)}
-                    onMouseLeave={() => setHoveredProductId(null)}
-                  >
-                    {/* Product Image */}
-                  <div className="w-full h-64 bg-gray-100 rounded-t-4xl relative" style={{ overflow: 'visible' }}>
-                      {product.images && product.images.length > 0 ? (
-                        <>
-                          <img
-                            src={product.images[0].startsWith('http') ? product.images[0] : `http://localhost:5000${product.images[0]}`}
-                            alt={product.name}
-                            className="w-full h-full object-cover"
-                          />
-                          {/* Allergen Icons with Tooltip */}
-                          {product.allergenInfo?.hasAllergens && product.allergenInfo.allergenImages?.length > 0 && (
-                            <div className="absolute bottom-2 left-2 right-2 flex flex-wrap gap-1 justify-center">
-                              {product.allergenInfo.allergenImages.map((img, idx) => (
-                                <div key={idx} className="relative">
-                                  <img
-                                    src={img.startsWith('http') ? img : `http://localhost:5000${img}`}
-                                    alt="Allergen"
-                                    className="w-5 h-5 object-cover rounded-full border border-white shadow-sm"
-                                  />
-                                </div>
-                              ))}
-                      {hoveredProductId === product._id && product.allergenInfo.tooltipText && (
-  <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 z-30 bg-gray-900 text-white text-xs rounded py-1 px-2 whitespace-nowrap shadow-lg">
-                                  {product.allergenInfo.tooltipText}
-                                  <div className="absolute w-2 h-2 bg-gray-900 transform rotate-45 -bottom-1 left-1/2 -translate-x-1/2"></div>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                          <div className="absolute bottom-0 left-0 right-0 h-1/4 bg-gradient-to-t from-black/30 to-transparent pointer-events-none"></div>
-                        </>
-                      ) : (
-                        <div className="w-full h-full bg-gray-200"></div>
-                      )}
-                      {(() => {
-                        const stock = Number(product.stock || 0);
-                        const isOutOfStock = !product.hasStock || stock <= 0;
-                        const isLowStock = stock > 0 && stock < 5;
-
-                        if (isOutOfStock) {
-                          return (
-                            <div className="absolute inset-0 flex items-center justify-center z-10">
-                              <div className="text-2xl font-bold text-red-500 rotate-12 select-none text-center bg-white/90 px-4 py-2 rounded-lg">
-                                Out of<br />Stock
-                              </div>
-                            </div>
-                          );
-                        } else if (isLowStock) {
-                          return (
-                            <div className="absolute top-2 right-2 z-10">
-                              <div className="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                                Only {stock} left
-                              </div>
-                            </div>
-                          );
-                        }
-                        return null;
-                      })()}
+              
+// Normal card UI for non-DRIED products - FULL WIDTH HORIZONTAL LAYOUT
+return (
+  <div 
+    key={product._id} 
+    className="col-span-full"
+    onMouseEnter={() => setHoveredProductId(product._id)}
+    onMouseLeave={() => setHoveredProductId(null)}
+  >
+    <div
+      className="relative rounded-3xl border border-gray-200 hover:shadow-lg transition-shadow bg-white overflow-hidden w-full max-w-4xl mx-auto"
+      onClick={() => handleProductClick(product)}
+    >
+      <div className="flex flex-col lg:flex-row">
+        {/* Left side - Product Image */}
+        <div className="w-full lg:w-2/5 h-64 lg:h-80 bg-gray-100 relative">
+          {product.images && product.images.length > 0 ? (
+            <>
+              <img
+                src={product.images[0].startsWith('http') ? product.images[0] : `http://localhost:5000${product.images[0]}`}
+                alt={product.name}
+                className="w-full h-full object-cover"
+              />
+              {/* Allergen Icons */}
+              {product.allergenInfo?.hasAllergens && product.allergenInfo.allergenImages?.length > 0 && (
+                <div className="absolute bottom-2 left-2 right-2 flex flex-wrap gap-1 justify-center z-20">
+                  {product.allergenInfo.allergenImages.map((img, idx) => (
+                    <div key={idx} className="relative">
+                      <img
+                        src={img.startsWith('http') ? img : `http://localhost:5000${img}`}
+                        alt="Allergen"
+                        className="w-6 h-6 object-cover rounded-full border border-white shadow-sm"
+                      />
                     </div>
+                  ))}
+                  {hoveredProductId === product._id && product.allergenInfo.tooltipText && (
+                    <div className="absolute -top-8 left-2/3 transform -translate-x-1/2 z-30 bg-gray-900 text-white text-xs rounded py-1 px-2 whitespace-nowrap shadow-lg">
+                      {product.allergenInfo.tooltipText}
+                      <div className="absolute w-2 h-2 bg-gray-900 transform rotate-45 -bottom-1 left-1/2 -translate-x-1/2"></div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="w-full h-full bg-gray-200"></div>
+          )}
 
-                    {/* Card Content */}
-                    <div className="p-4 relative">
-                      {product.allergenInfo?.tooltipText && (
-                        <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 z-10 hidden group-hover:block bg-gray-900 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
-                          {product.allergenInfo.tooltipText}
-                          <div className="absolute w-2 h-2 bg-gray-900 transform rotate-45 -bottom-1 left-1/2 -translate-x-1/2"></div>
-                        </div>
-                      )}
-                      <div className="space-y-3">
-                        <div className="flex justify-between items-start">
-                          <h3 className="font-medium text-gray-900 text-sm">{product.name}</h3>
-                          {product.allergenInfo?.hasAllergens && (
-                            <div className="relative group">
-                              <AlertCircle className="h-4 w-4 text-yellow-600" />
-                              <div className="absolute z-10 hidden group-hover:block w-48 bg-black text-white text-xs p-2 rounded shadow-lg -left-24 bottom-full mb-2">
-                                {product.allergenInfo.tooltipText}
-                                {product.allergenInfo.allergenImage && (
-                                  <img 
-                                    src={product.allergenInfo.allergenImage.startsWith('http') ? 
-                                      product.allergenInfo.allergenImage : 
-                                      `http://localhost:5000${product.allergenInfo.allergenImage}`} 
-                                    alt="Allergen information"
-                                    className="mt-2 rounded"
-                                  />
-                                )}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                        <p className="text-lg font-semibold text-gray-900">$ {product.price}</p>
-                        {product.intensity && (
-                          <div className="mt-1">
-                            <div className="flex items-center">
-                              <span className="text-xs font-medium text-gray-500 mr-2">Intensity:</span>
-                              <span className={`text-xs px-2 py-0.5 rounded-full ${product.intensity <= 3 ? 'bg-green-100 text-green-800' :
-                                product.intensity <= 7 ? 'bg-yellow-100 text-yellow-800' :
-                                  'bg-red-100 text-red-800'
-                                }`}>
-                                {product.intensity <= 3 ? 'Mild' : product.intensity <= 7 ? 'Medium' : 'Strong'} ({product.intensity}/10)
-                              </span>
-                            </div>
-                            <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
-                              <div
-                                className="h-1.5 rounded-full transition-all duration-300"
-                                style={{
-                                  width: `${(product.intensity / 10) * 100}%`,
-                                  backgroundColor:
-                                    product.intensity <= 3 ? '#10B981' :
-                                      product.intensity <= 7 ? '#F59E0B' :
-                                        '#EF4444'
-                                }}
-                              ></div>
-                            </div>
-                          </div>
-                        )}
-                        <div className="flex flex-wrap gap-1">
-                          {/* Show Review Tags instead of aggregates */}
-                          {(product.reviewTags || []).slice(0, 3).map((tag, idx) => {
-                            const color = colors[Math.min(idx, colors.length - 1)];
-                            return (
-                              <span key={tag._id} className="px-2 py-1 text-xs rounded-full" style={{ backgroundColor: color.bg, color: color.color }}>
-                                {tag.label}
-                              </span>
-                            );
-                          })}
-                          {(!product.reviewTags || product.reviewTags.length === 0) && (
-                            <span className="px-2 py-1 text-xs rounded-full" style={{ backgroundColor: '#B3194275', color: 'white' }}>
-                              No tags
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex justify-center mt-4">
-                          {(() => {
-                            const stock = Number(product.stock || 0);
-                            const isOutOfStock = !product.hasStock || stock <= 0;
-                            const cartItem = cart.find((i) => (i.id || i._id) === product._id);
-                            const isInCart = addedSet[product._id] || cartItem;
-
-                            if (isInCart && cartItem) {
-                              return (
-                                <div className="flex items-center space-x-3">
-                                  <div className="flex items-center border border-gray-300 rounded-full bg-white">
-                                    <button
-                                      onClick={(e) => handleQuantityChange(product, cartItem.quantity - 1, e)}
-                                      className="p-2 hover:bg-gray-50 rounded-l-full transition-colors"
-                                    >
-                                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="w-4 h-4 text-gray-600 hover:text-black" stroke="currentColor" strokeWidth="2">
-                                        <path d="M5 12h14" />
-                                      </svg>
-                                    </button>
-                                    <span className="px-3 py-1 text-sm text-gray-800 font-medium min-w-[2rem] text-center">
-                                      {cartItem.quantity}
-                                    </span>
-                                    <button
-                                      onClick={(e) => handleQuantityChange(product, cartItem.quantity + 1, e)}
-                                      disabled={isOutOfStock || (stock > 0 && cartItem.quantity >= stock)}
-                                      className={`p-2 rounded-r-full transition-colors ${isOutOfStock || (stock > 0 && cartItem.quantity >= stock)
-                                        ? 'opacity-50 cursor-not-allowed'
-                                        : 'hover:bg-gray-50'
-                                        }`}
-                                    >
-                                      <svg width="16" height="16" viewBox="0 0 24 24" className={`w-4 h-4 ${isOutOfStock || (stock > 0 && cartItem.quantity >= stock)
-                                        ? 'text-gray-400'
-                                        : 'text-gray-600 hover:text-black'
-                                        }`} fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M12 5v14M5 12h14" />
-                                      </svg>
-                                    </button>
-                                  </div>
-                                </div>
-                              );
-                            } else if (isOutOfStock) {
-                              return (
-                                <button
-                                  className="w-[40%] py-2 px-4 rounded-4xl text-sm font-medium bg-gray-400 text-white cursor-not-allowed"
-                                  disabled={true}
-                                >
-                                  Out of Stock
-                                </button>
-                              );
-                            } else {
-                              return (
-                                <button
-                                  className="w-[40%] py-2 px-4 rounded-4xl text-sm font-medium transition-colors bg-[#536690] text-white hover:bg-[#536690]"
-                                  onClick={(e) => handleAddToCart(product, e)}
-                                >
-                                  Add to Cart
-                                </button>
-                              );
-                            }
-                          })()}
-                        </div>
-                      </div>
+          {/* Stock Status Overlay */}
+          {(() => {
+            // Check variants
+            if (product.hasVariants && product.variants && product.variants.length > 0) {
+              const allVariantsOutOfStock = product.variants.every(variant => {
+                const variantStock = Number(variant.stock || 0);
+                return variantStock <= 0;
+              });
+              if (allVariantsOutOfStock) {
+                return (
+                  <div className="absolute inset-0 flex items-center justify-center z-10">
+                    <div className="text-2xl font-bold text-red-500 rotate-12 select-none text-center bg-white/90 px-4 py-2 rounded-lg">
+                      Out of<br />Stock
                     </div>
                   </div>
                 );
+              }
+              return null;
+            }
+
+            // Check flavors
+            if (product.flavors && product.flavors.length > 0) {
+              const allFlavorsOutOfStock = product.flavors.every(flavor => {
+                const flavorStock = Number(flavor.stock || 0);
+                return flavorStock <= 0;
+              });
+              if (allFlavorsOutOfStock) {
+                return (
+                  <div className="absolute inset-0 flex items-center justify-center z-10">
+                    <div className="text-2xl font-bold text-red-500 rotate-12 select-none text-center bg-white/90 px-4 py-2 rounded-lg">
+                      Out of<br />Stock
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            }
+
+            // Normal stock check
+            const stock = Number(product.stock || 0);
+            const isOutOfStock = !product.hasStock || stock <= 0;
+            if (isOutOfStock) {
+              return (
+                <div className="absolute inset-0 flex items-center justify-center z-10">
+                  <div className="text-2xl font-bold text-red-500 rotate-12 select-none text-center bg-white/90 px-4 py-2 rounded-lg">
+                    Out of<br />Stock
+                  </div>
+                </div>
+              );
+            }
+            return null;
+          })()}
+        </div>
+
+        {/* Right side - Product Details */}
+        <div className="w-full lg:w-3/5 p-6">
+          <h3 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h3>
+          {product?.short_description && <p className="text-gray-700 -mt-1 mb-2">{product.short_description}</p>}
+          
+          {/* Intensity Bar */}
+          {product.intensity && (
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-sm text-gray-600">Intensity</span>
+                <span className={`text-sm font-bold ${
+                  product.intensity <= 3 ? 'text-green-600' :
+                  product.intensity <= 7 ? 'text-yellow-600' :
+                  'text-red-500'
+                }`}>
+                  {product.intensity <= 3 ? 'Mild' : product.intensity <= 7 ? 'Medium' : 'Strong'} ({product.intensity}/10)
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="h-2 rounded-full transition-all duration-300"
+                  style={{
+                    width: `${(product.intensity / 10) * 100}%`,
+                    backgroundColor:
+                      product.intensity <= 3 ? '#10B981' :
+                      product.intensity <= 7 ? '#F59E0B' :
+                      '#EF4444'
+                  }}
+                ></div>
+              </div>
+            </div>
+          )}
+
+          {/* Review Tags */}
+          <div className="flex flex-wrap gap-2 mb-4">
+            {(product.reviewTags || []).slice(0, 4).map((tag, idx) => {
+              const color = colors[idx % colors.length];
+              return (
+                <span
+                  key={tag._id}
+                  className="px-3 py-1.5 text-sm rounded-full font-medium"
+                  style={{ backgroundColor: color.bg, color: color.color }}
+                >
+                  {tag.label}
+                </span>
+              );
+            })}
+          </div>
+
+          {/* Variants/Flavors or Simple Price */}
+          <div className="mt-4">
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Check if product has VARIANTS */}
+              {product.hasVariants && product.variants && product.variants.length > 0 && (
+                <>
+                  {product.variants.map((variant) => {
+                    const cartItem = cart.find((i) => {
+                      const isSameProduct = (i.id || i._id) === product._id;
+                      const isSameVariant = i.selectedVariant?._id === variant._id;
+                      return isSameProduct && isSameVariant;
+                    });
+
+                    const isInCart = cartItem && cartItem.quantity > 0;
+                    const variantStock = Number(variant.stock || 0);
+                    const isOutOfStock = variantStock <= 0;
+
+                    return (
+                      <div
+                        key={variant._id}
+                        className="relative border-2 border-gray-900 rounded-2xl px-4 py-3 bg-white min-w-[120px]"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="absolute -top-2 -right-2">
+                          {isInCart ? (
+                            <div className="flex items-center border-2 border-gray-900 rounded-full bg-white">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  updateCartItemQuantity(product._id, cartItem.quantity - 1, variant);
+                                }}
+                                className="p-1 hover:bg-gray-50 rounded-l-full transition-colors"
+                              >
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                                  <path d="M5 12h14" />
+                                </svg>
+                              </button>
+                              <span className="px-2 text-xs font-bold">{cartItem.quantity}</span>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (cartItem.quantity < variantStock) {
+                                    updateCartItemQuantity(product._id, cartItem.quantity + 1, variant);
+                                  } else {
+                                    toast.error(`Only ${variantStock} available`);
+                                  }
+                                }}
+                                disabled={cartItem.quantity >= variantStock}
+                                className="p-1 hover:bg-gray-50 rounded-r-full transition-colors disabled:opacity-50"
+                              >
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                                  <path d="M12 5v14M5 12h14" />
+                                </svg>
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (!isOutOfStock) {
+                                  addToCart({ ...product, selectedVariant: variant }, 1);
+                                  toast.success(`${product.name} (${variant.size.value}${variant.size.unit}) added!`);
+                                }
+                              }}
+                              disabled={isOutOfStock}
+                              className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-md ${
+                                isOutOfStock ? 'bg-gray-300 cursor-not-allowed' : 'bg-gray-900 hover:bg-gray-800'
+                              }`}
+                            >
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                                <path d="M12 5v14M5 12h14" />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-bold text-gray-900">
+                            {variant.size.value}{variant.size.unit === 'grams' ? 'G' : variant.size.unit}
+                          </span>
+                          <span className="text-base font-bold text-gray-900">${variant.price}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </>
+              )}
+
+              {/* Check if product has FLAVORS */}
+              {product.flavors && product.flavors.length > 0 && product.flavors.some(f => f.isActive) && (
+                <>
+                  {product.flavors.filter(f => f.isActive).map((flavor) => {
+                    const cartItem = cart.find((i) => {
+                      const isSameProduct = (i.id || i._id) === product._id;
+                      const isSameFlavor = i.selectedFlavor?._id === flavor._id;
+                      return isSameProduct && isSameFlavor;
+                    });
+
+                    const isInCart = cartItem && cartItem.quantity > 0;
+                    const flavorStock = Number(flavor.stock || 0);
+                    const isOutOfStock = !product.hasStock || flavorStock <= 0;
+
+                    return (
+                      <div
+                        key={flavor._id}
+                        className="relative border-2 border-gray-900 rounded-2xl px-4 py-3 bg-white min-w-[120px]"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="absolute -top-2 -right-2">
+                          {isInCart ? (
+                            <div className="flex items-center border-2 border-gray-900 rounded-full bg-white">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  updateCartItemQuantity(product._id, cartItem.quantity - 1, null, flavor);
+                                }}
+                                className="p-1 hover:bg-gray-50 rounded-l-full transition-colors"
+                              >
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                                  <path d="M5 12h14" />
+                                </svg>
+                              </button>
+                              <span className="px-2 text-xs font-bold">{cartItem.quantity}</span>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (cartItem.quantity < flavorStock) {
+                                    updateCartItemQuantity(product._id, cartItem.quantity + 1, null, flavor);
+                                  } else {
+                                    toast.error(`Only ${flavorStock} available`);
+                                  }
+                                }}
+                                disabled={cartItem.quantity >= flavorStock}
+                                className="p-1 hover:bg-gray-50 rounded-r-full transition-colors disabled:opacity-50"
+                              >
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                                  <path d="M12 5v14M5 12h14" />
+                                </svg>
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (!isOutOfStock) {
+                                  addToCart({ ...product, selectedFlavor: flavor }, 1);
+                                  toast.success(`${product.name} (${flavor.name}) added!`);
+                                }
+                              }}
+                              disabled={isOutOfStock}
+                              className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-md ${
+                                isOutOfStock ? 'bg-gray-300 cursor-not-allowed' : 'bg-gray-900 hover:bg-gray-800'
+                              }`}
+                            >
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                                <path d="M12 5v14M5 12h14" />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-bold text-gray-900">{flavor.name}</span>
+                          <span className="text-base font-bold text-gray-900">${flavor.price}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </>
+              )}
+
+              {/* Simple product - show only if NO variants AND NO flavors */}
+              {(!product.hasVariants || !product.variants || product.variants.length === 0) && 
+               (!product.flavors || product.flavors.length === 0 || !product.flavors.some(f => f.isActive)) && (
+                <div className="relative border-2 border-gray-900 rounded-2xl px-4 py-3 bg-white min-w-[120px]" onClick={(e) => e.stopPropagation()}>
+                  <div className="absolute -top-2 -right-2">
+                    {(() => {
+                      const stock = Number(product.stock || 0);
+                      const isOutOfStock = !product.hasStock || stock <= 0;
+                      const cartItem = cart.find((i) => (i.id || i._id) === product._id);
+                      const isInCart = cartItem && cartItem.quantity > 0;
+
+                      if (isInCart) {
+                        return (
+                          <div className="flex items-center border-2 border-gray-900 rounded-full bg-white">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateCartItemQuantity(product._id, cartItem.quantity - 1);
+                              }}
+                              className="p-1 hover:bg-gray-50 rounded-l-full transition-colors"
+                            >
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                                <path d="M5 12h14" />
+                              </svg>
+                            </button>
+                            <span className="px-2 text-xs font-bold">{cartItem.quantity}</span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (cartItem.quantity < stock) {
+                                  updateCartItemQuantity(product._id, cartItem.quantity + 1);
+                                } else {
+                                  toast.error(`Only ${stock} available`);
+                                }
+                              }}
+                              disabled={cartItem.quantity >= stock}
+                              className="p-1 hover:bg-gray-50 rounded-r-full transition-colors disabled:opacity-50"
+                            >
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                                <path d="M12 5v14M5 12h14" />
+                              </svg>
+                            </button>
+                          </div>
+                        );
+                      } else {
+                        return (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (!isOutOfStock) {
+                                addToCart(product, 1);
+                                toast.success(`${product.name} added!`);
+                                setAddedSet(prev => ({ ...prev, [product._id]: true }));
+                              }
+                            }}
+                            disabled={isOutOfStock}
+                            className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-md ${
+                              isOutOfStock ? 'bg-gray-300 cursor-not-allowed' : 'bg-gray-900 hover:bg-gray-800'
+                            }`}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                              <path d="M12 5v14M5 12h14" />
+                            </svg>
+                          </button>
+                        );
+                      }
+                    })()}
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-base font-bold text-gray-900">${product.price}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Wishlist Button */}
+              <div
+                className="flex items-center space-x-2 cursor-pointer hover:text-red-500 transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!isLoggedIn) {
+                    toast.error('Please login to manage your wishlist');
+                    return;
+                  }
+                  const wasInWishlist = isInWishlist(product._id);
+                  toggle(product);
+                  toast.success(wasInWishlist ? 'Removed from wishlist' : 'Added to wishlist!');
+                }}
+              >
+                <span className="text-sm font-medium">Wishlist</span>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill={isInWishlist(product._id) ? 'currentColor' : 'none'}
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
               })}
             </div>
 

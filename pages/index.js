@@ -16,11 +16,8 @@ export default function Home() {
   const [shopSettings, setShopSettings] = useState(null);
   const [todayTiming, setTodayTiming] = useState(null);
   const [showAllHours, setShowAllHours] = useState(false);
-  // Simple state to track section visibility
-  const [sections, setSections] = useState({
-    rewards: false,
-    feedback: false
-  });
+  // Simple state to track section visibility - null means loading
+  const [sections, setSections] = useState(null);
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem('token');
@@ -30,11 +27,11 @@ export default function Home() {
     };
   };
 
-  // Load homepage settings from the backend - public endpoint
+  // Load homepage settings from the backend
   const loadHomepageSettings = async () => {
-    console.log('Fetching homepage settings...');
+    console.log('🔄 Loading homepage settings...');
     try {
-      const response = await fetch('https://api.mypsyguide.io/api/public/homepage-settings', {
+      const response = await fetch('https://api.mypsyguide.io/api/homepage-settings', {
         method: 'GET',
         headers: { 
           'Content-Type': 'application/json',
@@ -42,43 +39,38 @@ export default function Home() {
           'Pragma': 'no-cache',
           'Expires': '0'
         },
-        credentials: 'omit' // Don't send cookies for public endpoint
+        cache: 'no-store'
       });
       
-      console.log('Response status:', response.status);
+      console.log('📡 Response status:', response.status);
       
       if (response.ok) {
         const result = await response.json();
-        console.log('API Response:', JSON.stringify(result, null, 2));
+        console.log('✅ API Response:', result);
         
         if (result.success && result.data) {
-          console.log('Setting sections with:', {
-            rewards: result.data.rewardsSectionVisible,
-            feedback: result.data.feedbackSectionVisible
-          });
-          
-          setSections({
+          const newSections = {
             rewards: result.data.rewardsSectionVisible ?? false,
             feedback: result.data.feedbackSectionVisible ?? false
-          });
+          };
+          console.log('🎯 Setting sections to:', newSections);
+          setSections(newSections);
         } else {
-          console.warn('Unexpected API response format, showing sections by default');
-          // Default to showing sections if API response is unexpected
+          console.warn('⚠️ Unexpected API response format');
           setSections({
-            rewards: true,
-            feedback: true
+            rewards: false,
+            feedback: false
           });
         }
       } else {
-        console.warn('Failed to load homepage settings. Status:', response.status);
-        // Default to showing sections if API fails
+        console.error('❌ API failed with status:', response.status);
         setSections({
-          rewards: true,
-          feedback: true
+          rewards: false,
+          feedback: false
         });
       }
     } catch (error) {
-      console.error('Error loading homepage settings:', error);
+      console.error('❌ Error loading homepage settings:', error);
       setSections({
         rewards: false,
         feedback: false
@@ -89,8 +81,6 @@ export default function Home() {
   useEffect(() => {
     const loadInitialData = async () => {
       try {
-        console.log('Loading initial data...');
-        
         // Load shop settings
         try {
           const shopResponse = await fetch(`https://api.mypsyguide.io/api/shop-settings`, {
@@ -112,52 +102,13 @@ export default function Home() {
                 }
               }
             }
-          } else {
-            console.error('Failed to load shop settings:', shopResponse.status);
           }
         } catch (shopErr) {
           console.error('Error loading shop settings:', shopErr);
         }
         
-        // Load homepage settings separately with error handling
-        try {
-          const response = await fetch('https://api.mypsyguide.io/api/homepage-settings', {
-            headers: getAuthHeaders(),
-            cache: 'no-store'
-          });
-          
-          if (response.ok) {
-            const data = await response.json();
-            console.log('Homepage settings loaded:', data);
-            if (data.success && data.data) {
-              setSections({
-                rewards: data.data.rewardsSectionVisible ?? false,
-                feedback: data.data.feedbackSectionVisible ?? false
-              });
-            } else {
-              console.warn('Invalid homepage settings response format:', data);
-              // Set default values if response format is invalid
-              setSections({
-                rewards: false,
-                feedback: false
-              });
-            }
-          } else {
-            console.error('Failed to load homepage settings:', response.status);
-            // Set default values if request fails
-            setSections({
-              rewards: false,
-              feedback: false
-            });
-          }
-        } catch (err) {
-          console.error('Error loading homepage settings:', err);
-          // Set default values on error
-          setSections({
-            rewards: false,
-            feedback: false
-          });
-        }
+        // Load homepage settings - single call only
+        await loadHomepageSettings();
       } catch (err) {
         console.error('Error in loadInitialData:', err);
       }
@@ -166,17 +117,7 @@ export default function Home() {
     loadInitialData();
   }, []);
 
-  // Load settings when component mounts and set up polling
-  useEffect(() => {
-    // Initial load
-    loadHomepageSettings();
-    
-    // Set up polling every 30 seconds
-    const intervalId = setInterval(loadHomepageSettings, 30000);
-    
-    // Clean up interval on unmount
-    return () => clearInterval(intervalId);
-  }, []);
+  // Removed duplicate polling - settings are loaded once on mount
 
   const formatTime = (time) => {
     if (!time) return '';
@@ -219,10 +160,26 @@ export default function Home() {
     setIsVisible(true);
   }, []);
 
+  // Debug: Log sections state whenever it changes
+  useEffect(() => {
+    console.log('🔍 Sections state updated:', sections);
+  }, [sections]);
+
   return (
     <div className="min-h-screen bg-white">
     
-     
+     {/* Debug Info - Remove in production */}
+     {/* <div style={{ position: 'fixed', top: 10, right: 10, background: 'black', color: 'white', padding: '10px', zIndex: 9999, fontSize: '12px', borderRadius: '5px' }}>
+       <div>Rewards: {sections?.rewards ? '✅ VISIBLE' : '❌ HIDDEN'}</div>
+       <div>Feedback: {sections?.feedback ? '✅ VISIBLE' : '❌ HIDDEN'}</div>
+       <div>State: {sections === null ? '⏳ Loading...' : '✓ Loaded'}</div>
+       <button 
+         onClick={() => loadHomepageSettings()} 
+         style={{ marginTop: '10px', padding: '5px 10px', background: '#4CAF50', border: 'none', borderRadius: '3px', cursor: 'pointer', color: 'white', fontSize: '11px' }}
+       >
+         🔄 Reload Settings
+       </button>
+     </div> */}
       
  {/* Hero Section */}
 <section className="relative h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-900 via-black to-gray-800">
@@ -436,8 +393,7 @@ export default function Home() {
           </div>
 
           {/* Third Row - Rewards Section */}
-          {console.log('Rendering rewards section, visible:', sections.rewards)}
-          {sections.rewards && (
+          {sections?.rewards && (
           <div className="grid relative lg:grid-cols-2 gap-12  items-center">
               <div className="absolute inset-0 z-0 flex justify-center items-center pointer-events-none">
    <div className="w-screen h-[350px] bg-[url('/images/over.png')] bg-no-repeat bg-center bg-cover -mx-36"></div>
@@ -480,8 +436,7 @@ export default function Home() {
        <section className="py-20 px-4 ">
         <div className="max-w-7xl mx-auto">
           {/* Fourth Row - Feedback Section */}
-          {console.log('Rendering feedback section, visible:', sections.feedback)}
-          {sections.feedback && (
+          {sections?.feedback && (
           <div
   className="rounded-3xl p-12 mb-16 border-[#8EAFF6] border-1 relative overflow-hidden"
   style={{

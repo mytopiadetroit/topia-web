@@ -1,33 +1,58 @@
-import React from 'react';
-import { AlertTriangle, Mail, Phone, Clock, ArrowLeft } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { AlertTriangle, Mail, Phone, Clock, ArrowLeft, LogOut } from 'lucide-react';
 import { useRouter } from 'next/router';
+import { useUser } from '../context/UserContext';
+import { toast } from 'react-toastify';
 
 export default function SuspendedAccount() {
- const router = useRouter();
+  const router = useRouter();
+  const { logout } = useUser();
 
-     const handleNavigation = () => {
+  useEffect(() => {
+    // Redirect to home if user is not suspended
+    const userData = JSON.parse(localStorage.getItem('userDetail') || '{}');
+    if (userData?.status !== 'suspend') {
+      router.push('/');
+    }
+  }, [router]);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Failed to logout. Please try again.');
+    }
+  };
+
+  const handleContactSupport = () => {
     router.push('/contact');
   };
+
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
       {/* Background Pattern */}
      
 
-      <div className="relative z-10 w-full max-w-6xl">
+      <div className="relative z-10 w-full max-w-4xl">
         {/* Main Card */}
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-200">
           {/* Header Section */}
-          <div className="bg-[#80A6F7] px-8 py-12 text-center relative">
-            
+          <div className="bg-red-600 px-8 py-12 text-center relative">
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute inset-0 bg-black"></div>
+            </div>
             <div className="relative z-10">
               <div className="mx-auto w-24 h-24 bg-white rounded-full flex items-center justify-center mb-6 shadow-lg">
-                <AlertTriangle className="w-12 h-12 text-red-500" />
+                <AlertTriangle className="w-12 h-12 text-red-600" />
               </div>
               <h1 className="text-3xl lg:text-4xl font-bold text-white mb-4">
                 Account Suspended
               </h1>
-              <p className="text-white text-lg max-w-md mx-auto">
-                Your account has been temporarily suspended due to policy violations
+              <p className="text-white text-lg max-w-2xl mx-auto">
+                Your account has been suspended due to a violation of our terms of service.
+                Please contact our support team for more information.
               </p>
             </div>
           </div>
@@ -35,17 +60,32 @@ export default function SuspendedAccount() {
           {/* Content Section */}
           <div className="px-8 py-12">
             {/* Status Info */}
-            <div className="bg-[#80A6F7] border-l-4 border-[#80A6F7] p-6 mb-8 rounded-r-lg">
+            <div className="bg-red-50 border-l-4 border-red-500 p-6 mb-8 rounded-r-lg">
               <div className="flex items-center mb-3">
-                <Clock className="w-5 h-5 text-white mr-3" />
-                <h3 className="text-lg font-semibold text-white">Suspension Details</h3>
+                <Clock className="w-5 h-5 text-red-600 mr-3" />
+                <h3 className="text-lg font-semibold text-gray-900">Suspension Details</h3>
               </div>
-              <div className="text-white space-y-2">
-                <p><strong>Status:</strong> Temporarily Suspended</p>
-                <p><strong>Date:</strong> January 15, 2025</p>
-                <p><strong>Reason:</strong> Community Guidelines Violation</p>
-                <p><strong>Reference ID:</strong> #SP-2025-0115-001</p>
+              <div className="text-gray-700 space-y-2">
+                <p><strong>Status:</strong> <span className="text-red-600 font-medium">Suspended</span></p>
+                <p><strong>Date:</strong> {new Date().toLocaleDateString()}</p>
+                <p><strong>Reason:</strong> Violation of Terms of Service</p>
+                <p><strong>Reference ID:</strong> SP-{new Date().getFullYear()}-{String(new Date().getMonth() + 1).padStart(2, '0')}-{String(new Date().getDate()).padStart(2, '0')}</p>
               </div>
+            </div>
+
+            {/* Next Steps */}
+            <div className="bg-blue-50 border-l-4 border-blue-500 p-6 mb-8 rounded-r-lg">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">What to do next?</h3>
+              <ul className="space-y-3">
+                <li className="flex items-start">
+                  <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full mr-3 mt-1">1</span>
+                  <span className="text-gray-700">Review our <a href="/terms" className="text-blue-600 hover:underline">Terms of Service</a> and <a href="/community-guidelines" className="text-blue-600 hover:underline">Community Guidelines</a>.</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full mr-3 mt-1">2</span>
+                  <span className="text-gray-700">If you believe this is a mistake, please contact our support team for assistance.</span>
+                </li>
+              </ul>
             </div>
 
             {/* What This Means */}
@@ -62,15 +102,12 @@ export default function SuspendedAccount() {
               </div>
             </div>
 
-      
-
             {/* Contact Support */}
             <div className="bg-gray-50 rounded-2xl p-8 border border-gray-200">
               <h3 className="text-xl font-bold text-gray-900 mb-4 text-center">Need Help?</h3>
               <p className="text-gray-600 text-center mb-6">
                 Our support team is here to assist you with any questions about your suspension.
               </p>
-              
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="flex items-center justify-center space-x-3 p-4 bg-white rounded-xl border border-gray-200 hover:border-gray-300 transition-colors cursor-pointer">
                   <Mail className="w-5 h-5 text-gray-500" />
@@ -79,7 +116,6 @@ export default function SuspendedAccount() {
                     <div className="text-sm text-gray-500">support@topia.com</div>
                   </div>
                 </div>
-                
                 <div className="flex items-center justify-center space-x-3 p-4 bg-white rounded-xl border border-gray-200 hover:border-gray-300 transition-colors cursor-pointer">
                   <Phone className="w-5 h-5 text-gray-500" />
                   <div>
@@ -91,15 +127,28 @@ export default function SuspendedAccount() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 mt-8">
-              <button onClick={handleNavigation} className="flex-1 bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2">
-                <span>Contact Support</span>
+            <div className="flex flex-col sm:flex-row gap-4 mt-10">
+              <button
+                onClick={handleContactSupport}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <Mail className="w-5 h-5" />
+                Contact Support
               </button>
-              
-              <button className="flex-1 border-2 border-gray-300 hover:border-gray-400 text-gray-700 px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center space-x-2">
-                <ArrowLeft className="w-4 h-4" />
-                <span>Go Back</span>
+              <button
+                onClick={handleLogout}
+                className="flex-1 border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <LogOut className="w-5 h-5" />
+                Sign Out
               </button>
+            </div>
+
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-500">
+                Need immediate assistance? Call us at{' '}
+                <a href="tel:+1234567890" className="text-blue-600 hover:underline">+1 (234) 567-890</a>
+              </p>
             </div>
 
             {/* Footer Note */}
