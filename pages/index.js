@@ -20,7 +20,7 @@ export default function Home() {
   const [sections, setSections] = useState(null);
 
   const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('userToken');
     return {
       'Content-Type': 'application/json',
       ...(token && { 'Authorization': `Bearer ${token}` })

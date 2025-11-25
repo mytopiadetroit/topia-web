@@ -26,7 +26,7 @@ const getVisitorId = () => {
 
 const getAuthToken = () => {
   if (typeof window !== 'undefined') {
-    return localStorage.getItem('token') || sessionStorage.getItem('token');
+    return localStorage.getItem('userToken') || sessionStorage.getItem('userToken');
   }
   return null;
 };

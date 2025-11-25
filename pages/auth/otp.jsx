@@ -16,15 +16,18 @@ const OtpVerification = () => {
   const { login } = useUser();
 
   useEffect(() => {
-    // Get user details from localStorage
-    const userDetail = localStorage.getItem('topiaDetail');
+    // Get user details from temporary storage
+    const userDetail = localStorage.getItem('tempUserDetail');
     if (userDetail) {
       const user = JSON.parse(userDetail);
       if (user.phone) {
         setUserPhone(user.phone);
       }
+    } else {
+      // If no temp data, redirect to login
+      router.push('/auth/login');
     }
-  }, []);
+  }, [router]);
 
   const handleInputChange = (e) => {
     setOtp(e.target.value);
@@ -59,11 +62,12 @@ const OtpVerification = () => {
           
           console.log('Logging in user with status:', userWithStatus.status);
           
-          // Save the updated user object with status
-          login(userWithStatus, response.token);
+          // Clear temporary storage
+          localStorage.removeItem('tempUserDetail');
+          localStorage.removeItem('tempUserToken');
           
-          // Also update localStorage directly to ensure consistency
-          localStorage.setItem('userDetail', JSON.stringify(userWithStatus));
+          // Use context login function to save properly
+          login(userWithStatus, response.token);
           
           safeToast.success('Login successful!');
           setTimeout(() => {

@@ -14,6 +14,7 @@ const Profile = () => {
     email: '',
     birthday: { day: '', month: '', year: '' },
     documentStatus: 'Processing',
+    status: 'pending',
     governmentId: ''
   });
   const [loading, setLoading] = useState(true);
@@ -30,6 +31,12 @@ const Profile = () => {
   const [updating, setUpdating] = useState(false);
   const fileInputRef = useRef(null);
   const documentInputRef = useRef(null);
+  const [rewardStats, setRewardStats] = useState({
+    totalEarned: 0,
+    pendingRequests: 0,
+    approvedRequests: 0
+  });
+  const [pointsBalance, setPointsBalance] = useState(0);
 
   useEffect(() => {
     // Only check after auth loading is complete
@@ -61,7 +68,7 @@ const Profile = () => {
       const fetchProfile = async () => {
         try {
           // Get token from localStorage
-          const token = localStorage.getItem('token');
+          const token = localStorage.getItem('userToken');
           
           if (!token) {
             setError('You need to login first');
@@ -94,7 +101,8 @@ const Profile = () => {
               phone: response.user.phone || '',
               email: response.user.email || '',
               birthday: response.user.birthday || { day: '', month: '', year: '' },
-              documentStatus: response.user.documentStatus || 'Processing', 
+              documentStatus: response.user.documentStatus || 'Processing',
+              status: response.user.status || 'pending',
               governmentId: response.user.governmentId || '',
               // Prioritize avatar from API response, but fall back to localStorage if API doesn't return it
               avatar: response.user.avatar || (userDataFromStorage?.avatar) || ''
@@ -154,6 +162,42 @@ const Profile = () => {
     };
 
     fetchOrders();
+
+    // Fetch user's reward statistics
+    const fetchRewardStats = async () => {
+      try {
+        const response = await Api('get', 'rewards/history', null, router);
+        if (response.success) {
+          const rewards = response.data || [];
+          const totalEarned = response.totalEarned || 0;
+          const pendingRequests = rewards.filter(r => r.status === 'pending').length;
+          const approvedRequests = rewards.filter(r => r.status === 'approved').length;
+          
+          setRewardStats({
+            totalEarned,
+            pendingRequests,
+            approvedRequests
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching reward stats:', error);
+      }
+    };
+
+    // Fetch user's points balance
+    const fetchPointsBalance = async () => {
+      try {
+        const response = await Api('get', 'points/my-points', null, router);
+        if (response.success) {
+          setPointsBalance(response.data.currentBalance || 0);
+        }
+      } catch (error) {
+        console.error('Error fetching points balance:', error);
+      }
+    };
+
+    fetchRewardStats();
+    fetchPointsBalance();
   }
   }, [router, isLoggedIn, authLoading]);
 
@@ -230,7 +274,7 @@ const Profile = () => {
   const updateProfile = async () => {
     try {
       setUpdating(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('userToken');
       if (!token) {
         toast.error('You need to login first');
         return;
@@ -280,7 +324,7 @@ const Profile = () => {
   const updateDocument = async () => {
     try {
       setUpdating(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('userToken');
       if (!token) {
         toast.error('You need to login first');
         return;
@@ -333,7 +377,7 @@ const Profile = () => {
   const updateAvatar = async () => {
     try {
       setUpdating(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('userToken');
       if (!token) {
         toast.error('You need to login first');
         return;
@@ -640,10 +684,79 @@ const Profile = () => {
                   </div>
                   <div className="text-right">
                     <span className="text-sm text-gray-500">Status: </span>
-                    <span className="text-pink-600 font-medium">Processing</span>
+                    <span className={`font-medium ${
+                      profile.status === 'verified' ? 'text-green-600' :
+                      profile.status === 'pending' ? 'text-yellow-600' :
+                      profile.status === 'suspend' ? 'text-red-600' :
+                      'text-gray-600'
+                    }`}>
+                      {profile.status ? profile.status.charAt(0).toUpperCase() + profile.status.slice(1) : 'Processing'}
+                    </span>
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* My Rewards Section */}
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-lg font-semibold text-gray-900">My Rewards</h2>
+                <button onClick={() => router.push('/rewards')} className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                  View All
+                </button>
+              </div>
+              <img src="/images/line.png" alt="edit" className='w-full h-[1px] mb-10'  />
+              
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-xl">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-purple-600 font-medium mb-1">Points Balance</p>
+                      <p className="text-2xl font-bold text-purple-700">${pointsBalance}</p>
+                    </div>
+                    <div className="text-3xl">💎</div>
+                  </div>
+                </div>
+                
+                <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-green-600 font-medium mb-1">Total Earned</p>
+                      <p className="text-2xl font-bold text-green-700">${rewardStats.totalEarned}</p>
+                    </div>
+                    <div className="text-3xl">💰</div>
+                  </div>
+                </div>
+                
+                <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-4 rounded-xl">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-yellow-600 font-medium mb-1">Pending</p>
+                      <p className="text-2xl font-bold text-yellow-700">{rewardStats.pendingRequests}</p>
+                    </div>
+                    <div className="text-3xl">⏳</div>
+                  </div>
+                </div>
+                
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-blue-600 font-medium mb-1">Approved</p>
+                      <p className="text-2xl font-bold text-blue-700">{rewardStats.approvedRequests}</p>
+                    </div>
+                    <div className="text-3xl">✅</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-center">
+                <button 
+                  onClick={() => router.push('/rewards')}
+                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-md hover:shadow-lg font-medium"
+                >
+                  Claim More Rewards 🎁
+                </button>
+              </div>
             </div>
 
             {/* My Orders Section */}

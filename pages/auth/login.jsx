@@ -165,8 +165,9 @@ const Login = () => {
           }
 
           if (response.user && response.token) {
-            localStorage.setItem('topiaDetail', JSON.stringify(response.user));
-            localStorage.setItem('token', response.token);
+            // Store user detail temporarily for OTP page (don't use context login yet)
+            localStorage.setItem('tempUserDetail', JSON.stringify(response.user));
+            localStorage.setItem('tempUserToken', response.token);
 
             // Only redirect to OTP page if login is successful
             safeToast.success('OTP has been sent! Please enter your OTP.');

@@ -64,7 +64,9 @@ const Categories = ({ user, loader }) => {
 
   const handleLogout = () => {
     localStorage.removeItem('userDetail');
-    localStorage.removeItem('token');
+    localStorage.removeItem('userToken');
+    localStorage.removeItem('token'); // Remove old token too
+    localStorage.removeItem('topiaDetail'); // Remove old detail too
     router.push('/');
   };
 

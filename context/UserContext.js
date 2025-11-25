@@ -40,8 +40,14 @@ export const UserProvider = ({ children }) => {
 
   // Clear user session
   const clearSession = useCallback(() => {
-    localStorage.removeItem('token');
+    // Remove new tokens
+    localStorage.removeItem('userToken');
     localStorage.removeItem('userDetail');
+    
+    // Also remove old tokens to prevent re-migration
+    localStorage.removeItem('token');
+    localStorage.removeItem('topiaDetail');
+    
     setUser(null);
     setIsLoggedIn(false);
     document.dispatchEvent(new Event('auth-state-changed'));
@@ -50,7 +56,7 @@ export const UserProvider = ({ children }) => {
   // Refresh user data from the server
   const refreshUserData = useCallback(async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('userToken');
       if (!token) return null;
 
       // Use the correct endpoint for fetching user profile
@@ -87,8 +93,35 @@ export const UserProvider = ({ children }) => {
   useEffect(() => {
     const checkUserLoggedIn = () => {
       try {
-        const token = localStorage.getItem('token');
-        const userDetail = localStorage.getItem('userDetail');
+        let token = localStorage.getItem('userToken');
+        let userDetail = localStorage.getItem('userDetail');
+        
+        // MIGRATION: Check for old token key and migrate to new key (ONE TIME ONLY)
+        if (!token) {
+          const oldToken = localStorage.getItem('token');
+          const oldUserDetail = localStorage.getItem('topiaDetail') || localStorage.getItem('userDetail');
+          
+          // Check if old data exists and user is NOT admin
+          if (oldToken && oldUserDetail) {
+            try {
+              const userData = JSON.parse(oldUserDetail);
+              // Only migrate if user is NOT admin (regular user)
+              if (!userData.role || userData.role !== 'admin') {
+                localStorage.setItem('userToken', oldToken);
+                localStorage.setItem('userDetail', oldUserDetail);
+                token = oldToken;
+                userDetail = oldUserDetail;
+                
+                // IMPORTANT: Delete old tokens after migration
+                localStorage.removeItem('token');
+                localStorage.removeItem('topiaDetail');
+                console.log('Migrated old user token to new key and cleaned up old tokens');
+              }
+            } catch (e) {
+              console.error('Migration error:', e);
+            }
+          }
+        }
         
         // If no token or user detail, clear session
         if (!token || !userDetail) {
@@ -119,7 +152,7 @@ export const UserProvider = ({ children }) => {
     
     // Listen for storage events (when localStorage changes in other tabs)
     const handleStorageChange = (event) => {
-      if (event.key === 'token' || event.key === 'userDetail' || !event.key) {
+      if (event.key === 'userToken' || event.key === 'userDetail' || !event.key) {
         checkUserLoggedIn();
       }
     };
@@ -154,8 +187,12 @@ export const UserProvider = ({ children }) => {
   // Login function
   const login = (userData, token) => {
     try {
-      // Save to localStorage
-      localStorage.setItem('token', token);
+      // Clear any old tokens first
+      localStorage.removeItem('token');
+      localStorage.removeItem('topiaDetail');
+      
+      // Save to localStorage with user-specific keys
+      localStorage.setItem('userToken', token);
       localStorage.setItem('userDetail', JSON.stringify(userData));
       
       // Update state

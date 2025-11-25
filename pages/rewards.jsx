@@ -38,14 +38,19 @@ const RewardsPage = () => {
       if (activeTab === 'claim') {
         // Load reward tasks from backend (dynamic)
         try {
+          console.log('🔄 Fetching reward tasks...');
           const response = await fetchRewardTasks(router);
+          console.log('📥 Reward tasks response:', response);
+          
           if (response.success) {
+            console.log('✅ Tasks loaded:', response.data);
             setRewardTasks(response.data || []);
           } else {
+            console.log('❌ Failed to load tasks:', response.message);
             setRewardTasks([]);
           }
         } catch (error) {
-          console.error('Error fetching tasks:', error);
+          console.error('❌ Error fetching tasks:', error);
           setRewardTasks([]);
         }
       } else if (activeTab === 'history') {
@@ -197,7 +202,13 @@ const RewardsPage = () => {
 
           {/* Content */}
           {activeTab === 'claim' && (
-            rewardTasks.length === 0 ? (
+            loading ? (
+              // Loading State
+              <div className="flex flex-col items-center justify-center py-20 px-4">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mb-4"></div>
+                <p className="text-gray-600 text-lg">Loading your rewards...</p>
+              </div>
+            ) : rewardTasks.length === 0 ? (
               // Coming Soon Screen - Enhanced
               <div className="flex flex-col items-center justify-center  py-20 px-4">
                 <div className="text-center max-w-2xl relative">

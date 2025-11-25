@@ -1,7 +1,7 @@
 import axios from "axios";
 
 //  export const ConstantsUrl = "http://localhost:5000/api/";
-export const ConstantsUrl = "https://api.mypsyguide.io/api/";
+ export const ConstantsUrl = "https://api.mypsyguide.io/api/";
 
 let isRedirecting = false;
 
@@ -15,7 +15,8 @@ function Api(method, url, data, router, params, preventRedirect = false) {
 
     let token = "";
     if (typeof window !== "undefined") {
-      token = localStorage?.getItem("token") || "";
+      // Check for new token key first, fallback to temp token during OTP flow
+      token = localStorage?.getItem("userToken") || localStorage?.getItem("tempUserToken") || "";
     }
 
     axios({
@@ -61,7 +62,8 @@ function ApiFormData(method, url, data, router, params) {
 
     let token = "";
     if (typeof window !== "undefined") {
-      token = localStorage?.getItem("token") || "";
+      // Check for new token key first, fallback to temp token during OTP flow
+      token = localStorage?.getItem("userToken") || localStorage?.getItem("tempUserToken") || "";
     }
 
     axios({
@@ -113,7 +115,8 @@ axios.interceptors.response.use(
 
         if (typeof window !== "undefined") {
           localStorage.removeItem("userDetail");
-          localStorage.removeItem("token");
+          localStorage.removeItem("userToken");
+          localStorage.removeItem("token"); // Remove old token too
           window.location.href = "/";
           window.dispatchEvent(new Event('storage'));
           document.dispatchEvent(new Event('auth-state-changed'));
@@ -154,7 +157,8 @@ const handleTokenExpiration = (router) => {
   try {
     if (typeof window !== "undefined") {
       localStorage.removeItem("userDetail");
-      localStorage.removeItem("token");
+      localStorage.removeItem("userToken");
+      localStorage.removeItem("token"); // Remove old token too
 
       notifyAuthChange();
 

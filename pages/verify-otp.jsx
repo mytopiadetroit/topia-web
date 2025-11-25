@@ -51,7 +51,7 @@ export default function OtpVerificationPage({ user, loader }) {
       if (response.success) {
         // Store updated token if provided
         if (response.token) {
-          localStorage.setItem('token', response.token);
+          localStorage.setItem('userToken', response.token);
         }
         
         // Show success toast message

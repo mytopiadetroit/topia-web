@@ -18,7 +18,7 @@ function AppContent({ Component, pageProps }) {
 
   const checkUserStatus = useCallback(async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('userToken');
       if (!token) return null;
 
       const response = await fetch('https://api.mypsyguide.io/api/auth/profile', {
