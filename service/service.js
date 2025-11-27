@@ -1,6 +1,6 @@
 import axios from "axios";
 
-//  export const ConstantsUrl = "http://localhost:5000/api/";
+  // export const ConstantsUrl = "http://localhost:5000/api/";
  export const ConstantsUrl = "https://api.mypsyguide.io/api/";
 
 let isRedirecting = false;

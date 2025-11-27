@@ -18,6 +18,12 @@ export default function Home() {
   const [showAllHours, setShowAllHours] = useState(false);
   // Simple state to track section visibility - null means loading
   const [sections, setSections] = useState(null);
+  const [homepageImages, setHomepageImages] = useState({
+    hero: '/images/mush3.jpg',
+    mission: '/images/mush5.jpg',
+    resource: '/images/ii4.png',
+    circle: '/images/ii4.png'
+  });
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem('userToken');
@@ -109,6 +115,47 @@ export default function Home() {
         
         // Load homepage settings - single call only
         await loadHomepageSettings();
+        
+        // Load homepage images
+        try {
+          const imagesResponse = await fetch('https://api.mypsyguide.io/api/homepage-images', {
+            headers: { 'Content-Type': 'application/json' },
+            cache: 'no-store'
+          });
+          
+          if (imagesResponse.ok) {
+            const imagesData = await imagesResponse.json();
+            if (imagesData.success && imagesData.data) {
+              const newImages = { ...homepageImages };
+              
+              // Direct mapping from API response
+              if (imagesData.data.hero) {
+                newImages.hero = imagesData.data.hero.startsWith('http') 
+                  ? imagesData.data.hero 
+                  : `http://localhost:5000${imagesData.data.hero}`;
+              }
+              if (imagesData.data.mission) {
+                newImages.mission = imagesData.data.mission.startsWith('http') 
+                  ? imagesData.data.mission 
+                  : `http://localhost:5000${imagesData.data.mission}`;
+              }
+              if (imagesData.data.resource) {
+                newImages.resource = imagesData.data.resource.startsWith('http') 
+                  ? imagesData.data.resource 
+                  : `http://localhost:5000${imagesData.data.resource}`;
+              }
+              if (imagesData.data.circle) {
+                newImages.circle = imagesData.data.circle.startsWith('http') 
+                  ? imagesData.data.circle 
+                  : `http://localhost:5000${imagesData.data.circle}`;
+              }
+              
+              setHomepageImages(newImages);
+            }
+          }
+        } catch (imgErr) {
+          console.error('Error loading homepage images:', imgErr);
+        }
       } catch (err) {
         console.error('Error in loadInitialData:', err);
       }
@@ -186,7 +233,7 @@ export default function Home() {
   {/* Background Image - Blue Mushrooms */}
   <div className="absolute inset-0 z-0">
     <Image 
-      src="/images/mush3.jpg"
+      src={homepageImages.hero}
       alt="Glowing blue mushrooms"
       className="w-full h-full object-cover opacity-60"
       fill
@@ -256,7 +303,7 @@ export default function Home() {
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <Image 
-          src="/images/mush5.jpg"
+          src={homepageImages.mission}
           alt="Mushroom preparation background"
           className="w-full h-full object-cover"
           fill
@@ -344,7 +391,7 @@ export default function Home() {
               <div className="relative">
                 
                 <Image 
-                  src="/images/ii4.png"
+                  src={homepageImages.circle}
                   alt="Wellness products and tools"
                   className="w-full object-cover transform transition-all duration-500 hover:scale-105"
                   width={600}
