@@ -8,8 +8,7 @@ export default function SuspendedAccount() {
   const router = useRouter();
   const { logout } = useUser();
 
-  // Removed the useEffect that was causing navigation loop
-  // _app.js already handles routing logic for suspended users
+
 
   const handleLogout = async () => {
     try {
@@ -74,7 +73,7 @@ export default function SuspendedAccount() {
               <ul className="space-y-3">
                 <li className="flex items-start">
                   <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full mr-3 mt-1">1</span>
-                  <span className="text-gray-700">Review our <a href="/terms" className="text-blue-600 hover:underline">Terms of Service</a> and <a href="/community-guidelines" className="text-blue-600 hover:underline">Community Guidelines</a>.</span>
+                  <span className="text-gray-700">Review our <a href="/terms" className="text-blue-600 hover:underline">Terms of Service</a> and <a href="/privacypolicy" className="text-blue-600 hover:underline">Community Guidelines</a>.</span>
                 </li>
                 <li className="flex items-start">
                   <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full mr-3 mt-1">2</span>
@@ -108,14 +107,14 @@ export default function SuspendedAccount() {
                   <Mail className="w-5 h-5 text-gray-500" />
                   <div>
                     <div className="font-medium text-gray-900">Email Support</div>
-                    <div className="text-sm text-gray-500">support@topia.com</div>
+                    <div className="text-sm text-gray-500">Mytopiadetroit@gmail.com</div>
                   </div>
                 </div>
                 <div className="flex items-center justify-center space-x-3 p-4 bg-white rounded-xl border border-gray-200 hover:border-gray-300 transition-colors cursor-pointer">
                   <Phone className="w-5 h-5 text-gray-500" />
                   <div>
                     <div className="font-medium text-gray-900">Phone Support</div>
-                    <div className="text-sm text-gray-500">1-800-TOPIA-HELP</div>
+                    <div className="text-sm text-gray-500">+313-231-8760</div>
                   </div>
                 </div>
               </div>

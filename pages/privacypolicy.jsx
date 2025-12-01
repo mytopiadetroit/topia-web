@@ -343,7 +343,7 @@ export default function PrivacyPolicy() {
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="bg-white/10 rounded-xl p-6">
                       <h4 className="font-semibold mb-3">Email Us</h4>
-                      <p className="text-white/80 text-sm">privacy@wellnessplatform.com</p>
+                      <p className="text-white/80 text-sm">Mytopiadetroit@gmail.com</p>
                     </div>
                     <div className="bg-white/10 rounded-xl p-6">
                       <h4 className="font-semibold mb-3">Response Time</h4>

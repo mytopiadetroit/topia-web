@@ -56,9 +56,13 @@ function AppContent({ Component, pageProps }) {
         const status = await checkUserStatus();
         console.log('User status from API:', status);
         
+        // Allow suspended users to access these pages
+        const allowedPagesForSuspended = ['/suspend', '/terms', '/privacypolicy', '/contact'];
+        const isAllowedPage = allowedPagesForSuspended.includes(router.pathname);
+        
         // Only redirect to suspend page if user is logged in AND status is 'suspend'
-        // and not already on the suspend page
-        if (isLoggedIn && status === 'suspend' && router.pathname !== '/suspend') {
+        // and not already on an allowed page
+        if (isLoggedIn && status === 'suspend' && !isAllowedPage) {
           console.log('User is suspended, redirecting to suspend page');
           router.push('/suspend');
         }
