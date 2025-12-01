@@ -8,13 +8,8 @@ export default function SuspendedAccount() {
   const router = useRouter();
   const { logout } = useUser();
 
-  useEffect(() => {
-    // Redirect to home if user is not suspended
-    const userData = JSON.parse(localStorage.getItem('userDetail') || '{}');
-    if (userData?.status !== 'suspend') {
-      router.push('/');
-    }
-  }, [router]);
+  // Removed the useEffect that was causing navigation loop
+  // _app.js already handles routing logic for suspended users
 
   const handleLogout = async () => {
     try {

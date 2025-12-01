@@ -60,7 +60,16 @@ const Register = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Validate that it's an image file
+      const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      if (!validImageTypes.includes(file.type)) {
+        setError('Please upload only image files (JPG, PNG, GIF, WEBP)');
+        safeToast.error('Please upload only image files (JPG, PNG, GIF, WEBP)');
+        e.target.value = ''; // Clear the input
+        return;
+      }
       setSelectedFile(file);
+      setError(''); // Clear any previous errors
     }
   };
 
@@ -469,7 +478,7 @@ const Register = () => {
                   </div>
                   <input
                     type="file"
-                    accept="image/*,.pdf"
+                    accept="image/*"
                     onChange={handleFileChange}
                     className="hidden"
                     id="id-upload"
@@ -480,7 +489,7 @@ const Register = () => {
                   >
                     {selectedFile ? selectedFile.name : 'Click to upload or drag and drop'}
                   </label>
-                  <p className="text-xs text-gray-500 mt-1">PNG, JPG, PDF up to 10MB</p>
+                  <p className="text-xs text-gray-500 mt-1">PNG, JPG, JPEG up to 10MB</p>
                 </div>
               </div>
             </div>
