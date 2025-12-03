@@ -164,7 +164,7 @@ export default function App({ Component, pageProps }) {
       if (scriptError) return;
       console.log('Tawk.to script loaded successfully');
       
-      // Check if Tawk_API is available
+  
       if (window.Tawk_API) {
         console.log('Tawk_API is available');
         window.Tawk_API.onLoad = function() {
@@ -193,7 +193,7 @@ export default function App({ Component, pageProps }) {
       if (script) {
         script.remove();
       }
-      // Don't delete Tawk_API as it might be used by other components
+      
     };
   }, []);
 

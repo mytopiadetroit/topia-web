@@ -351,10 +351,19 @@ export default function PrivacyPolicy() {
                     </div>
                   </div>
                   
-                  <button className="bg-white text-[#8CABFF] hover:bg-gray-100 px-8 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2 mt-8">
-                    <span>Contact Privacy Team</span>
-                    <ChevronRight className="w-5 h-5" />
-                  </button>
+                 <button
+  onClick={() =>
+    window.open(
+      "https://mail.google.com/mail/?view=cm&fs=1&to=Mytopiadetroit@gmail.com&su=Privacy%20Team%20Request&body=Hello, I want to contact the privacy team regarding...",
+      "_blank"
+    )
+  }
+  className="bg-white text-[#8CABFF] hover:bg-gray-100 px-8 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2 mt-8"
+>
+  <span>Contact Privacy Team</span>
+  <ChevronRight className="w-5 h-5" />
+</button>
+
                 </div>
               </section>
             </div>

@@ -274,10 +274,19 @@ export default function Terms() {
               <p className="text-gray-600 text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
                 If you have any questions about these Terms of Use, please don't hesitate to contact our support team.
               </p>
-              <button className="bg-[#2E2E2E] hover:bg-gray-800 text-white px-8 py-4 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2 mx-auto">
-                <span>Contact Support</span>
-                <ChevronRight className="w-5 h-5" />
-              </button>
+          <button
+  onClick={() =>
+    window.open(
+      "https://mail.google.com/mail/?view=cm&fs=1&to=Mytopiadetroit@gmail.com&su=Support Request&body=Hello, I need support regarding...",
+      "_blank"
+    )
+  }
+  className="bg-[#2E2E2E] hover:bg-gray-800 text-white px-8 py-4 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2 mx-auto"
+>
+  <span>Contact Support</span>
+  <ChevronRight className="w-5 h-5" />
+</button>
+
             </div>
           </div>
         </div>

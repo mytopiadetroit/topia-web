@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
+import { Api } from '@/service/service';
 
 export default function ContactPage() {
   const router = useRouter();

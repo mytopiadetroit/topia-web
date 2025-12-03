@@ -466,32 +466,100 @@ const Register = () => {
 
             {/* Government ID Upload */}
             <div className="bg-blue-50 p-4 rounded-2xl mt-6">
-              <p className="text-xs text-gray-600 mb-3">
-                *Drag & drop your government-issued ID here, or click to upload.
+              <p className="text-sm font-medium text-gray-700 mb-2">
+                Upload Government-Issued ID
               </p>
-              <div className="border-2 border-dashed border-blue-300 rounded-xl p-6 text-center bg-white">
-                <div className="flex flex-col items-center">
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
-                    <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
+              <p className="text-xs text-gray-600 mb-3">
+                Choose one of the following options to upload your ID:
+              </p>
+              
+              {/* Two Options: Camera and File Upload */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                {/* Camera Capture Option */}
+                <div className="border-2 border-dashed border-blue-300 rounded-xl p-4 text-center bg-white hover:bg-blue-50 transition-colors">
+                  <div className="flex flex-col items-center">
+                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-2">
+                      <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={handleFileChange}
+                      className="hidden"
+                      id="camera-capture"
+                    />
+                    <label
+                      htmlFor="camera-capture"
+                      className="cursor-pointer text-blue-600 text-sm font-medium hover:text-blue-700"
+                    >
+                      Take Photo
+                    </label>
+                    <p className="text-xs text-gray-500 mt-1">Use Camera</p>
                   </div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="hidden"
-                    id="id-upload"
-                  />
-                  <label
-                    htmlFor="id-upload"
-                    className="cursor-pointer text-blue-600 text-sm font-medium hover:text-blue-700"
-                  >
-                    {selectedFile ? selectedFile.name : 'Click to upload or drag and drop'}
-                  </label>
-                  <p className="text-xs text-gray-500 mt-1">PNG, JPG, JPEG up to 10MB</p>
+                </div>
+
+                {/* File Upload Option */}
+                <div className="border-2 border-dashed border-blue-300 rounded-xl p-4 text-center bg-white hover:bg-blue-50 transition-colors">
+                  <div className="flex flex-col items-center">
+                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-2">
+                      <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                      </svg>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                      id="id-upload"
+                    />
+                    <label
+                      htmlFor="id-upload"
+                      className="cursor-pointer text-blue-600 text-sm font-medium hover:text-blue-700"
+                    >
+                      Choose File
+                    </label>
+                    <p className="text-xs text-gray-500 mt-1">From Device</p>
+                  </div>
                 </div>
               </div>
+
+              {/* Selected File Display */}
+              {selectedFile && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-sm text-green-800 font-medium truncate max-w-[200px]">
+                      {selectedFile.name}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setSelectedFile(null)}
+                    className="text-green-600 hover:text-green-800"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+
+              {/* Help Text */}
+              <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <p className="text-xs text-yellow-800">
+                  <strong>💡 Tip:</strong> If file upload doesn't work on your device, use the "Take Photo" option to capture your ID directly with your camera.
+                </p>
+              </div>
+              
+              <p className="text-xs text-gray-500 mt-2 text-center">
+                Accepted formats: PNG, JPG, JPEG (up to 10MB)
+              </p>
             </div>
 
             {/* Terms Section */}

@@ -23,4 +23,11 @@ body {
   font-family: var(--font-poppins), sans-serif;
 }
 
+/* Tawk.io widget positioning adjustment */
+#tawk-bubble-container,
+.tawk-button,
+iframe[title*="chat"] {
+  bottom: 70px !important;
+}
+
 /* Custom toast styles end */
