@@ -148,19 +148,18 @@ function App() {
           </div>
         </div>
 
-        {/* Footer Bottom */}
-        <div className="border-t border-white border-opacity-30">
+      <div className="border-t border-white border-opacity-30">
           <div className="container mx-auto px-6 py-6">
-            <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
               <div className="flex items-center space-x-2 text-sm font-medium">
                 <span>©</span>
                 <span>Copyright</span>
               </div>
-              <div className="flex flex-wrap items-center space-x-6 text-sm font-medium">
+              <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 sm:gap-x-6 text-sm font-medium mr-0 md:mr-16">
                 <a href="/terms" className="hover:text-gray-200 transition-colors">Terms of Use</a>
-                <span className="opacity-60">|</span>
+                <span className="opacity-60 hidden sm:inline">|</span>
                 <a href="/privacypolicy" className="hover:text-gray-200 transition-colors">Privacy Policy</a>
-                <span className="opacity-60">|</span>
+                <span className="opacity-60 hidden sm:inline">|</span>
                 <a href="#" className="hover:text-gray-200 transition-colors">Cookie Policy</a>
               </div>
             </div>
