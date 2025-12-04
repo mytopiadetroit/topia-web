@@ -159,8 +159,8 @@ function App() {
                 <a href="/terms" className="hover:text-gray-200 transition-colors">Terms of Use</a>
                 <span className="opacity-60 hidden sm:inline">|</span>
                 <a href="/privacypolicy" className="hover:text-gray-200 transition-colors">Privacy Policy</a>
-                <span className="opacity-60 hidden sm:inline">|</span>
-                <a href="#" className="hover:text-gray-200 transition-colors">Cookie Policy</a>
+                {/* <span className="opacity-60 hidden sm:inline">|</span> */}
+                {/* <a href="#" className="hover:text-gray-200 transition-colors">Cookie Policy</a> */}
               </div>
             </div>
           </div>
