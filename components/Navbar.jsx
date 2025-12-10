@@ -126,7 +126,7 @@ export default function Navbar() {
             <div className="flex-shrink-0">
               <div className="flex items-center space-x-2">
                 <a href="/" className="flex items-center">
-                  <img src="/images/logo4.png" alt="Logo" className="h-20 w-auto" />
+                  <img src="/newlogo.jpg" alt="Logo" className="h-20 w-auto" />
                 </a>
               </div>
             </div>

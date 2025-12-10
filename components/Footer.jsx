@@ -72,8 +72,11 @@ function App() {
               <div className="flex items-center space-x-3 mb-6">
                 <div className="w-32 h-32 flex items-center justify-center">
                   <img src='/images/logo.png' alt="Logo" className='object-contain w-full h-full'/>
+                  
                 </div>
+             
               </div>
+                
             </div>
 
             {/* Newsletter Section - 5 columns */}
