@@ -86,9 +86,9 @@ const Menu = () => {
       return;
     }
 
-    // Only set showPendingMessage to true if we're certain about the user's status
-    if (isLoggedIn && (user?.status === 'pending' || user?.status === 'incomplete' || user?.status === 'suspend')) {
-      console.log('User status requires verification, clearing products');
+    // Only block suspended users, allow pending and incomplete
+    if (isLoggedIn && user?.status === 'suspend') {
+      console.log('User is suspended, clearing products');
       setProducts([]);
       setFilteredProducts([]);
       setShowPendingMessage(true);
@@ -109,8 +109,9 @@ const Menu = () => {
       currentTime: new Date().toISOString()
     });
     
-    if (!loading && isLoggedIn && user?.status === 'pending') {
-      console.log('Clearing product data due to pending status');
+    // Only block suspended users
+    if (!loading && isLoggedIn && user?.status === 'suspend') {
+      console.log('Clearing product data due to suspended status');
       setProducts([]);
       setFilteredProducts([]);
       setLoadingData(false);
@@ -125,9 +126,10 @@ const Menu = () => {
 
   // Fetch review tags
   const fetchReviewTags = async () => {
-    if (user?.status === 'pending') return;
+    // Allow all users except suspended
+    if (user?.status === 'suspend') return;
     
-    try {
+    try{
       const response = await fetchAllReviewTags(router);
       if (response.success) {
         setReviewTags(response.data || []);
@@ -143,8 +145,18 @@ const Menu = () => {
     }
   };
 
-  // Main data fetching effect
+  // Main data fetching effect with safety timeout
   useEffect(() => {
+    // Safety timeout - if loading takes too long, force data fetch
+    const safetyTimeout = setTimeout(() => {
+      if (loadingData && isLoggedIn) {
+        console.log('⚠️ Safety timeout triggered - forcing data fetch');
+        fetchCategories();
+        fetchProducts();
+        fetchReviewTags();
+      }
+    }, 3000); // 3 seconds timeout
+
     if (!loading) {
       if (!isLoggedIn) {
         toast.error('Please login to access the menu', {
@@ -169,6 +181,8 @@ const Menu = () => {
         fetchReviewTags();
       }
     }
+
+    return () => clearTimeout(safetyTimeout);
   }, [isLoggedIn, loading, router]);
 
   useEffect(() => {
@@ -217,15 +231,20 @@ const Menu = () => {
     } catch (error) {
       console.error('Error fetching categories:', error);
       toast.error('Failed to load categories');
+    } finally {
+      // Always clear loading state
+      setLoadingData(false);
     }
   };
 
   const fetchProducts = async () => {
     console.log('Fetching products - user status:', user?.status);
-    if (user?.status === 'pending') {
-      console.log('Skipping product fetch - user status is pending');
+    // Only block suspended users
+    if (user?.status === 'suspend') {
+      console.log('Skipping product fetch - user is suspended');
       setProducts([]);
       setFilteredProducts([]);
+      setLoadingData(false); // Important: clear loading state
       return;
     }
     
@@ -615,16 +634,17 @@ const Menu = () => {
     );
   }
 
-if (isLoggedIn && (user?.status === 'pending' || user?.status === 'incomplete' || user?.status === 'suspend')) {
+// Only block suspended users, allow pending and incomplete
+if (isLoggedIn && user?.status === 'suspend') {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-8 text-center">
           <div className="flex justify-center mb-6">
-            <div className="bg-yellow-100 p-4 rounded-full">
-              <AlertCircle className="h-12 w-12 text-yellow-600" />
+            <div className="bg-red-100 p-4 rounded-full">
+              <AlertCircle className="h-12 w-12 text-red-600" />
             </div>
           </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Account Under Review</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Account Suspended</h2>
           <p className="text-gray-600 mb-6">
             Thank you for signing up! Your account is currently under review by our team.
             You'll be able to browse our menu once your account is verified.

@@ -1,14 +1,61 @@
 import React, { useEffect } from 'react';
-import { AlertTriangle, Mail, Phone, Clock, ArrowLeft, LogOut } from 'lucide-react';
+import { AlertTriangle, Mail, Phone, Clock, LogOut } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { useUser } from '../context/UserContext';
 import { toast } from 'react-toastify';
+import { getSuspensionStatus } from '../service/service';
 
 export default function SuspendedAccount() {
   const router = useRouter();
-  const { logout } = useUser();
+  const { logout, user, refreshUserData } = useUser();
+  const [suspensionReason, setSuspensionReason] = React.useState('');
+  const [loading, setLoading] = React.useState(true);
 
+  // Debug: Log user data
+  useEffect(() => {
+    console.log('🔍 Suspend Page - User Data:', user);
+    console.log('🔍 Suspension Reason:', user?.suspensionReason);
+    
+    // Also check localStorage
+    const storedUser = localStorage.getItem('userDetail');
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        console.log('🔍 LocalStorage User:', parsedUser);
+        console.log('🔍 LocalStorage Suspension Reason:', parsedUser?.suspensionReason);
+      } catch (e) {
+        console.error('Error parsing stored user:', e);
+      }
+    }
+  }, [user]);
 
+  // Fetch suspension reason using service helper
+  useEffect(() => {
+    const fetchSuspensionReason = async () => {
+      try {
+        setLoading(true);
+        
+        console.log('🔄 Fetching suspension status...');
+        const response = await getSuspensionStatus(router);
+        
+        console.log('✅ Suspension Status API Response:', response);
+        
+        if (response.success && response.data) {
+          const reason = response.data.suspensionReason || '';
+          console.log('✅ Suspension Reason from API:', reason);
+          
+          setSuspensionReason(reason);
+          console.log('✅ State updated with reason:', reason);
+        }
+      } catch (error) {
+        console.error('❌ Error fetching suspension reason:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSuspensionReason();
+  }, [router]); // Run once on mount
 
   const handleLogout = async () => {
     try {
@@ -45,8 +92,11 @@ export default function SuspendedAccount() {
                 Account Suspended
               </h1>
               <p className="text-white text-lg max-w-2xl mx-auto">
-                Your account has been suspended due to a violation of our terms of service.
-                Please contact our support team for more information.
+                {loading ? (
+                  'Loading suspension details...'
+                ) : (
+                  suspensionReason || 'Your account has been suspended due to a violation of our terms of service. Please contact our support team for more information.'
+                )}
               </p>
             </div>
           </div>
@@ -62,7 +112,7 @@ export default function SuspendedAccount() {
               <div className="text-gray-700 space-y-2">
                 <p><strong>Status:</strong> <span className="text-red-600 font-medium">Suspended</span></p>
                 <p><strong>Date:</strong> {new Date().toLocaleDateString()}</p>
-                <p><strong>Reason:</strong> Violation of Terms of Service</p>
+                <p><strong>Reason:</strong> {loading ? 'Loading...' : (suspensionReason || 'Violation of Terms of Service')}</p>
                 <p><strong>Reference ID:</strong> SP-{new Date().getFullYear()}-{String(new Date().getMonth() + 1).padStart(2, '0')}-{String(new Date().getDate()).padStart(2, '0')}</p>
               </div>
             </div>
@@ -141,7 +191,7 @@ export default function SuspendedAccount() {
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-500">
                 Need immediate assistance? Call us at{' '}
-                <a href="tel:+1234567890" className="text-blue-600 hover:underline">+1 (234) 567-890</a>
+                <a href="tel:+313-231-8760" className="text-blue-600 hover:underline">+1 (234) 567-890</a>
               </p>
             </div>
 

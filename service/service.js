@@ -1,7 +1,7 @@
 import axios from "axios";
 
   //  export const ConstantsUrl = "http://localhost:5000/api/";
- export const ConstantsUrl = "https://api.mypsyguide.io/api/";
+  export const ConstantsUrl = "https://api.mypsyguide.io/api/";
 
 let isRedirecting = false;
 
@@ -15,7 +15,7 @@ function Api(method, url, data, router, params, preventRedirect = false) {
 
     let token = "";
     if (typeof window !== "undefined") {
-      // Check for new token key first, fallback to temp token during OTP flow
+     
       token = localStorage?.getItem("userToken") || localStorage?.getItem("tempUserToken") || "";
     }
 
@@ -485,6 +485,16 @@ export const subscribeEmail = async (email, router) => {
     return await Api('post', 'subscribers', { email }, router);
   } catch (error) {
     console.error('Error subscribing email:', error);
+    throw error;
+  }
+};
+
+// Get suspension status
+export const getSuspensionStatus = async (router) => {
+  try {
+    return await Api('get', 'auth/suspension-status', null, router);
+  } catch (error) {
+    console.error('Error fetching suspension status:', error);
     throw error;
   }
 };
