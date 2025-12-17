@@ -3,7 +3,7 @@ import { Check, ChevronLeft } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import { useUser } from '../context/UserContext';
-import { Api } from '../service/service';
+import { Api, fetchTaxSettings } from '../service/service';
 
 export default function OrderConfirm() {
   const router = useRouter();
@@ -12,6 +12,7 @@ export default function OrderConfirm() {
   const [orderData, setOrderData] = useState(null);
   const [loadingOrder, setLoadingOrder] = useState(true);
   const [error, setError] = useState(null);
+  const [taxPercentage, setTaxPercentage] = useState(7);
 
   useEffect(() => {
     // Only check after loading is complete
@@ -40,6 +41,21 @@ export default function OrderConfirm() {
       }
     }
   }, [isLoggedIn, loading, router]);
+
+  // Load tax settings
+  useEffect(() => {
+    const loadTaxSettings = async () => {
+      try {
+        const response = await fetchTaxSettings();
+        if (response.success && response.data.isActive) {
+          setTaxPercentage(response.data.percentage);
+        }
+      } catch (error) {
+        console.error('Error loading tax settings:', error);
+      }
+    };
+    loadTaxSettings();
+  }, []);
 
   // Fetch order data when orderId changes
   useEffect(() => {
@@ -237,7 +253,7 @@ export default function OrderConfirm() {
                   </div>
                   
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Tax (7%)</span>
+                    <span className="text-gray-600">Tax ({taxPercentage}%)</span>
                     <span className="font-medium text-gray-900">${orderData.tax.toFixed(2)}</span>
                   </div>
                   

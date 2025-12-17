@@ -669,14 +669,14 @@ export default function Home() {
 
       {/* Interactive Map */}
       <iframe
-        id="map-iframe"
-        src="https://www.openstreetmap.org/export/embed.html?bbox=-83.1587416%2C42.4405298%2C-83.1487416%2C42.4505298&layer=mapnik&marker=42.4455298%2C-83.1537416"
-        className="w-full h-full"
-        style={{ border: 0, display: 'block', margin: 0, padding: 0 }}
-        allowFullScreen
-        loading="lazy"
-        title="ShroomTopia Location Map"
-      />
+  id="map-iframe"
+  src="https://www.google.com/maps?q=42.4455298,-83.1537416&output=embed"
+  className="w-full h-full"
+  style={{ border: 0, display: 'block', margin: 0, padding: 0, borderRadius: '12px' }}
+  allowFullScreen
+  loading="lazy"
+  title="ShroomTopia Location Map"
+/>
       
       {/* Map Info Footer */}
       <p className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 text-sm text-gray-600 bg-white/90 px-4 py-2 rounded-full shadow-lg backdrop-blur-sm">

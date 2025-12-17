@@ -1,15 +1,30 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import { useUser } from '../context/UserContext';
 import { useApp } from '../context/AppContext';
-import { Api } from '@/service/service';
+import { Api, fetchTaxSettings } from '@/service/service';
 
 const Cart = () => {
   const router = useRouter();
   const { isLoggedIn, loading } = useUser();
   const { cart, cartCount, removeFromCart, updateCartItemQuantity, clearCart } = useApp();
+  const [taxPercentage, setTaxPercentage] = useState(7);
   
+  useEffect(() => {
+    const loadTaxSettings = async () => {
+      try {
+        const response = await fetchTaxSettings();
+        if (response.success && response.data.isActive) {
+          setTaxPercentage(response.data.percentage);
+        }
+      } catch (error) {
+        console.error('Error loading tax settings:', error);
+      }
+    };
+    loadTaxSettings();
+  }, []);
+
   useEffect(() => {
     // Only check after loading is complete
     if (!loading) {
@@ -40,7 +55,7 @@ const Cart = () => {
 
   // Calculate totals
   const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
-  const tax = subtotal * 0.07; // 7% tax
+  const tax = subtotal * (taxPercentage / 100);
   const grandTotal = subtotal + tax;
 
   const handleQuantityChange = (productId, newQuantity, variant = null, flavor = null) => {
@@ -276,7 +291,7 @@ const Cart = () => {
                   <span className="font-semibold text-gray-900">$ {subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Tax (7%)</span>
+                  <span className="text-gray-600">Tax ({taxPercentage}%)</span>
                   <span className="font-semibold text-gray-900">$ {tax.toFixed(2)}</span>
                 </div>
               </div>
