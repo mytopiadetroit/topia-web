@@ -2,6 +2,7 @@ import { useCallback, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
 import AgeVerification from '../components/AgeVerification';
+import DealBanner from '../components/DealBanner';
 import '../styles/globals.css';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -83,6 +84,7 @@ function AppContent({ Component, pageProps }) {
   const content = (
     <Layout>
       <Component {...pageProps} />
+      <DealBanner />
       <ToastContainer 
         position="bottom-left"
         autoClose={5000}

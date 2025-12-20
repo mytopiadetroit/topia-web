@@ -71,8 +71,15 @@ export const AppProvider = ({ children }) => {
     const variantId = product.selectedVariant?._id;
     const flavorId = product.selectedFlavor?._id;
     
-    // Determine the price based on whether it's a variant or base product
-    const price = variantId ? (product.selectedVariant?.price || product.price) : product.price;
+    // Determine the base price based on whether it's a variant or base product
+    let price = variantId ? (product.selectedVariant?.price || product.price) : 
+                flavorId ? (product.selectedFlavor?.price || product.price) : 
+                product.price;
+    
+    // Apply deal discount if product is from crazy deals
+    if (product.isDealProduct && product.dealDiscount) {
+      price = price - (price * product.dealDiscount / 100);
+    }
 
     setCart(prevCart => {
       // Find existing item with same product, variant, and flavor
@@ -117,11 +124,13 @@ export const AppProvider = ({ children }) => {
         const normalizedProduct = {
           ...product,
           id: productId,
-          price, // Set the correct price based on variant
+          price, // Set the correct price (with discount if applicable)
           quantity: finalQuantity,
           intensity: product.intensity || 5,
           selectedVariant: product.selectedVariant || null,
-          selectedFlavor: product.selectedFlavor || null
+          selectedFlavor: product.selectedFlavor || null,
+          isDealProduct: product.isDealProduct || false,
+          dealDiscount: product.dealDiscount || 0
         };
         
         return [...prevCart, normalizedProduct];

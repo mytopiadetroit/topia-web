@@ -1,7 +1,7 @@
 import axios from "axios";
 
-    // export const ConstantsUrl = "http://localhost:5000/api/";
-   export const ConstantsUrl = "https://api.mypsyguide.io/api/";
+    //  export const ConstantsUrl = "http://localhost:5000/api/";
+    export const ConstantsUrl = "https://api.mypsyguide.io/api/";
 
 let isRedirecting = false;
 
@@ -505,6 +505,37 @@ export const getSuspensionStatus = async (router) => {
     return await Api('get', 'auth/suspension-status', null, router);
   } catch (error) {
     console.error('Error fetching suspension status:', error);
+    throw error;
+  }
+};
+
+// Deals API helpers (public)
+export const fetchActiveDeals = async () => {
+  try {
+    const response = await axios.get(ConstantsUrl + 'deals/active');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching active deals:', error);
+    throw error;
+  }
+};
+
+export const fetchBannerDeal = async () => {
+  try {
+    const response = await axios.get(ConstantsUrl + 'deals/banner');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching banner deal:', error);
+    throw error;
+  }
+};
+
+export const fetchDealById = async (id) => {
+  try {
+    const response = await axios.get(ConstantsUrl + `deals/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching deal:', error);
     throw error;
   }
 };

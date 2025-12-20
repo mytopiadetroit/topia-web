@@ -196,9 +196,16 @@ const Cart = () => {
   />
 </div>
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 text-sm">
-                          {item.displayName || item.name}
-                        </h3>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-gray-900 text-sm">
+                            {item.displayName || item.name}
+                          </h3>
+                          {item.isDealProduct && item.dealDiscount > 0 && (
+                            <span className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-2 py-0.5 rounded-full text-xs font-bold">
+                              {item.dealDiscount}% OFF
+                            </span>
+                          )}
+                        </div>
                         {item.selectedVariant && (
                           <p className="text-sm text-gray-600">
                             Size: {item.selectedVariant.size.value}{item.selectedVariant.size.unit}

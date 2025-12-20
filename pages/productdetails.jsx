@@ -708,14 +708,14 @@ export default function ProductDetails() {
                     </h3>
 
                     {/* Price */}
-                    <div className="flex items-center gap-2 mb-3">
+                    {/* <div className="flex items-center gap-2 mb-3">
                       <span className="text-xl font-bold text-[#536690]">
                         ${Number(relatedProduct.price || 0).toFixed(2)}
                       </span>
                       {relatedProduct.hasVariants && relatedProduct.variants && (
                         <span className="text-sm text-gray-500">+ variants</span>
                       )}
-                    </div>
+                    </div> */}
 
                     {/* Stock Status */}
                     {relatedProduct.hasStock ? (
