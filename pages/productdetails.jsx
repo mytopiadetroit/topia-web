@@ -18,6 +18,7 @@ export default function ProductDetails() {
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [selectedFlavor, setSelectedFlavor] = useState(null);
   const [relatedLoading, setRelatedLoading] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const router = useRouter();
   const { id } = router.query;
   const { isLoggedIn, userLoading } = useUser();
@@ -371,40 +372,78 @@ export default function ProductDetails() {
         <div className="flex flex-col md:flex-row gap-8">
           {/* Left Column - Images */}
           <div className="md:w-1/2">
-            {/* Main Image */}
+            {/* Main Image with Carousel */}
             <div className="bg-white rounded-2xl overflow-hidden mb-4 border-2 border-gray-100 shadow-lg p-4">
-              <div className="bg-gray-50 rounded-xl overflow-hidden">
+              <div className="bg-gray-50 rounded-xl overflow-hidden relative group">
                 <img
                   src={product.images && product.images.length > 0
-                    ? (product.images[0].startsWith('http') ? product.images[0] : `http://localhost:5000${product.images[0]}`)
+                    ? (product.images[selectedImageIndex].startsWith('http') 
+                        ? product.images[selectedImageIndex] 
+                        : `http://localhost:5000${product.images[selectedImageIndex]}`)
                     : '/images/details.png'
                   }
-                  alt={product.name}
+                  alt={`${product.name} - Image ${selectedImageIndex + 1}`}
                   className="w-full h-auto object-cover"
                 />
+                
+                {/* Carousel Navigation Arrows - Only show if multiple images */}
+                {product.images && product.images.length > 1 && (
+                  <>
+                    {/* Previous Button */}
+                    <button
+                      onClick={() => setSelectedImageIndex(prev => 
+                        prev === 0 ? product.images.length - 1 : prev - 1
+                      )}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    
+                    {/* Next Button */}
+                    <button
+                      onClick={() => setSelectedImageIndex(prev => 
+                        prev === product.images.length - 1 ? 0 : prev + 1
+                      )}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+
+                    {/* Image Counter */}
+                    <div className="absolute bottom-4 right-4 bg-black/60 text-white px-3 py-1 rounded-full text-sm">
+                      {selectedImageIndex + 1} / {product.images.length}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
-            {/* Thumbnail Images */}
-            {/* <div className="grid grid-cols-3 gap-4">
-              {product.images && product.images.length > 1 ? (
-                product.images.slice(1, 4).map((image, index) => (
-                  <div key={index} className="bg-gray-200 rounded-lg aspect-square overflow-hidden">
+            {/* Thumbnail Gallery - Only show if multiple images */}
+            {product.images && product.images.length > 1 && (
+              <div className="grid grid-cols-4 gap-3">
+                {product.images.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedImageIndex(index)}
+                    className={`bg-gray-100 rounded-lg aspect-square overflow-hidden border-2 transition-all ${
+                      selectedImageIndex === index 
+                        ? 'border-[#536690] ring-2 ring-[#536690]/30' 
+                        : 'border-transparent hover:border-gray-300'
+                    }`}
+                  >
                     <img 
                       src={image.startsWith('http') ? image : `http://localhost:5000${image}`}
-                      alt={`${product.name} ${index + 2}`}
+                      alt={`${product.name} thumbnail ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
-                  </div>
-                ))
-              ) : (
-                Array.from({ length: 3 }, (_, index) => (
-                  <div key={index} className="bg-gray-200 rounded-lg aspect-square flex items-center justify-center">
-                    <span className="text-gray-400 text-sm">Product Image</span>
-                  </div>
-                ))
-              )}
-            </div> */}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Right Column - Product Info */}
