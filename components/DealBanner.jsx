@@ -10,42 +10,28 @@ export default function DealBanner() {
   const { isLoggedIn } = useUser();
   const [deal, setDeal] = useState(null);
   const [showBanner, setShowBanner] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
 
   // Only show banner on home and menu pages, not on crazy-deals
   const shouldShowBanner = router.pathname === '/' || router.pathname === '/menu';
 
   useEffect(() => {
-    if (shouldShowBanner) {
+    if (shouldShowBanner && isLoggedIn) {
       loadBannerDeal();
     }
-  }, [shouldShowBanner]);
+  }, [shouldShowBanner, isLoggedIn]);
 
   useEffect(() => {
-    if (!deal || dismissed || !shouldShowBanner) return;
+    if (!deal || !shouldShowBanner || !isLoggedIn) return;
 
-    // Show banner immediately on page load
-    setShowBanner(true);
-    setTimeout(() => {
-      setShowBanner(false);
-    }, 10000);
-
-    // Set interval to show banner again
-    const interval = setInterval(() => {
+    // Check if banner was already shown in this session
+    const bannerShown = sessionStorage.getItem('dealBannerShown');
+    
+    if (!bannerShown) {
+      // Show banner only once per session
       setShowBanner(true);
-      
-      setTimeout(() => {
-        setShowBanner(false);
-      }, 10000);
-    }, (deal.bannerInterval || 30) * 1000);
-
-    return () => clearInterval(interval);
-  }, [deal, dismissed, shouldShowBanner]);
-
-  // Reset dismissed state when route changes
-  useEffect(() => {
-    setDismissed(false);
-  }, [router.pathname]);
+      sessionStorage.setItem('dealBannerShown', 'true');
+    }
+  }, [deal, shouldShowBanner, isLoggedIn]);
 
   const loadBannerDeal = async () => {
     try {
@@ -74,7 +60,7 @@ export default function DealBanner() {
   const handleDismiss = (e) => {
     e.stopPropagation();
     setShowBanner(false);
-    setDismissed(true);
+    // Banner won't show again in this session
   };
 
   // Don't show banner if not on allowed pages or if dismissed or no deal
@@ -117,7 +103,9 @@ export default function DealBanner() {
                   <div className="bg-gradient-to-br from-[#80A6F7] to-[#80A6F7] px-6 py-3 shadow-2xl">
                     <div className="text-center">
                       <div className="text-3xl font-black text-white leading-none">
-                        {deal.discountPercentage}%
+                        {deal.discountType === 'percentage' 
+                          ? `${deal.discountPercentage}%` 
+                          : `$${deal.discountAmount}`}
                       </div>
                       <div className="text-xs font-bold text-white uppercase tracking-wide">
                         OFF

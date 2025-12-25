@@ -213,7 +213,9 @@ export default function CrazyDeals() {
                   <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-3xl blur-xl opacity-50 animate-pulse"></div>
                   <div className="relative bg-gradient-to-br from-orange-500 via-red-500 to-pink-600 text-white px-8 py-4 rounded-3xl text-center shadow-2xl transform hover:scale-105 transition-transform">
                     <div className="text-4xl font-black leading-none mb-2">
-                      {selectedDeal.discountPercentage}%
+                      {selectedDeal.discountType === 'percentage' 
+                        ? `${selectedDeal.discountPercentage}%` 
+                        : `$${selectedDeal.discountAmount}`}
                     </div>
                     <div className="text-xl font-bold uppercase tracking-widest">OFF</div>
                   </div>
@@ -237,7 +239,23 @@ export default function CrazyDeals() {
             <div className="space-y-6">
               {deal.products.map((product) => {
                 const hasVariants = product.hasVariants && product.variants && product.variants.length > 0;
-                const discount = deal.discountPercentage;
+                
+                // Calculate discount based on deal type
+                const calculateDiscountedPrice = (originalPrice) => {
+                  if (deal.discountType === 'percentage') {
+                    return originalPrice - (originalPrice * deal.discountPercentage / 100);
+                  } else {
+                    return Math.max(0, originalPrice - deal.discountAmount);
+                  }
+                };
+                
+                const getDiscountDisplay = () => {
+                  if (deal.discountType === 'percentage') {
+                    return `${deal.discountPercentage}%`;
+                  } else {
+                    return `$${deal.discountAmount}`;
+                  }
+                };
                 
                 if (hasVariants) {
                   return (
@@ -249,7 +267,7 @@ export default function CrazyDeals() {
                       {/* Discount Badge */}
                       <div className="absolute top-4 left-4 z-20 bg-gradient-to-r from-[#80A6F7] to-[#80A6F7] text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-2">
                         <Tag className="w-4 h-4" />
-                        {discount}% OFF
+                        {getDiscountDisplay()} OFF
                       </div>
 
                       {/* Horizontal Layout */}
@@ -328,7 +346,7 @@ export default function CrazyDeals() {
                               const variantStock = Number(variant.stock || 0);
                               const isOutOfStock = variantStock <= 0;
                               const originalPrice = variant.price;
-                              const discountedPrice = originalPrice - (originalPrice * discount / 100);
+                              const discountedPrice = calculateDiscountedPrice(originalPrice);
 
                               return (
                                 <div
@@ -377,10 +395,17 @@ export default function CrazyDeals() {
                                             addToCart({ 
                                               ...product, 
                                               selectedVariant: variant,
-                                              dealDiscount: discount,
+                                              deal: {
+                                                discountType: deal.discountType,
+                                                discountPercentage: deal.discountPercentage,
+                                                discountAmount: deal.discountAmount
+                                              },
                                               isDealProduct: true
                                             }, 1);
-                                            toast.success(`${product.name} added with ${discount}% discount!`);
+                                            const discountText = deal.discountType === 'percentage' 
+                                              ? `${deal.discountPercentage}% discount` 
+                                              : `$${deal.discountAmount} off`;
+                                            toast.success(`${product.name} added with ${discountText}!`);
                                           }
                                         }}
                                         disabled={isOutOfStock}
@@ -512,7 +537,7 @@ export default function CrazyDeals() {
                                 const flavorStock = Number(flavor.stock || 0);
                                 const isOutOfStock = flavorStock <= 0;
                                 const originalPrice = flavor.price;
-                                const discountedPrice = originalPrice - (originalPrice * discount / 100);
+                                const discountedPrice = calculateDiscountedPrice(originalPrice);
 
                                 return (
                                   <div
@@ -561,10 +586,17 @@ export default function CrazyDeals() {
                                               addToCart({ 
                                                 ...product, 
                                                 selectedFlavor: flavor,
-                                                dealDiscount: discount,
+                                                deal: {
+                                                  discountType: deal.discountType,
+                                                  discountPercentage: deal.discountPercentage,
+                                                  discountAmount: deal.discountAmount
+                                                },
                                                 isDealProduct: true
                                               }, 1);
-                                              toast.success(`${product.name} - ${flavor.name} added with ${discount}% discount!`);
+                                              const discountText = deal.discountType === 'percentage' 
+                                                ? `${deal.discountPercentage}% discount` 
+                                                : `$${deal.discountAmount} off`;
+                                              toast.success(`${product.name} - ${flavor.name} added with ${discountText}!`);
                                             }
                                           }}
                                           disabled={isOutOfStock}
