@@ -23,7 +23,7 @@ export default function Navbar() {
   useEffect(() => {
     const checkActiveDeals = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/deals/active');
+        const response = await fetch('https://api.mypsyguide.io/api/deals/active');
         const result = await response.json();
         console.log("dddd",result)
         setHasActiveDeals(result.success && result.data && result.data.length > 0);
