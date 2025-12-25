@@ -458,7 +458,7 @@ export default function CrazyDeals() {
                       {/* Discount Badge */}
                       <div className="absolute top-4 left-4 z-20 bg-gradient-to-r from-[#80A6F7] to-[#80A6F7]  text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-2">
                         <Tag className="w-4 h-4" />
-                        {discount}% OFF
+                        {getDiscountDisplay()} OFF
                       </div>
 
                       {/* Horizontal Layout */}
