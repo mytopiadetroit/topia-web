@@ -173,50 +173,17 @@ const ResourceCenter = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const openContentModal = async (contentId) => {
-    try {
-      const response = await fetch(`https://api.mypsyguide.io/api/content/public/${contentId}`, {
-        headers: getAuthHeaders()
-      });
-      const data = await response.json();
-
-      if (data.success) {
-        const detail = data.data;
-        setSelectedContent(detail);
-        setLikesCount(detail.likes || 0);
-        setViewsCount(detail.views || 0);
-        // determine liked if user is logged in and likedBy present
-        try {
-          const userDetail = JSON.parse(localStorage.getItem('userDetail') || 'null');
-          const userId = userDetail?._id || userDetail?.id;
-          const likedBy = detail.likedBy || [];
-          const hasLiked = userId ? likedBy.some((u) => String(u) === String(userId)) : false;
-          setLiked(!!hasLiked);
-        } catch { }
-        setShowModal(true);
-        document.body.style.overflow = 'hidden';
-
-        // Add unique view
-        const visitorId = getVisitorId();
-        if (visitorId) {
-          try {
-            const vRes = await fetch(`https://api.mypsyguide.io/api/content/public/${contentId}/view`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-              body: JSON.stringify({ visitorId })
-            });
-            const vData = await vRes.json();
-            if (vData?.success && vData?.data?.views != null) {
-              setViewsCount(vData.data.views);
-            }
-          } catch (e) {
-            console.warn('View track failed', e);
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error loading content details:', error);
-    }
+  const openContentModal = async (contentItem) => {
+    // Generate slug from title on frontend
+    const slug = contentItem.title
+      .toLowerCase()
+      .replace(/[^a-zA-Z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim();
+    
+    // Navigate to slug URL with ID as fallback
+    router.push(`/blog/${slug}?id=${contentItem._id}`);
   };
 
   const closeModal = () => {
@@ -473,7 +440,7 @@ const ResourceCenter = () => {
                 <div
                   key={item._id}
                   className="bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden cursor-pointer group"
-                  onClick={() => openContentModal(item._id)}
+                  onClick={() => openContentModal(item)}
                 >
                   {/* Image */}
                   <div className="relative h-48 bg-gray-200">
