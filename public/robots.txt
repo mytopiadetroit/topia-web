@@ -1,0 +1,28 @@
+# robots.txt for mypsyguide.io
+
+User-agent: *
+Allow: /
+
+# Disallow admin and auth pages
+Disallow: /admin/
+Disallow: /auth/login
+Disallow: /auth/signup
+Disallow: /auth/otp
+Disallow: /auth/forgot-password
+
+# Disallow user-specific pages
+Disallow: /wishlist
+Disallow: /profile
+Disallow: /orders
+
+# Allow important pages
+Allow: /
+Allow: /menu
+Allow: /resourcecenter
+Allow: /blog/
+Allow: /crazy-deals
+Allow: /products/
+Allow: /rewards
+
+# Sitemap location
+Sitemap: https://www.mypsyguide.io/sitemap.xml

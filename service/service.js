@@ -1,7 +1,7 @@
 import axios from "axios";
 
-      // export const ConstantsUrl = "http://localhost:5000/api/";
-    export const ConstantsUrl = "https://api.mypsyguide.io/api/";
+    //  export const ConstantsUrl = "http://localhost:5000/api/";
+     export const ConstantsUrl = "https://api.mypsyguide.io/api/";
 
 let isRedirecting = false;
 
@@ -536,6 +536,43 @@ export const fetchDealById = async (id) => {
     return response.data;
   } catch (error) {
     console.error('Error fetching deal:', error);
+    throw error;
+  }
+};
+
+// Content/Blog API helpers
+export const fetchContentBySlug = async (slug, router) => {
+  try {
+    return await Api('get', `content/public/slug/${slug}`, null, router);
+  } catch (error) {
+    console.error('Error fetching content by slug:', error);
+    throw error;
+  }
+};
+
+export const addContentView = async (contentId, visitorId, router) => {
+  try {
+    return await Api('post', `content/public/${contentId}/view`, { visitorId }, router);
+  } catch (error) {
+    console.error('Error adding content view:', error);
+    throw error;
+  }
+};
+
+export const likeContent = async (contentId, router) => {
+  try {
+    return await Api('post', `content/public/${contentId}/like`, null, router);
+  } catch (error) {
+    console.error('Error liking content:', error);
+    throw error;
+  }
+};
+
+export const unlikeContent = async (contentId, router) => {
+  try {
+    return await Api('post', `content/public/${contentId}/unlike`, null, router);
+  } catch (error) {
+    console.error('Error unliking content:', error);
     throw error;
   }
 };

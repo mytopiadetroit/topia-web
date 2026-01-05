@@ -174,16 +174,11 @@ const ResourceCenter = () => {
   };
 
   const openContentModal = async (contentItem) => {
-    // Generate slug from title on frontend
-    const slug = contentItem.title
-      .toLowerCase()
-      .replace(/[^a-zA-Z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim();
+    // Use slug from backend (SEO-friendly!)
+    const slug = contentItem.slug || contentItem._id; // Fallback to ID if slug doesn't exist yet
     
-    // Navigate to slug URL with ID as fallback
-    router.push(`/blog/${slug}?id=${contentItem._id}`);
+    // Navigate to clean slug URL (no ID parameter!)
+    router.push(`/blog/${slug}`);
   };
 
   const closeModal = () => {

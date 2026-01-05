@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
+import { fetchContentBySlug, addContentView, likeContent, unlikeContent } from '../../service/service';
 
 const uuid = () =>
   'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -20,24 +21,9 @@ const getVisitorId = () => {
   return id;
 };
 
-const getAuthToken = () => {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('userToken') || sessionStorage.getItem('userToken');
-  }
-  return null;
-};
-
-const getAuthHeaders = () => {
-  const token = getAuthToken();
-  return {
-    'Content-Type': 'application/json',
-    ...(token && { 'Authorization': `Bearer ${token}` })
-  };
-};
-
 const BlogDetail = () => {
   const router = useRouter();
-  const { slug, id } = router.query; // Get both slug and id from URL
+  const { slug } = router.query; // Only use slug now
   const [content, setContent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [liked, setLiked] = useState(false);
@@ -45,20 +31,17 @@ const BlogDetail = () => {
   const [viewsCount, setViewsCount] = useState(0);
 
   useEffect(() => {
-    if (id) {
-      // Use ID to fetch content (no backend changes needed!)
+    if (slug) {
       loadContent();
     }
-  }, [id]);
+  }, [slug]);
 
   const loadContent = async () => {
     try {
       setLoading(true);
-      // Fetch by ID - existing endpoint
-      const response = await fetch(`https://api.mypsyguide.io/api/content/public/${id}`, {
-        headers: getAuthHeaders()
-      });
-      const data = await response.json();
+      
+      // Fetch by slug using service helper - SEO friendly!
+      const data = await fetchContentBySlug(slug, router);
 
       if (data.success) {
         const detail = data.data;
@@ -79,12 +62,7 @@ const BlogDetail = () => {
         const visitorId = getVisitorId();
         if (visitorId) {
           try {
-            const vRes = await fetch(`https://api.mypsyguide.io/api/content/public/${detail._id}/view`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-              body: JSON.stringify({ visitorId })
-            });
-            const vData = await vRes.json();
+            const vData = await addContentView(detail._id, visitorId, router);
             if (vData?.success && vData?.data?.views != null) {
               setViewsCount(vData.data.views);
             }
@@ -108,20 +86,18 @@ const BlogDetail = () => {
     if (!content) return;
     const isLiking = !liked;
     try {
-      const endpoint = isLiking ? 'like' : 'unlike';
-      const res = await fetch(`https://api.mypsyguide.io/api/content/public/${content._id}/${endpoint}`, {
-        method: 'POST',
-        headers: getAuthHeaders()
-      });
-      const j = await res.json();
-      if (j?.success) {
-        if (typeof j.data?.likes === 'number') setLikesCount(j.data.likes);
+      const endpoint = isLiking ? likeContent : unlikeContent;
+      const result = await endpoint(content._id, router);
+      
+      if (result?.success) {
+        if (typeof result.data?.likes === 'number') setLikesCount(result.data.likes);
         setLiked(isLiking);
-      } else if (res.status === 401) {
-        router.push('/auth/login');
       }
     } catch (e) {
       console.error('Like toggle failed', e);
+      if (e.response?.status === 401) {
+        router.push('/auth/login');
+      }
     }
   };
 

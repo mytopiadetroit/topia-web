@@ -233,11 +233,43 @@ export default function CrazyDeals() {
 
       {/* Deals Section */}
       <div className="max-w-6xl mx-auto px-4 py-12">
-        {deals.map((deal) => (
-          <div key={deal._id} className="mb-16">
-            {/* Products List - Single Column like Menu */}
-            <div className="space-y-6">
-              {deal.products.map((product) => {
+        {deals.map((deal) => {
+          // Helper function to check if a variant is on sale
+          const isVariantOnSale = (productId, variantId) => {
+            if (!deal.dealItems || deal.dealItems.length === 0) {
+              // Old format: all products are on sale
+              return deal.products.some(p => p._id === productId);
+            }
+            // New format: check specific variants
+            return deal.dealItems.some(
+              item => item.product._id === productId && item.variantId && item.variantId.toString() === variantId.toString()
+            );
+          };
+
+          // Helper function to check if a flavor is on sale
+          const isFlavorOnSale = (productId, flavorId) => {
+            if (!deal.dealItems || deal.dealItems.length === 0) {
+              // Old format: all products are on sale
+              return deal.products.some(p => p._id === productId);
+            }
+            // New format: check specific flavors
+            return deal.dealItems.some(
+              item => item.product._id === productId && item.flavorId && item.flavorId.toString() === flavorId.toString()
+            );
+          };
+
+          // Get unique products from dealItems
+          const productsToShow = deal.dealItems && deal.dealItems.length > 0
+            ? [...new Set(deal.dealItems.map(item => item.product._id))].map(productId => 
+                deal.dealItems.find(item => item.product._id === productId).product
+              )
+            : deal.products;
+
+          return (
+            <div key={deal._id} className="mb-16">
+              {/* Products List - Single Column like Menu */}
+              <div className="space-y-6">
+                {productsToShow.map((product) => {
                 const hasVariants = product.hasVariants && product.variants && product.variants.length > 0;
                 
                 // Calculate discount based on deal type
@@ -340,7 +372,7 @@ export default function CrazyDeals() {
                           {/* Variants */}
                           <div className="mt-4">
                             <div className="flex flex-wrap items-center gap-3">
-                            {product.variants.map((variant) => {
+                            {product.variants.filter(variant => isVariantOnSale(product._id, variant._id)).map((variant) => {
                               const cartItem = cart.find((i) => (i.id || i._id) === product._id && i.selectedVariant?._id === variant._id);
                               const isInCart = cartItem && cartItem.quantity > 0;
                               const variantStock = Number(variant.stock || 0);
@@ -531,7 +563,7 @@ export default function CrazyDeals() {
                           {/* Flavors - Same style as variants */}
                           <div className="mt-4">
                             <div className="flex flex-wrap items-center gap-3">
-                              {product.flavors.filter(f => f.isActive).map((flavor) => {
+                              {product.flavors.filter(f => f.isActive && isFlavorOnSale(product._id, f._id)).map((flavor) => {
                                 const cartItem = cart.find((i) => (i.id || i._id) === product._id && i.selectedFlavor?._id === flavor._id);
                                 const isInCart = cartItem && cartItem.quantity > 0;
                                 const flavorStock = Number(flavor.stock || 0);
@@ -641,7 +673,8 @@ export default function CrazyDeals() {
               })}
             </div>
           </div>
-        ))}
+        );
+        })}
       </div>
     </div>
   );
