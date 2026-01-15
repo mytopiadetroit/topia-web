@@ -1,6 +1,6 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.mypsyguide.io/api/';
 
-// Fetch published content with filters and pagination
+
 export const fetchPublishedContent = async (params = {}) => {
   try {
     const queryParams = new URLSearchParams();

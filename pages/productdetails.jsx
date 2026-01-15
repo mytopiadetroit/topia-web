@@ -546,7 +546,7 @@ export default function ProductDetails() {
                     >
                       <div className="text-center">
                         <span className="text-lg font-bold">
-                          {variant.size.value}{variant.size.unit === 'grams' ? 'G' : variant.size.unit}
+                          {variant.size.value}{variant.size.unit === 'grams' ? 'G' : variant.size.unit === 'pieces' ? ' pcs' : variant.size.unit.toUpperCase()}
                         </span>
                       </div>
                     </button>

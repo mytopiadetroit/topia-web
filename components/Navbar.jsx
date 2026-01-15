@@ -153,7 +153,7 @@ export default function Navbar() {
             </div>
 
             {/* Desktop Navigation */}
-           <div className={`hidden md:block rounded-4xl bg-[url('/images/navbar.png')] bg-cover bg-center transition-all duration-300 ${hasActiveDeals ? 'w-[780px]' : 'w-[680px]'}`}>
+           <div className={`hidden md:block rounded-4xl bg-[url('/images/navbar.png')] bg-cover bg-center transition-all duration-300 ${hasActiveDeals && isLoggedIn ? 'w-[780px]' : 'w-[680px]'}`}>
               <div className="ml-20 flex items-baseline space-x-8">
                 <a href="/" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
                   HOME
@@ -161,7 +161,7 @@ export default function Navbar() {
                 <a href="/menu" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
                   MENU
                 </a>
-                {hasActiveDeals && (
+                {hasActiveDeals && isLoggedIn && (
                   <a href="/crazy-deals" className="relative text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
                     CRAZY DEALS
                     <span className="absolute -top-2 -right-3 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
@@ -350,7 +350,7 @@ export default function Navbar() {
                   <span className="font-medium">Menu</span>
                 </a>
                 
-                {hasActiveDeals && (
+                {hasActiveDeals && isLoggedIn && (
                   <a 
                     href="/crazy-deals" 
                     onClick={handleNavItemClick}

@@ -1473,7 +1473,7 @@ if (isLoggedIn && user?.status === 'suspend') {
                                       {/* Size and Price */}
                                       <div className="flex flex-col">
                                         <span className="text-sm font-bold text-gray-900">
-                                          {variant.size.value}{variant.size.unit === 'grams' ? 'G' : variant.size.unit}
+                                          {variant.size.value}{variant.size.unit === 'grams' ? 'G' : variant.size.unit === 'pieces' ? ' pcs' : variant.size.unit.toUpperCase()}
                                         </span>
                                         <span className="text-base font-bold text-gray-900">
                                           ${variant.price}
@@ -2022,7 +2022,7 @@ return (
                         </div>
                         <div className="flex flex-col">
                           <span className="text-sm font-bold text-gray-900">
-                            {variant.size.value}{variant.size.unit === 'grams' ? 'G' : variant.size.unit}
+                            {variant.size.value}{variant.size.unit === 'grams' ? 'G' : variant.size.unit === 'pieces' ? ' pcs' : variant.size.unit.toUpperCase()}
                           </span>
                           <span className="text-base font-bold text-gray-900">${variant.price}</span>
                         </div>
