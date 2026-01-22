@@ -1,7 +1,7 @@
 import axios from "axios";
 
-    //  export const ConstantsUrl = "http://localhost:5000/api/";
-     export const ConstantsUrl = "https://api.mypsyguide.io/api/";
+      // export const ConstantsUrl = "http://localhost:5000/api/";
+      export const ConstantsUrl = "https://api.mypsyguide.io/api/";
 
 let isRedirecting = false;
 
@@ -457,6 +457,16 @@ const fetchGalleryImages = async (router) => {
     return await Api('get', 'gallery', null, router);
   } catch (error) {
     console.error('Error fetching gallery images:', error);
+    throw error;
+  }
+};
+
+// Update SMS preferences
+export const updateSMSPreferences = async (userId, smsOptOut, router) => {
+  try {
+    return await Api('put', `users/${userId}/sms-preferences`, { smsOptOut }, router);
+  } catch (error) {
+    console.error('Error updating SMS preferences:', error);
     throw error;
   }
 };

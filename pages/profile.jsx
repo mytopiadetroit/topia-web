@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Edit, FileText, Upload, X, Check, Camera } from 'lucide-react';
 import { Api } from '../service/service';
+import { updateSMSPreferences } from '../service/service';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import { useUser } from '../context/UserContext';
@@ -9,13 +10,16 @@ const Profile = () => {
   const router = useRouter();
   const { isLoggedIn, loading: authLoading } = useUser();
   const [profile, setProfile] = useState({
+    _id: '',
     fullName: '',
     phone: '',
     email: '',
     birthday: { day: '', month: '', year: '' },
     documentStatus: 'Processing',
     status: 'pending',
-    governmentId: ''
+    governmentId: '',
+    smsOptOut: false,
+    smsOptOutDate: null
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -97,6 +101,7 @@ const Profile = () => {
           if (response.success) {
             // Create profile data from API response
             const profileData = {
+              _id: response.user._id || response.user.id, // Add user ID
               fullName: response.user.fullName || '',
               phone: response.user.phone || '',
               email: response.user.email || '',
@@ -104,6 +109,8 @@ const Profile = () => {
               documentStatus: response.user.documentStatus || 'Processing',
               status: response.user.status || 'pending',
               governmentId: response.user.governmentId || '',
+              smsOptOut: response.user.smsOptOut || false, // Add SMS opt-out status
+              smsOptOutDate: response.user.smsOptOutDate || null, // Add SMS opt-out date
               // Prioritize avatar from API response, but fall back to localStorage if API doesn't return it
               avatar: response.user.avatar || (userDataFromStorage?.avatar) || ''
             };
@@ -267,6 +274,54 @@ const Profile = () => {
         setDocumentPreview(reader.result);
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  // Handle SMS preferences toggle
+  const handleSMSToggle = async (e) => {
+    const newOptOutStatus = !e.target.checked; // If unchecked, user wants to opt out
+    
+    console.log('SMS Toggle - Profile ID:', profile._id);
+    console.log('SMS Toggle - New Opt Out Status:', newOptOutStatus);
+    
+    if (!profile._id) {
+      toast.error('User ID not found. Please refresh the page.', {
+        position: "top-center",
+        autoClose: 5000,
+      });
+      return;
+    }
+    
+    try {
+      setUpdating(true);
+      const response = await updateSMSPreferences(profile._id, newOptOutStatus, router);
+      
+      if (response.success) {
+        // Update profile state
+        setProfile(prev => ({
+          ...prev,
+          smsOptOut: newOptOutStatus,
+          smsOptOutDate: newOptOutStatus ? new Date() : null
+        }));
+        
+        toast.success(response.message, {
+          position: "top-center",
+          autoClose: 3000,
+        });
+      } else {
+        toast.error(response.message || 'Failed to update SMS preferences', {
+          position: "top-center",
+          autoClose: 5000,
+        });
+      }
+    } catch (error) {
+      console.error('Error updating SMS preferences:', error);
+      toast.error('Failed to update SMS preferences', {
+        position: "top-center",
+        autoClose: 5000,
+      });
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -695,6 +750,46 @@ const Profile = () => {
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* SMS Preferences Section */}
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-lg font-semibold text-gray-900">SMS Notifications</h2>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div className="flex-1">
+                    <h3 className="font-medium text-gray-900">SMS Notifications</h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Receive SMS notifications for birthday wishes, promotions, and special offers
+                    </p>
+                  </div>
+                  <div className="flex items-center">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={!profile.smsOptOut}
+                        onChange={handleSMSToggle}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                  </div>
+                </div>
+                
+                {profile.smsOptOut && profile.smsOptOutDate && (
+                  <div className="text-sm text-gray-500 bg-yellow-50 p-3 rounded-lg">
+                    <p>SMS notifications disabled on {new Date(profile.smsOptOutDate).toLocaleDateString()}</p>
+                    <p className="mt-1">You can re-enable them anytime by toggling the switch above.</p>
+                  </div>
+                )}
+                
+                {/* <div className="text-xs text-gray-500 bg-blue-50 p-3 rounded-lg">
+                  <p><strong>Note:</strong> You can also text "STOP" to our SMS number to unsubscribe, or "START" to resubscribe.</p>
+                </div> */}
+              </div>
             </div>
 
             {/* My Rewards Section */}
