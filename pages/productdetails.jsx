@@ -48,8 +48,8 @@ export default function ProductDetails() {
           }
         });
 
-        // Redirect to login page
-        router.push('/auth/login');
+        // Redirect to welcome page
+        router.push('/welcome');
       }
     }
   }, [isLoggedIn, userLoading, router]);

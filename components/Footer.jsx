@@ -67,7 +67,7 @@ function App() {
         <div className="container mx-auto px-6 py-16">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
-            {/* Logo and Contact Section - 3 columns */}
+          
             <div className="lg:col-span-3">
               <div className="flex items-center space-x-3 mb-6">
                 <div className="w-32 h-32 flex items-center justify-center">

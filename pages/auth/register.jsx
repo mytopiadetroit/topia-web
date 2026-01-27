@@ -609,7 +609,7 @@ const Register = () => {
               <p className="text-gray-600 text-sm">
                 Already have an account? 
                 <Link href="/auth/login">
-                  <span className="text-[#8EAFF6CC] font-medium cursor-pointer hover:underline ml-1">Login</span>
+                  <span className="bg-[#8EAFF6CC] text-white font-medium cursor-pointer hover:bg-[#6B94F5] ml-2 px-4 py-2 rounded-full transition-colors duration-200">Login</span>
                 </Link>
               </p>
             </div>

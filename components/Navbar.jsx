@@ -58,7 +58,7 @@ export default function Navbar() {
   // Handle 403 errors from API responses
   useEffect(() => {
     const handleApiError = (event) => {
-      // Check if this is an API error with 403 status
+      
       if (event.detail?.status === 403) {
         toast.error('Your session has expired. Please login again.');
         logout();
@@ -116,6 +116,14 @@ export default function Navbar() {
     setIsMobileProfileOpen(false);
   };
 
+  const handleProtectedNavigation = (path) => {
+    if (!isLoggedIn) {
+      router.push('/welcome');
+      return;
+    }
+    router.push(path);
+  };
+
   const handleLogout = async () => {
     try {
       await logout();
@@ -158,12 +166,15 @@ export default function Navbar() {
                 <a href="/" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
                   HOME
                 </a>
-                <a href="/menu" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
+                <button 
+                  onClick={() => handleProtectedNavigation('/menu')}
+                  className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200"
+                >
                   MENU
-                </a>
+                </button>
                 {hasActiveDeals && isLoggedIn && (
                   <a href="/crazy-deals" className="relative text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
-                    CRAZY DEALS
+                    DEALS OF THE WEEK
                     <span className="absolute -top-2 -right-3 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
                       🔥
                     </span>
@@ -176,16 +187,22 @@ export default function Navbar() {
                   {/* <a href="/myhistory" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
                     Experiences
                   </a> */}
-                <a href="/rewards" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
+                <button 
+                  onClick={() => handleProtectedNavigation('/rewards')}
+                  className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200"
+                >
                   REWARDS
-                </a>
+                </button>
               </div>
             </div>
 
             {/* Profile, Cart and Mobile menu button */}
             <div className="flex items-center space-x-4">
               {/* Wishlist Icon */}
-              <a href="/wishlist" className="relative">
+              <button 
+                onClick={() => handleProtectedNavigation('/wishlist')}
+                className="relative"
+              >
                 <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-400 transition-colors duration-200">
                   <Heart className="w-5 h-5 text-gray-600" />
                 </div>
@@ -194,9 +211,12 @@ export default function Navbar() {
                     {wishlistCount}
                   </span>
                 )}
-              </a>
+              </button>
               {/* Cart Icon */}
-              <a href="/cart" className="relative">
+              <button 
+                onClick={() => handleProtectedNavigation('/cart')}
+                className="relative"
+              >
                 <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-400 transition-colors duration-200">
                   <ShoppingCart className="w-5 h-5 text-gray-600" />
                 </div>
@@ -205,13 +225,13 @@ export default function Navbar() {
                     {cartCount}
                   </span>
                 )}
-              </a>
+              </button>
 
               {/* Desktop Profile Dropdown */}
               <div className="hidden md:block relative" ref={profileRef}>
                 <div 
                   className="flex items-center space-x-1 cursor-pointer"
-                  onClick={() => isLoggedIn ? setIsProfileOpen(!isProfileOpen) : router.push('/auth/login')}
+                  onClick={() => isLoggedIn ? setIsProfileOpen(!isProfileOpen) : router.push('/welcome')}
                 >
                   <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
                     {isLoggedIn ? (
@@ -342,13 +362,26 @@ export default function Navbar() {
               {/* Main Navigation */}
               <div className="space-y-1">
                 <a 
-                  href="/menu" 
+                  href="/" 
                   onClick={handleNavItemClick}
                   className="flex items-center space-x-3 px-2 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 group"
                 >
                   <Home className="w-5 h-5 group-hover:text-blue-600" />
-                  <span className="font-medium">Menu</span>
+                  <span className="font-medium">Home</span>
                 </a>
+                
+                <button 
+                  onClick={() => {
+                    handleProtectedNavigation('/menu');
+                    handleNavItemClick();
+                  }}
+                  className="flex items-center space-x-3 px-2 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 group w-full text-left"
+                >
+                  <svg className="w-5 h-5 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  <span className="font-medium">Menu</span>
+                </button>
                 
                 {hasActiveDeals && isLoggedIn && (
                   <a 
@@ -359,7 +392,7 @@ export default function Navbar() {
                     <svg className="w-5 h-5 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span className="font-medium">Crazy Deals</span>
+                    <span className="font-medium">Deals of the Week</span>
                     <span className="ml-auto flex h-2 w-2">
                       <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-red-400 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
@@ -394,22 +427,26 @@ export default function Navbar() {
                   <span className="font-medium"> Experiences</span>
                 </a> */}
                 
-                <a 
-                  href="/rewards" 
-                  onClick={handleNavItemClick}
-                  className="flex items-center space-x-3 px-2 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 group"
+                <button 
+                  onClick={() => {
+                    handleProtectedNavigation('/rewards');
+                    handleNavItemClick();
+                  }}
+                  className="flex items-center space-x-3 px-2 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 group w-full text-left"
                 >
                   <Award className="w-5 h-5 group-hover:text-blue-600" />
                   <span className="font-medium"> Rewards</span>
-                </a>
+                </button>
               </div>
 
               {/* Cart Section */}
               <div className="pt-4 border-t border-gray-200">
-                <a 
-                  href="/cart" 
-                  onClick={handleNavItemClick}
-                  className="flex items-center justify-between px-2 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 group"
+                <button 
+                  onClick={() => {
+                    handleProtectedNavigation('/cart');
+                    handleNavItemClick();
+                  }}
+                  className="flex items-center justify-between px-2 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 group w-full text-left"
                 >
                   <div className="flex items-center space-x-3">
                     <ShoppingCart className="w-5 h-5 group-hover:text-blue-600" />
@@ -420,7 +457,7 @@ export default function Navbar() {
                       {cartCount}
                     </span>
                   )}
-                </a>
+                </button>
               </div>
 
               {/* My Profile Section with Dropdown */}

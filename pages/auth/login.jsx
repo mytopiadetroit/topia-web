@@ -337,7 +337,7 @@ const Login = () => {
               <p className="text-gray-600 text-sm">
                 Do not have an account ?
                 <Link href="/auth/register">
-                  <span className="text-[#8EAFF6CC] font-medium cursor-pointer hover:underline ml-1">Register</span>
+                  <span className="bg-[#8EAFF6CC] text-white font-medium cursor-pointer hover:bg-[#6B94F5] ml-2 px-4 py-2 rounded-full transition-colors duration-200">Register</span>
                 </Link>
               </p>
             </div>
