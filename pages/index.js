@@ -436,7 +436,7 @@ export default function Home() {
                   </div>
                 ) : (
                   <button   
-                    onClick={() => router.push('/topia-circle')} 
+                    onClick={() => router.push('/commingsoon')} 
                     className="bg-[#2E2E2E] hover:bg-[#2E2E2E] text-white px-8 py-4 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105"
                   >
                     Join Now 
