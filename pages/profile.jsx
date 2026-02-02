@@ -5,6 +5,7 @@ import { updateSMSPreferences } from '../service/service';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import { useUser } from '../context/UserContext';
+import SubscriptionStatus from '../components/SubscriptionStatus';
 
 const Profile = () => {
   const router = useRouter();
@@ -19,7 +20,9 @@ const Profile = () => {
     status: 'pending',
     governmentId: '',
     smsOptOut: false,
-    smsOptOutDate: null
+    smsOptOutDate: null,
+    isTopiaCircleMember: false,
+    subscriptionStatus: 'inactive'
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -112,7 +115,10 @@ const Profile = () => {
               smsOptOut: response.user.smsOptOut || false, // Add SMS opt-out status
               smsOptOutDate: response.user.smsOptOutDate || null, // Add SMS opt-out date
               // Prioritize avatar from API response, but fall back to localStorage if API doesn't return it
-              avatar: response.user.avatar || (userDataFromStorage?.avatar) || ''
+              avatar: response.user.avatar || (userDataFromStorage?.avatar) || '',
+              // Add Topia Circle membership fields
+              isTopiaCircleMember: response.user.isTopiaCircleMember || false,
+              subscriptionStatus: response.user.subscriptionStatus || 'inactive'
             };
             
             console.log('Final profile data with avatar:', profileData);
@@ -751,6 +757,9 @@ const Profile = () => {
                 </div>
               )}
             </div>
+
+            {/* Subscription Status Section */}
+            <SubscriptionStatus user={profile} />
 
             {/* SMS Preferences Section */}
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">

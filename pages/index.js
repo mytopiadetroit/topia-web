@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { useUser } from '../context/UserContext';
 import { useApp } from '../context/AppContext';
 import { useRouter } from 'next/router';
+import { Api } from '../service/service';
 
 export default function Home() {
   const [isVisible, setIsVisible] = useState(false);
@@ -24,52 +25,44 @@ export default function Home() {
     resource: '/images/ii4.png',
     circle: '/images/ii4.png'
   });
+  const [userProfile, setUserProfile] = useState(null);
+  const [profileLoading, setProfileLoading] = useState(true);
 
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem('userToken');
-    return {
-      'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` })
-    };
+  // Load user profile to check subscription status
+  const loadUserProfile = async () => {
+    if (!isLoggedIn) {
+      setProfileLoading(false);
+      return;
+    }
+
+    try {
+      const data = await Api('get', 'auth/profile', null, router);
+      if (data.success) {
+        setUserProfile(data.user);
+      }
+    } catch (error) {
+      console.error('Error loading user profile:', error);
+    } finally {
+      setProfileLoading(false);
+    }
   };
 
   // Load homepage settings from the backend
   const loadHomepageSettings = async () => {
     console.log('🔄 Loading homepage settings...');
     try {
-      const response = await fetch('https://api.mypsyguide.io/api/homepage-settings', {
-        method: 'GET',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        },
-        cache: 'no-store'
-      });
+      const response = await Api('get', 'homepage-settings', null, router);
+      console.log('✅ API Response:', response);
       
-      console.log('📡 Response status:', response.status);
-      
-      if (response.ok) {
-        const result = await response.json();
-        console.log('✅ API Response:', result);
-        
-        if (result.success && result.data) {
-          const newSections = {
-            rewards: result.data.rewardsSectionVisible ?? false,
-            feedback: result.data.feedbackSectionVisible ?? false
-          };
-          console.log('🎯 Setting sections to:', newSections);
-          setSections(newSections);
-        } else {
-          console.warn('⚠️ Unexpected API response format');
-          setSections({
-            rewards: false,
-            feedback: false
-          });
-        }
+      if (response.success && response.data) {
+        const newSections = {
+          rewards: response.data.rewardsSectionVisible ?? false,
+          feedback: response.data.feedbackSectionVisible ?? false
+        };
+        console.log('🎯 Setting sections to:', newSections);
+        setSections(newSections);
       } else {
-        console.error('❌ API failed with status:', response.status);
+        console.warn('⚠️ Unexpected API response format');
         setSections({
           rewards: false,
           feedback: false
@@ -87,25 +80,21 @@ export default function Home() {
   useEffect(() => {
     const loadInitialData = async () => {
       try {
+        // Load user profile first
+        await loadUserProfile();
+        
         // Load shop settings
         try {
-          const shopResponse = await fetch(`https://api.mypsyguide.io/api/shop-settings`, {
-            headers: getAuthHeaders(),
-            cache: 'no-store'
-          });
-          
-          if (shopResponse.ok) {
-            const shopData = await shopResponse.json();
-            if (shopData.success) {
-              setShopSettings(shopData.data);
-              // Get today's timing
-              const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-              const today = days[new Date().getDay()];
-              if (shopData.data.timings) {
-                const timing = shopData.data.timings.find(t => t.day && t.day.toLowerCase() === today);
-                if (timing) {
-                  setTodayTiming(timing);
-                }
+          const shopData = await Api('get', 'shop-settings', null, router);
+          if (shopData.success) {
+            setShopSettings(shopData.data);
+            // Get today's timing
+            const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            const today = days[new Date().getDay()];
+            if (shopData.data.timings) {
+              const timing = shopData.data.timings.find(t => t.day && t.day.toLowerCase() === today);
+              if (timing) {
+                setTodayTiming(timing);
               }
             }
           }
@@ -118,40 +107,33 @@ export default function Home() {
         
         // Load homepage images
         try {
-          const imagesResponse = await fetch('https://api.mypsyguide.io/api/homepage-images', {
-            headers: { 'Content-Type': 'application/json' },
-            cache: 'no-store'
-          });
-          
-          if (imagesResponse.ok) {
-            const imagesData = await imagesResponse.json();
-            if (imagesData.success && imagesData.data) {
-              const newImages = { ...homepageImages };
-              
-              // Direct mapping from API response
-              if (imagesData.data.hero) {
-                newImages.hero = imagesData.data.hero.startsWith('http') 
-                  ? imagesData.data.hero 
-                  : `http://localhost:5000${imagesData.data.hero}`;
-              }
-              if (imagesData.data.mission) {
-                newImages.mission = imagesData.data.mission.startsWith('http') 
-                  ? imagesData.data.mission 
-                  : `http://localhost:5000${imagesData.data.mission}`;
-              }
-              if (imagesData.data.resource) {
-                newImages.resource = imagesData.data.resource.startsWith('http') 
-                  ? imagesData.data.resource 
-                  : `http://localhost:5000${imagesData.data.resource}`;
-              }
-              if (imagesData.data.circle) {
-                newImages.circle = imagesData.data.circle.startsWith('http') 
-                  ? imagesData.data.circle 
-                  : `http://localhost:5000${imagesData.data.circle}`;
-              }
-              
-              setHomepageImages(newImages);
+          const imagesData = await Api('get', 'homepage-images', null, router);
+          if (imagesData.success && imagesData.data) {
+            const newImages = { ...homepageImages };
+            
+            // Direct mapping from API response
+            if (imagesData.data.hero) {
+              newImages.hero = imagesData.data.hero.startsWith('http') 
+                ? imagesData.data.hero 
+                : `http://localhost:5000${imagesData.data.hero}`;
             }
+            if (imagesData.data.mission) {
+              newImages.mission = imagesData.data.mission.startsWith('http') 
+                ? imagesData.data.mission 
+                : `http://localhost:5000${imagesData.data.mission}`;
+            }
+            if (imagesData.data.resource) {
+              newImages.resource = imagesData.data.resource.startsWith('http') 
+                ? imagesData.data.resource 
+                : `http://localhost:5000${imagesData.data.resource}`;
+            }
+            if (imagesData.data.circle) {
+              newImages.circle = imagesData.data.circle.startsWith('http') 
+                ? imagesData.data.circle 
+                : `http://localhost:5000${imagesData.data.circle}`;
+            }
+            
+            setHomepageImages(newImages);
           }
         } catch (imgErr) {
           console.error('Error loading homepage images:', imgErr);
@@ -162,7 +144,7 @@ export default function Home() {
     };
     
     loadInitialData();
-  }, []);
+  }, [isLoggedIn]); // Re-run when login status changes
 
   // Removed duplicate polling - settings are loaded once on mount
 
@@ -432,9 +414,34 @@ export default function Home() {
                  personalized benefits, and a community of growth await.
                 </p>
                 
-                <button   onClick={() => router.push('/commingsoon')} className="bg-[#2E2E2E] hover:bg-[#2E2E2E] text-white px-8 py-4 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105">
-                  Coming Soon 
-                </button>
+                {profileLoading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600"></div>
+                    <span className="text-gray-600">Loading...</span>
+                  </div>
+                ) : userProfile?.isTopiaCircleMember ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-2 text-[#80A6F7] mb-4">
+                      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span className="font-semibold">You're a Topia Circle Member!</span>
+                    </div>
+                    <button 
+                      onClick={() => router.push('/profile')} 
+                      className="bg-[#80A6F7] hover:bg-sky-500 text-white px-8 py-4 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105"
+                    >
+                      Manage Subscription
+                    </button>
+                  </div>
+                ) : (
+                  <button   
+                    onClick={() => router.push('/topia-circle')} 
+                    className="bg-[#2E2E2E] hover:bg-[#2E2E2E] text-white px-8 py-4 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105"
+                  >
+                    Join Now 
+                  </button>
+                )}
               </div>
             </div>
           </div>

@@ -166,7 +166,7 @@ export default function ComingSoon() {
               </div>
               
               <button
-                onClick={handleSubscribe}
+                onClick={() => router.push('/topia-circle')}
                 disabled={isSubscribed}
                 className={`w-full py-4 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2 ${
                   isSubscribed 
@@ -178,7 +178,7 @@ export default function ComingSoon() {
                   <span>✓ Successfully Subscribed!</span>
                 ) : (
                   <>
-                    <span>Notify Me</span>
+                    <span>Join Now</span>
                     <ChevronRight className="w-5 h-5" />
                   </>
                 )}

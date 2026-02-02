@@ -1,7 +1,7 @@
 import axios from "axios";
 
-      // export const ConstantsUrl = "http://localhost:5000/api/";
-      export const ConstantsUrl = "https://api.mypsyguide.io/api/";
+       export const ConstantsUrl = "http://localhost:5000/api/";
+      // export const ConstantsUrl = "https://api.mypsyguide.io/api/";
 
 let isRedirecting = false;
 
@@ -252,6 +252,27 @@ const fetchProductsByCategory = async (categoryId, router) => {
   }
 };
 
+// Helper function to fetch all products
+const fetchAllProducts = async (router, params = {}) => {
+  try {
+    return await Api('get', 'products', null, router, params);
+  } catch (error) {
+    console.error('Error fetching all products:', error);
+    throw error;
+  }
+};
+
+// Helper function to fetch products for subscription (public)
+export const fetchProductsForSubscription = async () => {
+  try {
+    const response = await axios.get(ConstantsUrl + 'products?limit=100&includeInactive=false');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching products for subscription:', error);
+    throw error;
+  }
+};
+
 // Helper function to create product (multipart/form-data)
 const createProduct = async (formData, router) => {
   try {
@@ -480,6 +501,7 @@ export {
   setGlobalToast,
   fetchAllCategories,
   fetchProductsByCategory,
+  fetchAllProducts,
   createProduct,
   fetchAllUsers,
   fetchUserById,
@@ -583,6 +605,52 @@ export const unlikeContent = async (contentId, router) => {
     return await Api('post', `content/public/${contentId}/unlike`, null, router);
   } catch (error) {
     console.error('Error unliking content:', error);
+    throw error;
+  }
+};
+
+export const fetchSubscriptionSettings = async () => {
+  try {
+    const response = await axios.get(ConstantsUrl + 'subscriptions/settings');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching subscription settings:', error);
+    throw error;
+  }
+};
+
+export const createSubscription = async (data, router) => {
+  try {
+    return await Api('post', 'subscriptions', data, router);
+  } catch (error) {
+    console.error('Error creating subscription:', error);
+    throw error;
+  }
+};
+
+export const fetchMySubscription = async (router) => {
+  try {
+    return await Api('get', 'subscriptions/my-subscription', null, router);
+  } catch (error) {
+    console.error('Error fetching subscription:', error);
+    throw error;
+  }
+};
+
+export const updateMySubscription = async (data, router) => {
+  try {
+    return await Api('put', 'subscriptions/my-subscription', data, router);
+  } catch (error) {
+    console.error('Error updating subscription:', error);
+    throw error;
+  }
+};
+
+export const cancelSubscription = async (reason, router) => {
+  try {
+    return await Api('post', 'subscriptions/cancel', { reason }, router);
+  } catch (error) {
+    console.error('Error cancelling subscription:', error);
     throw error;
   }
 };
