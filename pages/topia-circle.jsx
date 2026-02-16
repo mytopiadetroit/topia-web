@@ -1,24 +1,27 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { useUser } from '../context/UserContext'
-import { Star, Check, CreditCard, Shield, Gift, Package } from 'lucide-react'
+import { Star, Check, CreditCard, Shield, Gift } from 'lucide-react'
 import { toast } from 'react-toastify'
-import { fetchSubscriptionSettings, createSubscription, fetchProductsForSubscription } from '../service/service'
+import { fetchSubscriptionSettings, createSubscription } from '../service/service'
 
 export default function TopiaCircle() {
   const router = useRouter()
   const { isLoggedIn } = useUser()
   const [settings, setSettings] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [productsLoading, setProductsLoading] = useState(true)
   const [subscribing, setSubscribing] = useState(false)
-  const [products, setProducts] = useState([])
-  const [selectedProducts, setSelectedProducts] = useState([])
   const [formData, setFormData] = useState({
     preferences: [],
     allergies: [],
     paymentMethodId: '',
-    selectedProducts: []
+    billingAddress: {
+      street: '',
+      city: '',
+      state: '',
+      zipCode: '',
+      country: 'USA'
+    }
   })
 
   useEffect(() => {
@@ -27,38 +30,8 @@ export default function TopiaCircle() {
       return
     }
     loadSettings()
-    loadProducts()
   }, [isLoggedIn])
-
-  const loadProducts = async () => {
-    try {
-      setProductsLoading(true)
-      console.log('Fetching products using service...')
-      
-      const data = await fetchProductsForSubscription()
-      console.log('API Response:', data)
-      console.log('Total products in response:', data.data?.length)
-      
-      if (data.success && data.data) {
-        const allProducts = data.data.filter(product => product.isActive !== false)
-        console.log('Active products after filtering:', allProducts.length)
         
-        const withoutPrice = allProducts.filter(product => !product.price || product.price <= 0)
-        if (withoutPrice.length > 0) {
-          console.log('Products without price:', withoutPrice.map(p => ({ name: p.name, price: p.price })))
-        }
-        
-        setProducts(allProducts)
-      } else {
-        console.error('API call failed or no data:', data)
-      }
-    } catch (error) {
-      console.error('Error loading products:', error)
-    } finally {
-      setProductsLoading(false)
-    }
-  }
-
   const loadSettings = async () => {
     try {
       const data = await fetchSubscriptionSettings()
@@ -82,21 +55,22 @@ export default function TopiaCircle() {
     }))
   }
 
-  const handleProductSelection = (productId) => {
-    const updatedProducts = selectedProducts.includes(productId)
-      ? selectedProducts.filter(id => id !== productId)
-      : [...selectedProducts, productId]
-    
-    setSelectedProducts(updatedProducts)
-    setFormData(prev => ({ ...prev, selectedProducts: updatedProducts }))
-  }
-
   const handleAllergyChange = (allergy) => {
     setFormData(prev => ({
       ...prev,
       allergies: prev.allergies.includes(allergy)
         ? prev.allergies.filter(a => a !== allergy)
         : [...prev.allergies, allergy]
+    }))
+  }
+
+  const handleBillingAddressChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      billingAddress: {
+        ...prev.billingAddress,
+        [field]: value
+      }
     }))
   }
 
@@ -108,8 +82,8 @@ export default function TopiaCircle() {
       return
     }
 
-    if (selectedProducts.length === 0) {
-      toast.error('Please select at least one product for your monthly box')
+    if (!formData.billingAddress.street || !formData.billingAddress.city || !formData.billingAddress.zipCode) {
+      toast.error('Please complete your billing address')
       return
     }
 
@@ -126,7 +100,8 @@ export default function TopiaCircle() {
       }
     } catch (error) {
       console.error('Error creating subscription:', error)
-      toast.error('Failed to create subscription')
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to create subscription'
+      toast.error(errorMessage)
     } finally {
       setSubscribing(false)
     }
@@ -174,7 +149,7 @@ export default function TopiaCircle() {
           <div className="order-2 lg:order-1 bg-white rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl p-4 sm:p-6 lg:p-8">
             <div className="text-center mb-6 sm:mb-8">
               <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#80A6F7] mb-2">
-                ${settings?.monthlyPrice}
+                $100
               </div>
               <div className="text-gray-600 text-sm sm:text-base">per month</div>
               <div className="text-xs sm:text-sm text-gray-500 mt-2">
@@ -189,7 +164,7 @@ export default function TopiaCircle() {
               </div>
               <div className="flex items-center space-x-3">
                 <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
-                <span className="text-sm sm:text-base">Personalized product selection</span>
+                <span className="text-sm sm:text-base">$200 worth of premium products</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
@@ -201,7 +176,7 @@ export default function TopiaCircle() {
               </div>
               <div className="flex items-center space-x-3">
                 <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
-                <span className="text-sm sm:text-base">Flexible box customization</span>
+                <span className="text-sm sm:text-base">Curated by our expert team</span>
               </div>
             </div>
 
@@ -219,129 +194,29 @@ export default function TopiaCircle() {
           {/* Form */}
           <div className="order-1 lg:order-2">
             <form onSubmit={handleSubscribe} className="space-y-4 sm:space-y-6">
-              {/* Products Section */}
-              <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
-                <div className="flex items-center mb-3 sm:mb-4">
-                  <Package className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-[#80A6F7] flex-shrink-0" />
-                  <h3 className="text-base sm:text-lg font-semibold">Select Products</h3>
-                </div>
-                
-                <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
-                  Choose products for your monthly box
-                  <span className="block sm:inline sm:ml-2 mt-1 sm:mt-0">
-                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                      {products.length} available
-                    </span>
-                  </span>
-                </p>
-                
-                {/* Products List */}
-                <div className="border border-gray-200 rounded-lg max-h-64 sm:max-h-80 overflow-y-auto">
-                  {productsLoading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
-                      <span className="ml-3 text-sm text-gray-600">Loading...</span>
+              {/* Subscription Value Info */}
+              <div className="bg-gradient-to-r from-blue-50 to-blue-50 rounded-xl shadow-lg p-4 sm:p-6 border-2 border-blue-200">
+                <div className="text-center">
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Your Monthly Box Value</h3>
+                  <div className="flex items-center justify-center space-x-4 mb-3">
+                    <div>
+                      <p className="text-sm text-gray-600">You Pay</p>
+                      <p className="text-2xl sm:text-3xl font-bold text-blue-600">$100</p>
                     </div>
-                  ) : products.length === 0 ? (
-                    <div className="text-center py-8">
-                      <Package className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                      <p className="text-sm text-gray-500">No products available</p>
+                    <div className="text-2xl text-gray-400">→</div>
+                    <div>
+                      <p className="text-sm text-gray-600">You Get</p>
+                      <p className="text-2xl sm:text-3xl font-bold text-green-600">$200</p>
                     </div>
-                  ) : (
-                    <div className="divide-y divide-gray-100">
-                      {products.map(product => (
-                        <div key={product._id} className="p-3 sm:p-4">
-                          {/* Main Product */}
-                          <label className="flex items-start space-x-3 cursor-pointer group">
-                            <input
-                              type="checkbox"
-                              checked={selectedProducts.includes(product._id)}
-                              onChange={() => handleProductSelection(product._id)}
-                              className="mt-1 rounded border-gray-300 text-green-600 focus:ring-green-500 flex-shrink-0"
-                            />
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-start space-x-3">
-                                <div className="flex-shrink-0">
-                                  {product.images && product.images[0] ? (
-                                    <img 
-                                      src={product.images[0]} 
-                                      alt={product.name}
-                                      className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-cover border border-gray-200"
-                                    />
-                                  ) : (
-                                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center">
-                                      <Package className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <h4 className="text-sm sm:text-base font-medium text-gray-900 group-hover:text-green-600">
-                                    {product.name}
-                                  </h4>
-                                  {/* Price hidden for subscription products */}
-                                  {/* <p className="text-sm font-medium text-green-600">
-                                    {product.price ? `$${product.price}` : 'Price not set'}
-                                  </p> */}
-                                </div>
-                              </div>
-                            </div>
-                          </label>
-
-                          {/* Variants */}
-                          {product.hasVariants && product.variants && product.variants.length > 0 && (
-                            <div className="mt-3 ml-6 sm:ml-9 space-y-2">
-                              <p className="text-xs font-medium text-gray-500 uppercase">Sizes:</p>
-                              {product.variants.map((variant, index) => (
-                                <label key={`${product._id}-variant-${index}`} className="flex items-center justify-between p-2 rounded hover:bg-gray-50 cursor-pointer">
-                                  <div className="flex items-center space-x-2">
-                                    <input
-                                      type="checkbox"
-                                      checked={selectedProducts.includes(`${product._id}-variant-${index}`)}
-                                      onChange={() => handleProductSelection(`${product._id}-variant-${index}`)}
-                                      className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                                    />
-                                    <span className="text-xs sm:text-sm text-gray-700">
-                                      {variant.size.value}{variant.size.unit}
-                                    </span>
-                                  </div>
-                                  {/* Variant price hidden */}
-                                  {/* <span className="text-xs sm:text-sm font-medium text-green-600">
-                                    ${variant.price}
-                                  </span> */}
-                                </label>
-                              ))}
-                            </div>
-                          )}
-
-                          {/* Flavors */}
-                          {product.flavors && product.flavors.length > 0 && (
-                            <div className="mt-3 ml-6 sm:ml-9 space-y-2">
-                              <p className="text-xs font-medium text-gray-500 uppercase">Flavors:</p>
-                              {product.flavors.filter(flavor => flavor.isActive).map((flavor, index) => (
-                                <label key={`${product._id}-flavor-${index}`} className="flex items-center justify-between p-2 rounded hover:bg-gray-50 cursor-pointer">
-                                  <div className="flex items-center space-x-2">
-                                    <input
-                                      type="checkbox"
-                                      checked={selectedProducts.includes(`${product._id}-flavor-${index}`)}
-                                      onChange={() => handleProductSelection(`${product._id}-flavor-${index}`)}
-                                      className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                                    />
-                                    <span className="text-xs sm:text-sm text-gray-700 truncate">
-                                      {flavor.name}
-                                    </span>
-                                  </div>
-                                  {/* Flavor price hidden */}
-                                  {/* <span className="text-xs sm:text-sm font-medium text-green-600 ml-2">
-                                    ${flavor.price}
-                                  </span> */}
-                                </label>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  </div>
+                  <div className="bg-white rounded-lg p-3 border border-blue-300">
+                    <p className="text-sm font-medium text-sky-700">
+                      🎉 Save 50% on premium products every month!
+                    </p>
+                    <p className="text-xs text-gray-600 mt-1">
+                      Our team curates the best selection for your monthly box
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -423,13 +298,66 @@ export default function TopiaCircle() {
                 </div>
               </div>
 
+              {/* Billing Address */}
+              <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 flex items-center">
+                  <Shield className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-purple-600" />
+                  Billing Address
+                </h3>
+                <div className="space-y-3">
+                  <input
+                    type="text"
+                    placeholder="Street Address"
+                    value={formData.billingAddress.street}
+                    onChange={(e) => handleBillingAddressChange('street', e.target.value)}
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm sm:text-base"
+                    required
+                  />
+                  <div className="grid grid-cols-2 gap-3">
+                    <input
+                      type="text"
+                      placeholder="City"
+                      value={formData.billingAddress.city}
+                      onChange={(e) => handleBillingAddressChange('city', e.target.value)}
+                      className="px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm sm:text-base"
+                      required
+                    />
+                    <input
+                      type="text"
+                      placeholder="State"
+                      value={formData.billingAddress.state}
+                      onChange={(e) => handleBillingAddressChange('state', e.target.value)}
+                      className="px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm sm:text-base"
+                      required
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <input
+                      type="text"
+                      placeholder="ZIP Code"
+                      value={formData.billingAddress.zipCode}
+                      onChange={(e) => handleBillingAddressChange('zipCode', e.target.value)}
+                      className="px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm sm:text-base"
+                      required
+                    />
+                    <input
+                      type="text"
+                      placeholder="Country"
+                      value={formData.billingAddress.country}
+                      disabled
+                      className="px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 text-sm sm:text-base"
+                    />
+                  </div>
+                </div>
+              </div>
+
               {/* Submit Button */}
               <button
                 type="submit"
                 disabled={subscribing}
-                className="w-full bg-[#80A6F7] text-white py-3 sm:py-4 rounded-xl font-semibold text-sm sm:text-base lg:text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-[#80A6F7] text-white py-3 sm:py-4 rounded-xl font-semibold text-sm sm:text-base lg:text-lg hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {subscribing ? 'Processing...' : `Subscribe for $${settings?.monthlyPrice}/month`}
+                {subscribing ? 'Processing...' : 'Subscribe for $100/month'}
               </button>
             </form>
           </div>
