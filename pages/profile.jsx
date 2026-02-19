@@ -44,6 +44,7 @@ const Profile = () => {
     approvedRequests: 0
   });
   const [pointsBalance, setPointsBalance] = useState(0);
+  const [hasPendingChanges, setHasPendingChanges] = useState(false);
 
   useEffect(() => {
     // Only check after auth loading is complete
@@ -209,8 +210,22 @@ const Profile = () => {
       }
     };
 
+    // Check for pending change requests
+    const checkPendingChanges = async () => {
+      try {
+        const response = await Api('get', 'pending-changes/my-requests', null, router);
+        if (response.success) {
+          const pendingRequests = response.data.filter(r => r.status === 'pending');
+          setHasPendingChanges(pendingRequests.length > 0);
+        }
+      } catch (error) {
+        console.error('Error checking pending changes:', error);
+      }
+    };
+
     fetchRewardStats();
     fetchPointsBalance();
+    checkPendingChanges();
   }
   }, [router, isLoggedIn, authLoading]);
 
@@ -333,6 +348,11 @@ const Profile = () => {
 
   // Update profile
   const updateProfile = async () => {
+    if (hasPendingChanges) {
+      toast.error('You already have a pending change request. Please wait for admin approval.');
+      return;
+    }
+
     try {
       setUpdating(true);
       const token = localStorage.getItem('userToken');
@@ -341,20 +361,12 @@ const Profile = () => {
         return;
       }
 
-      const formData = new FormData();
-      formData.append('fullName', updatedProfile.fullName);
-      formData.append('phone', updatedProfile.phone);
-      formData.append('day', updatedProfile.birthday.day);
-      formData.append('month', updatedProfile.birthday.month);
-      formData.append('year', updatedProfile.birthday.year);
-
-      // Get user ID from localStorage
       const userDetail = localStorage.getItem('userDetail');
       let userId = null;
       
       if (userDetail) {
         const user = JSON.parse(userDetail);
-        userId = user.id; // Use 'id' instead of 'userId'
+        userId = user.id;
       }
       
       if (!userId) {
@@ -363,19 +375,31 @@ const Profile = () => {
         return;
       }
 
-      // Make API call to update profile
-      const response = await Api('put', `auth/profile/${userId}`, formData, router);
+      const requestedData = {
+        fullName: updatedProfile.fullName,
+        phone: updatedProfile.phone,
+        birthday: {
+          day: updatedProfile.birthday.day,
+          month: updatedProfile.birthday.month,
+          year: updatedProfile.birthday.year
+        }
+      };
 
-      if (response.message === 'Profile updated successfully') {
-        toast.success('Profile updated successfully');
-        setProfile(updatedProfile);
+      const response = await Api('post', 'pending-changes', {
+        changeType: 'profile',
+        requestedData
+      }, router);
+
+      if (response.success) {
+        toast.success('Change request submitted! Admin will review it.');
         setEditMode(false);
+        setHasPendingChanges(true);
       } else {
-        toast.error('Failed to update profile');
+        toast.error(response.message || 'Failed to submit change request');
       }
     } catch (err) {
-      console.error('Error updating profile:', err);
-      toast.error('Failed to update profile');
+      console.error('Error submitting change request:', err);
+      toast.error('Failed to submit change request');
     } finally {
       setUpdating(false);
     }
@@ -383,52 +407,52 @@ const Profile = () => {
 
   // Update document
   const updateDocument = async () => {
+    if (hasPendingChanges) {
+      toast.error('You already have a pending change request. Please wait for admin approval.');
+      return;
+    }
+
     try {
       setUpdating(true);
-      const token = localStorage.getItem('userToken');
-      if (!token) {
-        toast.error('You need to login first');
+      
+      if (!documentFile) {
+        toast.error('Please select a document first');
         return;
       }
 
-      const formData = new FormData();
-      if (documentFile) {
-        formData.append('govId', documentFile);
-      }
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64String = reader.result;
+        
+        const requestedData = {
+          governmentId: base64String
+        };
 
-      // Get user ID from localStorage
-      const userDetail = localStorage.getItem('userDetail');
-      let userId = null;
+        try {
+          const response = await Api('post', 'pending-changes', {
+            changeType: 'account',
+            requestedData
+          }, router);
+
+          if (response.success) {
+            toast.success('Document change request submitted! Admin will review it.');
+            setDocumentEditMode(false);
+            setDocumentFile(null);
+            setDocumentPreview(null);
+            setHasPendingChanges(true);
+          } else {
+            toast.error(response.message || 'Failed to submit change request');
+          }
+        } catch (err) {
+          console.error('Error submitting document change request:', err);
+          toast.error('Failed to submit change request');
+        }
+      };
       
-      if (userDetail) {
-        const user = JSON.parse(userDetail);
-        userId = user.id; // Use 'id' instead of 'userId'
-      }
-      
-      if (!userId) {
-        toast.error('User ID not found. Please login again.');
-        router.push('/auth/login');
-        return;
-      }
-
-      // Make API call to update profile with document
-      const response = await Api('put', `auth/profile/${userId}`, formData, router);
-
-      if (response.message === 'Profile updated successfully') {
-        toast.success('Document updated successfully');
-        setProfile({
-          ...profile,
-          governmentId: response.user.governmentId
-        });
-        setDocumentEditMode(false);
-        setDocumentFile(null);
-        setDocumentPreview(null);
-      } else {
-        toast.error('Failed to update document');
-      }
+      reader.readAsDataURL(documentFile);
     } catch (err) {
-      console.error('Error updating document:', err);
-      toast.error('Failed to update document');
+      console.error('Error processing document:', err);
+      toast.error('Failed to process document');
     } finally {
       setUpdating(false);
     }
@@ -436,75 +460,55 @@ const Profile = () => {
 
   // Update avatar
   const updateAvatar = async () => {
+    if (hasPendingChanges) {
+      toast.error('You already have a pending change request. Please wait for admin approval.');
+      return;
+    }
+
     try {
       setUpdating(true);
-      const token = localStorage.getItem('userToken');
-      if (!token) {
-        toast.error('You need to login first');
+      
+      if (!avatarFile) {
+        toast.error('Please select an avatar first');
         return;
       }
 
-      const formData = new FormData();
-      if (avatarFile) {
-        formData.append('avatar', avatarFile);
-      }
-
-      // Get user ID from localStorage
-      const userDetail = localStorage.getItem('userDetail');
-      let userId = null;
-      let userData = null;
-      
-      if (userDetail) {
-        userData = JSON.parse(userDetail);
-        userId = userData.id; // Use 'id' instead of 'userId'
-      }
-      
-      if (!userId) {
-        toast.error('User ID not found. Please login again.');
-        router.push('/auth/login');
-        return;
-      }
-
-      // Make API call to update profile with avatar
-      const response = await Api('put', `auth/profile/${userId}`, formData, router);
-      console.log('Avatar update response:', response);
-
-      if (response.message === 'Profile updated successfully') {
-        toast.success('Avatar updated successfully');
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64String = reader.result;
         
-        // Update profile state with the new avatar URL
-        const updatedProfile = {
-          ...profile,
-          avatar: response.user.avatar
+        const requestedData = {
+          avatar: base64String
         };
-        
-        console.log('Updated profile with new avatar:', updatedProfile);
-        setProfile(updatedProfile);
-        setUpdatedProfile(updatedProfile);
-        
-        // Update localStorage userDetail with new avatar
-        if (userData) {
-          userData.avatar = response.user.avatar;
-          localStorage.setItem('userDetail', JSON.stringify(userData));
-          console.log('Updated userDetail in localStorage:', userData);
-          
-          // Trigger auth state change to update UI across the app
-          document.dispatchEvent(new Event('auth-state-changed'));
+
+        try {
+          const response = await Api('post', 'pending-changes', {
+            changeType: 'account',
+            requestedData
+          }, router);
+
+          if (response.success) {
+            toast.success('Avatar change request submitted! Admin will review it.');
+            setAvatarFile(null);
+            setAvatarPreview(null);
+            setHasPendingChanges(true);
+          } else {
+            toast.error(response.message || 'Failed to submit change request');
+          }
+        } catch (err) {
+          console.error('Error submitting avatar change request:', err);
+          toast.error('Failed to submit change request');
         }
-        
-        setAvatarFile(null);
-        setAvatarPreview(null);
-      } else {
-        toast.error('Failed to update avatar');
-      }
+      };
+      
+      reader.readAsDataURL(avatarFile);
     } catch (err) {
-      console.error('Error updating avatar:', err);
-      toast.error('Failed to update avatar');
+      console.error('Error processing avatar:', err);
+      toast.error('Failed to process avatar');
     } finally {
       setUpdating(false);
     }
   };
-
 
   const getDisplayOrderNumber = (orderNumber) => {
   if (orderNumber && orderNumber.startsWith('ORD')) {
