@@ -139,6 +139,31 @@ export default function Navbar() {
 
   return (
     <>
+      {/* CSS for navbar glow effect */}
+      <style jsx>{`
+        .navbar-with-glow {
+          position: relative;
+          overflow: visible;
+        }
+        
+        .nav-link {
+          position: relative;
+        }
+        
+        .nav-link:hover::after {
+          content: '';
+          position: absolute;
+          bottom: -20px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 150%;
+          height: 30px;
+          background: radial-gradient(ellipse at center, rgba(77, 163, 255, 0.6) 0%, rgba(77, 163, 255, 0.3) 40%, transparent 70%);
+          pointer-events: none;
+          filter: blur(12px);
+        }
+      `}</style>
+      
       {/* Overlay for mobile drawer */}
       {isMenuOpen && (
         <div 
@@ -148,39 +173,40 @@ export default function Navbar() {
       )}
       
       {/* Main navbar */}
-     <nav className="bg-white shadow-sm relative z-50">
+     <nav className="bg-[#0B0F1A] shadow-sm relative z-50 border-b border-white/10 navbar-with-glow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             {/* Logo */}
             <div className="flex-shrink-0">
               <div className="flex items-center space-x-2">
                 <a href="/" className="flex items-center">
-                  <img src="/newlogo.jpg" alt="Logo" className="h-20 w-auto" />
+                  <img src="/images/pnglogo.png" alt="Logo" className="h-20 w-auto" />
                 </a>
               </div>
             </div>
 
             {/* Desktop Navigation */}
-           <div className={`hidden md:block rounded-4xl bg-[url('/images/navbar.png')] bg-cover bg-center transition-all duration-300 ${hasActiveDeals && isLoggedIn ? 'w-[780px]' : 'w-[680px]'}`}>
+           {/* <div className={`hidden md:block rounded-4xl bg-[url('/images/navbar.png')] bg-cover bg-center transition-all duration-300 ${hasActiveDeals && isLoggedIn ? 'w-[780px]' : 'w-[680px]'}`}> */}
+           <div className="hidden md:block">
               <div className="ml-20 flex items-baseline space-x-8">
-                <a href="/" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
+                <a href="/" className="nav-link text-white/70 hover:text-white/70 px-3 py-2 text-sm font-medium transition-all duration-300">
                   HOME
                 </a>
                 <button 
                   onClick={() => handleProtectedNavigation('/menu')}
-                  className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200"
+                  className="nav-link text-white/70 hover:text-white/70 px-3 py-2 text-sm font-medium transition-all duration-300"
                 >
                   MENU
                 </button>
                 {hasActiveDeals && isLoggedIn && (
-                  <a href="/crazy-deals" className="relative text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
+                  <a href="/crazy-deals" className="nav-link relative text-white/70 hover:text-white/70 px-3 py-2 text-sm font-medium transition-all duration-300">
                     DEALS OF THE WEEK
-                    <span className="absolute -top-2 -right-3 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+                    <span className="absolute -top-2 -right-3 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded z-10">
                       🔥
                     </span>
                   </a>
                 )}
-                <a href="/resourcecenter" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
+                <a href="/resourcecenter" className="nav-link text-white/70 hover:text-white/70 px-3 py-2 text-sm font-medium transition-all duration-300">
                RESOURCE CENTER
 
                 </a>
@@ -189,7 +215,7 @@ export default function Navbar() {
                   </a> */}
                 <button 
                   onClick={() => handleProtectedNavigation('/rewards')}
-                  className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200"
+                  className="nav-link text-white/70 hover:text-white/70 px-3 py-2 text-sm font-medium transition-all duration-300"
                 >
                   REWARDS
                 </button>
@@ -203,8 +229,8 @@ export default function Navbar() {
                 onClick={() => handleProtectedNavigation('/wishlist')}
                 className="relative"
               >
-                <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-400 transition-colors duration-200">
-                  <Heart className="w-5 h-5 text-gray-600" />
+                <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center cursor-pointer hover:bg-white/20 transition-colors duration-200">
+                  <Heart className="w-5 h-5 text-white" />
                 </div>
                 {wishlistCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
@@ -217,8 +243,8 @@ export default function Navbar() {
                 onClick={() => handleProtectedNavigation('/cart')}
                 className="relative"
               >
-                <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-400 transition-colors duration-200">
-                  <ShoppingCart className="w-5 h-5 text-gray-600" />
+                <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center cursor-pointer hover:bg-white/20 transition-colors duration-200">
+                  <ShoppingCart className="w-5 h-5 text-white" />
                 </div>
                 {cartCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
@@ -233,47 +259,47 @@ export default function Navbar() {
                   className="flex items-center space-x-1 cursor-pointer"
                   onClick={() => isLoggedIn ? setIsProfileOpen(!isProfileOpen) : router.push('/welcome')}
                 >
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden bg-white/10">
                     {isLoggedIn ? (
                       <img src={user?.avatar || "/images/pic1.png"} alt="Profile" className="w-full h-full object-cover" />
                     ) : (
-                      <User className="w-5 h-5 text-gray-600" />
+                      <User className="w-5 h-5 text-white" />
                     )}
                   </div>
-                  {isLoggedIn && <ChevronDown className="w-3 h-3 text-gray-600" />}
+                  {isLoggedIn && <ChevronDown className="w-3 h-3 text-white" />}
                 </div>
                 
                 {/* Profile Dropdown */}
               
 {isLoggedIn && isProfileOpen && (
-  <div className="absolute right-0 mt-2 w-[220px] bg-white rounded-md shadow-2xl py-0 z-40 border border-gray-100">
+  <div className="absolute right-0 mt-2 w-[220px] bg-[#0B0F1A] backdrop-blur-sm rounded-md shadow-2xl py-0 z-40 border border-gray-700/50 shadow-[0_0_20px_rgba(77,163,255,0.3)]">
     {/* Arrow indicator */}
-    <div className="absolute -top-1 right-4 w-3 h-3 bg-white transform rotate-45 border-l border-t border-gray-100"></div>
+    <div className="absolute -top-1 right-4 w-3 h-3 bg-[#0B0F1A] transform rotate-45 border-l border-t border-gray-700/50"></div>
     
-    <div className="bg-[#80A6F7]/80 shadow-inner rounded-t-md">
+    <div className="bg-white/5 backdrop-blur-sm shadow-inner rounded-t-md">
       <ul>
-        <li className="px-3 py-2 shadow-inner border-b-2 border-white">
+        <li className="px-3 py-2 shadow-inner border-b border-white/10 hover:bg-white/10 transition-colors">
           <a href="/profile" className="flex items-center gap-3 text-white font-semibold text-sm">
             <User className="text-lg" />
             Profile Settings
           </a>
         </li>
         
-        <li className="px-3 py-2 shadow-inner border-b-2 border-white">
+        <li className="px-3 py-2 shadow-inner border-b border-white/10 hover:bg-white/10 transition-colors">
           <a href="/myorders" className="flex items-center gap-3 text-white font-semibold text-sm">
             <ShoppingCart className="text-lg" />
             My Orders
           </a>
         </li>
         
-        <li className="px-3 py-2 shadow-inner border-b-2 border-white">
+        <li className="px-3 py-2 shadow-inner border-b border-white/10 hover:bg-white/10 transition-colors">
           <a href="/myhistory" className="flex items-center gap-3 text-white font-semibold text-sm">
             <BookOpen className="text-lg" />
             My History
           </a>
         </li>
         
-        <li className="px-3 py-2 shadow-inner">
+        <li className="px-3 py-2 shadow-inner hover:bg-white/10 transition-colors rounded-b-md">
           <button 
             onClick={() => {
               logout();

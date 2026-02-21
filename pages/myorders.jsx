@@ -84,15 +84,15 @@ export default function MyOrders() {
   const getStatusColor = (status) => {
     switch (status) {
       case 'unfulfilled':
-        return 'text-blue-600'; // Ready for Pick-Up
+        return 'text-cyan-400'; // Ready for Pick-Up
       case 'fulfilled':
-        return 'text-green-600'; // Picked
+        return 'text-green-400'; // Picked
       case 'incomplete':
-        return 'text-red-600';
+        return 'text-red-400';
       case 'pending':
-        return 'text-yellow-600';
+        return 'text-yellow-400';
       default:
-        return 'text-gray-500';
+        return 'text-gray-400';
     }
   };
 
@@ -135,12 +135,72 @@ export default function MyOrders() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="min-h-screen relative" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+      {/* Animated stars background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="stars-container">
+          {[...Array(60)].map((_, i) => (
+            <div
+              key={`star-${i}`}
+              className="star"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${2 + Math.random() * 3}s`
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* CSS for Stars Animation */}
+      <style jsx>{`
+        .stars-container {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+        }
+        
+        .star {
+          position: absolute;
+          width: 2px;
+          height: 2px;
+          background: white;
+          border-radius: 50%;
+          animation: twinkle linear infinite;
+          box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
+        }
+        
+        @keyframes twinkle {
+          0%, 100% {
+            opacity: 0.2;
+            transform: scale(0.8);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.2);
+          }
+        }
+        
+        .star:nth-child(3n) {
+          width: 3px;
+          height: 3px;
+          box-shadow: 0 0 6px rgba(124, 198, 255, 0.7);
+        }
+        
+        .star:nth-child(5n) {
+          width: 4px;
+          height: 4px;
+          box-shadow: 0 0 8px rgba(47, 128, 255, 0.8);
+        }
+      `}</style>
+
+      <div className="max-w-4xl mx-auto px-4 py-8 relative z-10">
         {/* Header Section */}
         <div className="mb-8">
           {/* Title */}
-          <h1 className="text-2xl font-bold text-gray-900 mb-6">My Orders</h1>
+          <h1 className="text-2xl font-bold text-white mb-6">My Orders</h1>
           
           {/* Filter Buttons */}
           <div className="flex flex-wrap gap-3">
@@ -148,10 +208,10 @@ export default function MyOrders() {
               <button
                 key={filter}
                 onClick={() => setActiveFilter(filter)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                   activeFilter === filter
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'bg-[#D9D9D9] text-gray-700 hover:bg-gray-200'
+                    ? 'bg-white/20 text-white border border-cyan-400/50 shadow-[0_0_10px_rgba(34,211,238,0.3)]'
+                    : 'bg-white/10 text-gray-300 border border-white/20 hover:bg-white/15 hover:border-white/30'
                 }`}
               >
                 {filter}
@@ -163,26 +223,26 @@ export default function MyOrders() {
         {/* Orders List */}
         <div className="space-y-4">
           {isLoading && (
-            <div className="text-center text-gray-600">Loading your orders...</div>
+            <div className="text-center text-gray-300">Loading your orders...</div>
           )}
           {!isLoading && filteredOrders.length === 0 && (
-            <div className="text-center text-gray-500">No orders found</div>
+            <div className="text-center text-gray-400">No orders found</div>
           )}
           {filteredOrders.map((order, orderIndex) => {
             const isOpen = !!expandedByOrder[order.id];
             const productsToShow = isOpen ? order.products : order.products.slice(0, 1);
             return (
-              <div key={orderIndex} className="bg-[#E7E7E7] rounded-xl shadow-lg border-b p-4 ">
+              <div key={orderIndex} className="bg-white/10 backdrop-blur-sm rounded-xl border border-gray-700/50 p-4 shadow-[0_0_10px_rgba(77,163,255,0.15)]">
                 {/* Order Header */}
                 <div className="flex justify-between items-center mb-4">
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-gray-300">
   Order ID: ORD{order.id.slice(-4)}
 </span>
                   <div className="flex items-center gap-3">
-                    <span className="text-sm font-medium text-gray-900">Total: ${order.total}</span>
+                    <span className="text-sm font-medium text-white">Total: ${order.total}</span>
                     <button
                       onClick={() => toggleOrder(order.id)}
-                      className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                      className="text-sm text-cyan-400 hover:text-cyan-300 flex items-center gap-1 transition-colors"
                     >
                       <span>{isOpen ? 'Hide items' : 'Show all items'}</span>
                       <span>{isOpen ? '▲' : '▼'}</span>
@@ -193,7 +253,7 @@ export default function MyOrders() {
                           e.stopPropagation();
                           handleCancelOrder(order.id);
                         }}
-                        className="flex items-center text-red-600 hover:text-red-800 text-sm font-medium"
+                        className="flex items-center text-red-400 hover:text-red-300 text-sm font-medium transition-colors"
                       >
                         <XCircle className="w-4 h-4 mr-1" />
                         Cancel Order
@@ -233,14 +293,14 @@ export default function MyOrders() {
                             }
                           }}
                         >
-                          <div className="w-12 h-12 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
+                          <div className="w-12 h-12 bg-white/10 rounded-lg overflow-hidden flex items-center justify-center">
                             {product.image ? (
                               <img src={product.image} alt={product.name} className="w-12 h-12 object-cover" />
                             ) : (
-                              <div className="w-10 h-10 bg-[#2E2E2E40] rounded-lg"></div>
+                              <div className="w-10 h-10 bg-white/10 rounded-lg"></div>
                             )}
                           </div>
-                          <span className="text-sm text-gray-900">{product.name}</span>
+                          <span className="text-sm text-white">{product.name}</span>
                         </div>
 
                         {/* Right Side - Status and Amount */}
@@ -248,7 +308,7 @@ export default function MyOrders() {
                           <span className={`text-sm font-medium ${getStatusColor(order.status)}`}>
                             Status: {activeFilter === 'Ready for Pick-Up' ? 'Ready for Pick-Up' : activeFilter === 'Picked' ? 'Picked' : activeFilter === 'Processing' ? 'Processing' : order.status}
                           </span>
-                          <span className="text-sm text-gray-600">Amount: ${product.amount}</span>
+                          <span className="text-sm text-gray-300">Amount: ${product.amount}</span>
                         </div>
                       </div>
                     );

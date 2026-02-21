@@ -101,9 +101,69 @@ const OtpVerification = () => {
   const isFormFilled = otp.length === 6;
 
   return (
-    <div className="h-screen flex overflow-hidden">
+    <div className="h-screen flex overflow-hidden relative" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+      {/* Animated stars background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="stars-container">
+          {[...Array(60)].map((_, i) => (
+            <div
+              key={`star-${i}`}
+              className="star"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${2 + Math.random() * 3}s`
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* CSS for Stars Animation */}
+      <style jsx>{`
+        .stars-container {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+        }
+        
+        .star {
+          position: absolute;
+          width: 2px;
+          height: 2px;
+          background: white;
+          border-radius: 50%;
+          animation: twinkle linear infinite;
+          box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
+        }
+        
+        @keyframes twinkle {
+          0%, 100% {
+            opacity: 0.2;
+            transform: scale(0.8);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.2);
+          }
+        }
+        
+        .star:nth-child(3n) {
+          width: 3px;
+          height: 3px;
+          box-shadow: 0 0 6px rgba(124, 198, 255, 0.7);
+        }
+        
+        .star:nth-child(5n) {
+          width: 4px;
+          height: 4px;
+          box-shadow: 0 0 8px rgba(47, 128, 255, 0.8);
+        }
+      `}</style>
+
       {/* Left Side - Mushroom Image */}
-      <div className="hidden lg:block lg:w-1/2 relative">
+      <div className="hidden lg:block lg:w-1/2 relative z-10">
         <img 
           src="/images/auth.png" 
           alt="Mushroom in forest" 
@@ -112,11 +172,11 @@ const OtpVerification = () => {
       </div>
 
       {/* Right Side - Login Form */}
-      <div className="w-full lg:w-2/3 bg-white flex items-center justify-center p-8 overflow-y-auto">
+      <div className="w-full lg:w-2/3 bg-white/5 backdrop-blur-[1px] flex items-center justify-center p-8 overflow-y-auto relative z-10">
         <div className="w-full max-w-md">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-6xl font-bold text-gray-900 mb-2 break-words">Welcome to your <br/> Topia </h1>
+            <h1 className="text-6xl font-bold text-white mb-2 break-words">Welcome to your <br/> Topia </h1>
           </div>
 
           <div className="space-y-4">
@@ -139,7 +199,7 @@ const OtpVerification = () => {
 
             {/* OTP Label */}
             <div className="mb-4">
-              <div className="block text-gray-700 text-sm font-medium mb-3">
+              <div className="block text-gray-300 text-sm font-medium mb-3">
                 Enter the one-time password received on your registered phone number {userPhone && `(${userPhone})`}.
               </div>
               
@@ -152,7 +212,7 @@ const OtpVerification = () => {
                   value={otp}
                   onChange={handleInputChange}
                   maxLength={6}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 placeholder-gray-500"
+                  className="w-full px-4 py-3 border border-white/30 bg-white/10 rounded-full focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-white placeholder-gray-400 shadow-[0_0_15px_rgba(34,211,238,0.3)]"
                 />
               </div>
             </div>
@@ -165,11 +225,7 @@ const OtpVerification = () => {
             {/* Submit Button */}
             <button
               type="button"
-              className={`${
-                isFormFilled 
-                  ? 'bg-[#6B92E8] hover:bg-[#5A81D7]' 
-                  : 'bg-[#8EAFF6CC] hover:bg-[#8EAFF6CC]'
-              } text-white font-medium py-2 px-8 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#8EAFF6CC] focus:ring-offset-2`}
+              className="bg-transparent text-white border-2 border-white/50 hover:border-white font-medium py-3 px-8 rounded-full transition-all duration-200 focus:outline-none shadow-[0_8px_30px_rgba(77,163,255,0.8)] hover:shadow-[0_12px_40px_rgba(77,163,255,1)] transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={handleSubmit}
               disabled={loading}
             >
@@ -178,9 +234,9 @@ const OtpVerification = () => {
 
             {/* Footer Text */}
             <div className="text-center mt-16">
-              <p className="text-gray-600 text-sm">
+              <p className="text-gray-300 text-sm">
                 Do not have an account ? 
-                <span className="text-blue-600 font-medium cursor-pointer hover:underline ml-1">Register</span>
+                <span className="text-cyan-400 font-medium cursor-pointer hover:underline ml-1">Register</span>
               </p>
             </div>
           </div>

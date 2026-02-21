@@ -63,7 +63,7 @@ function App() {
   return (
     <div>
       {/* Footer Component */}
-      <footer className="bg-gradient-to-r from-[#80A6F7] via-[#80A6F7] to-[#80A6F7] text-white">
+      <footer className="text-white" style={{ background: '#060A12', boxShadow: '0 -8px 60px rgba(34, 211, 238, 0.6), 0 -4px 30px rgba(34, 211, 238, 0.4)' }}>
         <div className="container mx-auto px-6 py-16">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
@@ -71,7 +71,7 @@ function App() {
             <div className="lg:col-span-3">
               <div className="flex items-center space-x-3 mb-6">
                 <div className="w-32 h-32 flex items-center justify-center">
-                  <img src='/images/logo.png' alt="Logo" className='object-contain w-full h-full'/>
+                  <img src='/images/pnglogo.png' alt="Logo" className='object-contain w-full h-full'/>
                   
                 </div>
              
@@ -92,13 +92,13 @@ function App() {
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-3 rounded-lg sm:rounded-r-none bg-[#80A6F7] text-white placeholder-white placeholder-opacity-80 border border-white focus:outline-none focus:ring-2 focus:ring-white"
+                    className="w-full px-4 py-3 rounded-full sm:rounded-r-full bg-white/10 text-white placeholder-white placeholder-opacity-60 border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/50"
                   />
                 </div>
                 <button 
                   type="submit" 
                   disabled={submitting} 
-                  className="bg-white text-[#80A6F7] px-6 py-3 rounded-lg sm:rounded-l-none font-semibold hover:bg-gray-100 transition-colors disabled:opacity-60 whitespace-nowrap w-full sm:w-auto"
+                  className="bg-white hover:bg-gray-50 text-black px-6 py-3 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-[0_8px_30px_rgba(77,163,255,0.8)] disabled:opacity-60 whitespace-nowrap w-full sm:w-auto uppercase tracking-wider text-sm"
                 >
                   {submitting ? 'Submitting...' : 'Subscribe'}
                 </button>
@@ -112,7 +112,7 @@ function App() {
                 <div className="space-y-3">
                   <a href="/" className="block hover:text-gray-200 transition-colors font-medium">Home</a>
                   <a href="/resourcecenter" className="block hover:text-gray-200 transition-colors font-medium">Articles</a>
-                  <a href="/commingsoon" className="block hover:text-gray-200 transition-colors font-medium">Coming soon</a>
+                  {/* <a href="/commingsoon" className="block hover:text-gray-200 transition-colors font-medium">Coming soon</a> */}
                   <a href="/contact" className="block hover:text-gray-200 transition-colors font-medium">Contact</a>
                 </div>
                 
@@ -121,7 +121,7 @@ function App() {
                   {!isLoggedIn && (
                     <a href="/auth/register" className="block hover:text-gray-200 transition-colors font-medium">Register</a>
                   )}
-                  <a href="#" className="block hover:text-gray-200 transition-colors font-medium">About Us</a>
+                  <a href="/about" className="block hover:text-gray-200 transition-colors font-medium">About Us</a>
                   <a href="/resourcecenter" className="block hover:text-gray-200 transition-colors font-medium">Blogs</a>
                   <a href="/rewards" className="block hover:text-gray-200 transition-colors font-medium">Rewards</a>
                 </div>
@@ -151,7 +151,7 @@ function App() {
           </div>
         </div>
 
-      <div className="border-t border-white border-opacity-30">
+      <div>
           <div className="container mx-auto px-6 py-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
               <div className="flex items-center space-x-2 text-sm font-medium">

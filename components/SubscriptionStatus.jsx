@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Crown, Calendar, Settings, X } from 'lucide-react'
+import { Crown, Settings, X } from 'lucide-react'
 import { toast } from 'react-toastify'
 import { fetchMySubscription, Api } from '../service/service'
 import { useRouter } from 'next/router'
@@ -110,10 +110,10 @@ export default function SubscriptionStatus({ user }) {
 
   if (loading) {
     return (
-      <div className="bg-gradient-to-r from-purple-100 to-blue-100 rounded-xl p-6">
+      <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50">
         <div className="animate-pulse">
-          <div className="h-4 bg-gray-300 rounded w-1/2 mb-2"></div>
-          <div className="h-3 bg-gray-300 rounded w-3/4"></div>
+          <div className="h-4 bg-gray-600/50 rounded w-1/2 mb-2"></div>
+          <div className="h-3 bg-gray-600/50 rounded w-3/4"></div>
         </div>
       </div>
     )
@@ -121,18 +121,18 @@ export default function SubscriptionStatus({ user }) {
 
   if (!user?.isTopiaCircleMember) {
     return (
-      <div className="bg-gradient-to-r from-purple-100 to-blue-100 rounded-xl p-6 border border-purple-200">
+      <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-purple-500/30 shadow-[0_0_10px_rgba(168,85,247,0.2)]">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <Crown className="w-6 h-6 text-purple-600 mr-3" />
+            <Crown className="w-6 h-6 text-purple-400 mr-3" />
             <div>
-              <h3 className="font-semibold text-gray-900">Join Topia Circle</h3>
-              <p className="text-sm text-gray-600">Unlock exclusive benefits and monthly boxes</p>
+              <h3 className="font-semibold text-white">Join Topia Circle</h3>
+              <p className="text-sm text-gray-300">Unlock exclusive benefits and monthly boxes</p>
             </div>
           </div>
           <button
             onClick={() => window.location.href = '/topia-circle'}
-            className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+            className="bg-transparent text-white border border-white/50 hover:border-white px-4 py-2 rounded-lg transition-all shadow-[0_0_10px_rgba(77,163,255,0.3)] hover:shadow-[0_0_15px_rgba(77,163,255,0.5)] transform hover:scale-105"
           >
             Join Now
           </button>
@@ -143,12 +143,12 @@ export default function SubscriptionStatus({ user }) {
 
   return (
     <>
-      <div className="bg-white rounded-xl p-6 border border-purple-200">
+      <div className="bg-white/5 backdrop-blur-[1px] rounded-xl p-6 border border-gray-800/40">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center">
             <Crown className="w-6 h-6 text-[#80A6F7] mr-3" />
             <div>
-              <h3 className="font-semibold text-gray-900">Topia Circle Member</h3>
+              <h3 className="font-semibold text-white">Topia Circle Member</h3>
               <p className="text-sm text-[#80A6F7] font-medium">Active Subscription</p>
             </div>
           </div>
@@ -167,7 +167,7 @@ export default function SubscriptionStatus({ user }) {
               })
               setShowManage(true)
             }}
-            className="text-[#80A6F7] hover:text-blue-600"
+            className="text-[#80A6F7] hover:text-cyan-400 transition-colors"
           >
             <Settings className="w-5 h-5" />
           </button>
@@ -177,23 +177,23 @@ export default function SubscriptionStatus({ user }) {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="text-gray-600">Monthly Price:</span>
-                <p className="font-medium">${subscription.monthlyPrice}</p>
+                <span className="text-gray-400">Monthly Price:</span>
+                <p className="font-medium text-white">${subscription.monthlyPrice}</p>
               </div>
               <div>
-                <span className="text-gray-600">Next Billing:</span>
-                <p className="font-medium">{formatDate(subscription.nextBillingDate)}</p>
+                <span className="text-gray-400">Next Billing:</span>
+                <p className="font-medium text-white">{formatDate(subscription.nextBillingDate)}</p>
               </div>
             </div>
 
             {subscription.currentBoxItems && subscription.currentBoxItems.length > 0 && (
               <div>
-                <h4 className="text-sm font-medium text-gray-700 mb-2">This Month's Box:</h4>
+                <h4 className="text-sm font-medium text-gray-300 mb-2">This Month's Box:</h4>
                 <div className="space-y-1">
                   {subscription.currentBoxItems.map((item, index) => (
-                    <div key={index} className="flex items-center justify-between text-xs bg-purple-50 px-2 py-1 rounded">
-                      <span className="font-medium">{item.itemName}</span>
-                      <span className="text-gray-600">x{item.quantity}</span>
+                    <div key={index} className="flex items-center justify-between text-xs bg-white/10 px-2 py-1 rounded">
+                      <span className="font-medium text-white">{item.itemName}</span>
+                      <span className="text-gray-400">x{item.quantity}</span>
                     </div>
                   ))}
                 </div>
@@ -204,13 +204,13 @@ export default function SubscriptionStatus({ user }) {
       </div>
 
       {showManage && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[85vh] flex flex-col">
-            <div className="flex items-center justify-between p-6 border-b flex-shrink-0">
-              <h2 className="text-xl font-semibold">Manage Subscription</h2>
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#0B0F1A] border border-gray-700/50 rounded-xl max-w-2xl w-full max-h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between p-6 border-b border-gray-700/50 flex-shrink-0">
+              <h2 className="text-xl font-semibold text-white">Manage Subscription</h2>
               <button
                 onClick={() => setShowManage(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-white transition-colors"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -218,7 +218,7 @@ export default function SubscriptionStatus({ user }) {
 
             <div className="p-6 space-y-6 overflow-y-auto flex-1">
               <div>
-                <h3 className="font-medium mb-3">Billing Address</h3>
+                <h3 className="font-medium text-white mb-3">Billing Address</h3>
                 <div className="space-y-3">
                   <input
                     type="text"
@@ -228,7 +228,7 @@ export default function SubscriptionStatus({ user }) {
                       ...prev,
                       billingAddress: { ...prev.billingAddress, street: e.target.value }
                     }))}
-                    className="w-full px-3 py-2 border rounded-lg"
+                    className="w-full px-3 py-2 border border-white/30 bg-white/10 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
                   />
                   <div className="grid grid-cols-2 gap-3">
                     <input
@@ -239,7 +239,7 @@ export default function SubscriptionStatus({ user }) {
                         ...prev,
                         billingAddress: { ...prev.billingAddress, city: e.target.value }
                       }))}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border border-white/30 bg-white/10 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
                     />
                     <input
                       type="text"
@@ -249,7 +249,7 @@ export default function SubscriptionStatus({ user }) {
                         ...prev,
                         billingAddress: { ...prev.billingAddress, state: e.target.value }
                       }))}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border border-white/30 bg-white/10 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
@@ -261,7 +261,7 @@ export default function SubscriptionStatus({ user }) {
                         ...prev,
                         billingAddress: { ...prev.billingAddress, zipCode: e.target.value }
                       }))}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border border-white/30 bg-white/10 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
                     />
                     <input
                       type="text"
@@ -271,7 +271,7 @@ export default function SubscriptionStatus({ user }) {
                         ...prev,
                         billingAddress: { ...prev.billingAddress, country: e.target.value }
                       }))}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border border-white/30 bg-white/10 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
                     />
                   </div>
                 </div>
@@ -279,20 +279,20 @@ export default function SubscriptionStatus({ user }) {
 
               {subscription.currentBoxItems && subscription.currentBoxItems.length > 0 && (
                 <div>
-                  <h3 className="font-medium mb-3">This Month's Box Items</h3>
-                  <div className="bg-purple-50 p-3 rounded-lg space-y-2">
+                  <h3 className="font-medium text-white mb-3">This Month's Box Items</h3>
+                  <div className="bg-white/10 p-3 rounded-lg space-y-2 border border-purple-500/30">
                     {subscription.currentBoxItems.map((item, index) => (
                       <div key={index} className="flex items-center justify-between text-sm">
-                        <span className="font-medium">{item.itemName}</span>
+                        <span className="font-medium text-white">{item.itemName}</span>
                         <div className="flex items-center space-x-2">
-                          <span className="text-gray-600">Qty: {item.quantity}</span>
+                          <span className="text-gray-400">Qty: {item.quantity}</span>
                           {item.notes && (
                             <span className="text-xs text-gray-500 italic">({item.notes})</span>
                           )}
                         </div>
                       </div>
                     ))}
-                    <p className="text-xs text-gray-500 mt-2">
+                    <p className="text-xs text-gray-400 mt-2">
                       These items are prepared by our team for your monthly pickup
                     </p>
                   </div>
@@ -300,7 +300,7 @@ export default function SubscriptionStatus({ user }) {
               )}
 
               <div>
-                <h3 className="font-medium mb-3">Preferences</h3>
+                <h3 className="font-medium text-white mb-3">Preferences</h3>
                 <div className="grid grid-cols-2 gap-2">
                   {preferenceOptions.map(preference => (
                     <label key={preference} className="flex items-center space-x-2 cursor-pointer">
@@ -315,16 +315,16 @@ export default function SubscriptionStatus({ user }) {
                               : [...prev.preferences, preference]
                           }))
                         }}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        className="rounded border-gray-500 bg-white/10 text-blue-500 focus:ring-blue-500"
                       />
-                      <span className="text-sm">{preference}</span>
+                      <span className="text-sm text-gray-300">{preference}</span>
                     </label>
                   ))}
                 </div>
               </div>
 
               <div>
-                <h3 className="font-medium mb-3">Allergies</h3>
+                <h3 className="font-medium text-white mb-3">Allergies</h3>
                 <div className="grid grid-cols-2 gap-2">
                   {allergyOptions.map(allergy => (
                     <label key={allergy} className="flex items-center space-x-2 cursor-pointer">
@@ -339,9 +339,9 @@ export default function SubscriptionStatus({ user }) {
                               : [...prev.allergies, allergy]
                           }))
                         }}
-                        className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                        className="rounded border-gray-500 bg-white/10 text-red-500 focus:ring-red-500"
                       />
-                      <span className="text-sm">{allergy}</span>
+                      <span className="text-sm text-gray-300">{allergy}</span>
                     </label>
                   ))}
                 </div>
@@ -350,13 +350,13 @@ export default function SubscriptionStatus({ user }) {
               <div className="flex space-x-3">
                 <button
                   onClick={updateSubscription}
-                  className="flex-1 bg-[#80A6F7] text-white py-2 rounded-lg  transition-colors"
+                  className="flex-1 bg-transparent text-white border border-white/50 hover:border-white py-2 rounded-lg transition-all shadow-[0_0_10px_rgba(77,163,255,0.3)] hover:shadow-[0_0_15px_rgba(77,163,255,0.5)] transform hover:scale-105"
                 >
                   Save Changes
                 </button>
                 <button
                   onClick={() => setShowManage(false)}
-                  className="flex-1 bg-gray-200 text-gray-800 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+                  className="flex-1 bg-white/10 text-gray-300 border border-gray-600 py-2 rounded-lg hover:bg-white/20 transition-colors"
                 >
                   Cancel
                 </button>

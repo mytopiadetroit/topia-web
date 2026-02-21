@@ -294,10 +294,10 @@ export default function ProductDetails() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#536690] mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading product...</p>
+          <p className="mt-4 text-gray-300">Loading product...</p>
         </div>
       </div>
     );
@@ -306,9 +306,9 @@ export default function ProductDetails() {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
         <div className="text-center">
-          <p className="text-red-500 text-lg mb-4">{error}</p>
+          <p className="text-red-400 text-lg mb-4">{error}</p>
           <button
             onClick={() => router.push('/menu')}
             className="px-6 py-2 bg-[#536690] text-white rounded-full hover:bg-[#536690] transition-colors"
@@ -323,9 +323,9 @@ export default function ProductDetails() {
   // No product state
   if (!product) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
         <div className="text-center">
-          <p className="text-gray-500 text-lg mb-4">Product not found</p>
+          <p className="text-gray-300 text-lg mb-4">Product not found</p>
           <button
             onClick={() => router.push('/menu')}
             className="px-6 py-2 bg-[#536690] text-white rounded-full hover:bg-[#536690] transition-colors"
@@ -357,15 +357,75 @@ export default function ProductDetails() {
   // };
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="min-h-screen relative" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+      {/* Global Stars Animation */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="stars-container">
+          {[...Array(60)].map((_, i) => (
+            <div
+              key={`global-star-${i}`}
+              className="star"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${2 + Math.random() * 3}s`
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* CSS for Stars Animation */}
+      <style jsx>{`
+        .stars-container {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+        }
+        
+        .star {
+          position: absolute;
+          width: 2px;
+          height: 2px;
+          background: white;
+          border-radius: 50%;
+          animation: twinkle linear infinite;
+          box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
+        }
+        
+        @keyframes twinkle {
+          0%, 100% {
+            opacity: 0.2;
+            transform: scale(0.8);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.2);
+          }
+        }
+        
+        .star:nth-child(3n) {
+          width: 3px;
+          height: 3px;
+          box-shadow: 0 0 6px rgba(124, 198, 255, 0.7);
+        }
+        
+        .star:nth-child(5n) {
+          width: 4px;
+          height: 4px;
+          box-shadow: 0 0 8px rgba(47, 128, 255, 0.8);
+        }
+      `}</style>
+
+      <div className="max-w-7xl mx-auto px-4 py-8 relative z-10">
         {/* Breadcrumb */}
-        <nav className="flex items-center text-sm text-gray-500 mb-8">
-          <Link href="/" className="hover:text-gray-700">Home</Link>
+        <nav className="flex items-center text-sm text-gray-300 mb-8">
+          <Link href="/" className="hover:text-white">Home</Link>
           <span className="mx-2">›</span>
-          <Link href="/menu" className="hover:text-gray-700">Menu</Link>
+          <Link href="/menu" className="hover:text-white">Menu</Link>
           <span className="mx-2">›</span>
-          <span className="text-gray-700">{product.name}</span>
+          <span className="text-white">{product.name}</span>
         </nav>
 
         {/* Product Section */}
@@ -373,8 +433,8 @@ export default function ProductDetails() {
           {/* Left Column - Images */}
           <div className="md:w-1/2">
             {/* Main Image with Carousel */}
-            <div className="bg-white rounded-2xl overflow-hidden mb-4 border-2 border-gray-100 shadow-lg p-4">
-              <div className="bg-gray-50 rounded-xl overflow-hidden relative group">
+            <div className="bg-transparent rounded-2xl overflow-hidden mb-4 border-2 border-gray-800/40 shadow-lg p-4">
+              <div className="bg-transparent rounded-xl overflow-hidden relative group">
                 <img
                   src={product.images && product.images.length > 0
                     ? (product.images[selectedImageIndex].startsWith('http') 
@@ -429,10 +489,10 @@ export default function ProductDetails() {
                   <button
                     key={index}
                     onClick={() => setSelectedImageIndex(index)}
-                    className={`bg-gray-100 rounded-lg aspect-square overflow-hidden border-2 transition-all ${
+                    className={`bg-transparent rounded-lg aspect-square overflow-hidden border-2 transition-all ${
                       selectedImageIndex === index 
-                        ? 'border-[#536690] ring-2 ring-[#536690]/30' 
-                        : 'border-transparent hover:border-gray-300'
+                        ? 'border-cyan-400 ring-2 ring-cyan-400/30' 
+                        : 'border-gray-700/50 hover:border-gray-600'
                     }`}
                   >
                     <img 
@@ -448,28 +508,21 @@ export default function ProductDetails() {
 
           {/* Right Column - Product Info */}
           <div className="md:w-1/2">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">{product.name}</h1>
-            {product?.short_description && <p className="text-gray-700 -mt-3  mb-4">{product.short_description}</p>}
+            <h1 className="text-4xl font-bold text-white mb-4">{product.name}</h1>
+            {product?.short_description && <p className="text-gray-300 -mt-3  mb-4">{product.short_description}</p>}
             {product.intensity && (
               <div className="mt-4">
-                <div className="flex items-center">
-                  <span className="text-sm font-medium text-gray-600 mr-3">Intensity:</span>
-                  <span className={`text-sm px-3 py-1 rounded-full font-medium ${product.intensity <= 3 ? 'bg-green-100 text-green-800' :
-                    product.intensity <= 7 ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                    {product.intensity <= 3 ? 'Mild' : product.intensity <= 7 ? 'Medium' : 'Strong'} ({product.intensity}/10)
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity</span>
+                  <span className="text-sm font-bold text-cyan-400">
+                    {product.intensity}/10
                   </span>
                 </div>
-                <div className="w-[50%] bg-gray-200 rounded-full h-2 mt-2">
+                <div className="w-[50%] bg-gray-700/30 rounded-full h-2">
                   <div
-                    className="h-2 rounded-full transition-all duration-300"
+                    className="h-2 rounded-full transition-all duration-300 bg-gradient-to-r from-blue-400 via-blue-500 to-cyan-400"
                     style={{
-                      width: `${(product.intensity / 10) * 100}%`,
-                      backgroundColor:
-                        product.intensity <= 3 ? '#10B981' :
-                          product.intensity <= 7 ? '#F59E0B' :
-                            '#EF4444'
+                      width: `${(product.intensity / 10) * 100}%`
                     }}
                   ></div>
                 </div>
@@ -482,7 +535,6 @@ export default function ProductDetails() {
                 {/* <h3 className="text-sm font-medium text-gray-700 mb-3">Experience</h3> */}
                 <div className="flex flex-wrap gap-2">
                   {product.reviewTags.map((tag, idx) => {
-                    const color = colors[Math.min(idx, colors.length - 1)];
                     const label = tag.label || '';
                     const match = label.match(/^[\p{Emoji}\p{Extended_Pictographic}]/u);
                     const emoji = match ? match[0] + ' ' : '';
@@ -491,8 +543,7 @@ export default function ProductDetails() {
                     return (
                       <span
                         key={tag._id}
-                        className="px-3 py-2 rounded-full text-sm font-medium flex items-center gap-1"
-                        style={{ backgroundColor: color.bg, color: color.color }}
+                        className="px-3 py-1.5 text-sm rounded-full font-medium bg-white/5 backdrop-blur-sm border border-blue-400/40 hover:border-2 hover:border-blue-400 transition-all text-white flex items-center gap-1"
                       >
                         <span className="text-sm">{emoji}</span>
                         {text}
@@ -504,11 +555,11 @@ export default function ProductDetails() {
             )}
             {/* Description */}
             <div className="mt-6">
-              <h2 className="text-lg text-gray-700 font-semibold mb-2">Description</h2>
+              <h2 className="text-lg text-white font-semibold mb-2">Description</h2>
               <div className="relative">
                 <div 
                   ref={descriptionRef}
-                  className={`text-gray-700 mb-4 overflow-hidden transition-all duration-300 ${!showFullDescription && 'max-h-20'}`}
+                  className={`text-gray-300 mb-4 overflow-hidden transition-all duration-300 ${!showFullDescription && 'max-h-20'}`}
                 >
                   {product.description?.main || 'No description available'}
                   {product.description?.details && (
@@ -518,7 +569,7 @@ export default function ProductDetails() {
                 {isDescriptionLong && (
                   <button 
                     onClick={() => setShowFullDescription(!showFullDescription)}
-                    className="text-[#536690] mb-6 underline text-sm font-medium hover:underline focus:outline-none"
+                    className="text-gray-200 mb-6 underline text-sm font-medium hover:underline focus:outline-none"
                   >
                     {showFullDescription ? 'Show Less' : 'Read More'}
                   </button>
@@ -529,7 +580,7 @@ export default function ProductDetails() {
             {/* Size Variant Selection */}
             {product.hasVariants && product.variants && product.variants.length > 0 && (
               <div className="mb-6">
-                <h3 className="text-sm font-medium text-gray-700 mb-3">Select Size</h3>
+                <h3 className="text-sm font-medium text-white mb-3">Select Size</h3>
                 <div className="flex flex-wrap gap-3">
                   {product.variants.map((variant, index) => (
                     <button
@@ -539,9 +590,9 @@ export default function ProductDetails() {
                         setSelectedFlavor(null); // Ye line add karo
                         setQuantity(1);
                       }}
-                      className={`px-6 py-3 border-2 rounded-lg transition-all ${selectedVariant === variant
-                        ? 'border-[#536690] bg-[#536690] text-white'
-                        : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                      className={`px-6 py-3 border-2 rounded-lg transition-all duration-300 transform ${selectedVariant === variant
+                        ? 'border-white/50 bg-transparent text-white shadow-[0_8px_30px_rgba(77,163,255,0.8)] scale-105'
+                        : 'border-white/30 bg-transparent text-white hover:border-white/50 hover:shadow-[0_8px_30px_rgba(77,163,255,0.5)]'
                         }`}
                     >
                       <div className="text-center">
@@ -557,7 +608,7 @@ export default function ProductDetails() {
             {/* Flavor Selection */}
             {product.flavors && product.flavors.length > 0 && (
               <div className="mt-4">
-                <h3 className="text-sm text-gray-700 font-semibold mb-2">Select Flavor</h3>
+                <h3 className="text-sm text-white font-semibold mb-2">Select Flavor</h3>
                 <div className="flex flex-wrap gap-2">
                   {product.flavors.map((flavor, index) => {
                     const flavorStock = Number(flavor.stock || 0);
@@ -577,21 +628,21 @@ export default function ProductDetails() {
                           }
                         }}
                         disabled={isOutOfStock}
-                        className={`px-3 py-2 border-2 rounded-lg transition-all ${isOutOfStock
-                          ? 'border-gray-200 bg-gray-100 opacity-50 cursor-not-allowed'
+                        className={`px-3 py-2 border-2 rounded-lg transition-all duration-300 transform ${isOutOfStock
+                          ? 'border-gray-600/50 bg-transparent opacity-50 cursor-not-allowed text-gray-500'
                           : selectedFlavor?._id === flavor._id
-                            ? 'border-green-600 bg-green-50'
-                            : 'border-gray-300 hover:border-gray-400'
+                            ? 'border-white/50 bg-transparent text-white shadow-[0_8px_30px_rgba(77,163,255,0.8)] scale-105'
+                            : 'border-white/30 bg-transparent text-white hover:border-white/50 hover:shadow-[0_8px_30px_rgba(77,163,255,0.5)]'
                           }`}
                       >
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-semibold text-gray-900">
+                          <span className="text-sm font-semibold">
                             {flavor.name}
                           </span>
                           {isOutOfStock ? (
-                            <span className="text-xs text-red-600 font-medium">Out of Stock</span>
+                            <span className="text-xs text-red-400 font-medium">Out of Stock</span>
                           ) : (
-                            <span className="text-sm text-green-600 font-medium">
+                            <span className="text-sm text-cyan-400 font-medium">
                               {Number(flavor.price) > 0 ? `+$${Number(flavor.price).toFixed(2)}` : 'Free'}
                             </span>
                           )}
@@ -605,13 +656,13 @@ export default function ProductDetails() {
 
             {/* Price */}
             <div className="mb-6">
-              <h2 className="text-lg text-gray-700 font-semibold mb-2">Final Price</h2>
+              <h2 className="text-lg text-gray-100 font-semibold mt-2">Final Price</h2>
               <div className="flex flex-col gap-1">
                 <div className="flex items-baseline gap-2">
-                  <p className="text-3xl font-bold text-[#536690]">$ {displayPrice}</p>
+                  <p className="text-3xl font-bold text-gray-200">$ {displayPrice}</p>
                 </div>
                 {product?.allergenInfo?.tooltipText && (
-                  <div className="text-sm text-gray-500 mt-1">
+                  <div className="text-sm text-gray-300 mt-1">
                    Allergen : {product.allergenInfo.tooltipText}
                   </div>
                 )}
@@ -632,7 +683,7 @@ export default function ProductDetails() {
 
             {/* Quantity Selector (respect stock limits) */}
             <div className="mb-6">
-              <h3 className="text-lg text-gray-700 font-semibold mb-3">Quantity</h3>
+              <h3 className="text-lg text-gray-200 font-semibold mb-3">Quantity</h3>
               <div className="flex items-center ">
                 <button
                   onClick={decreaseQuantity}
@@ -641,7 +692,7 @@ export default function ProductDetails() {
                 >
                   <span className="text-gray-600  text-lg">-</span>
                 </button>
-                <span className="text-xl font-semibold text-gray-800 w-16 text-center">{quantity}</span>
+                <span className="text-xl font-semibold text-gray-200 w-16 text-center">{quantity}</span>
                 <button
                   onClick={increaseQuantity}
                   disabled={
@@ -666,14 +717,14 @@ export default function ProductDetails() {
               <button
                 onClick={handleAddToCart}
                 disabled={getAvailableStock() <= 0}
-                className={`bg-[#536690] hover:bg-[#536690] text-white font-medium py-3 px-8 rounded-full flex items-center justify-center gap-2 flex-1 transition-colors ${getAvailableStock() <= 0 ? 'opacity-50 cursor-not-allowed' : ''
+                className={`bg-transparent text-white border-2 border-white/50 hover:border-white px-8 py-3 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 shadow-[0_8px_30px_rgba(77,163,255,0.8)] hover:shadow-[0_12px_40px_rgba(77,163,255,1)] flex items-center justify-center gap-2 flex-1 ${getAvailableStock() <= 0 ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
               >
                 <span>{getAvailableStock() > 0 ? 'Add to Cart' : 'Out of Stock'}</span>
                 {getAvailableStock() > 0 && <span className="text-xl">+</span>}
               </button>
 
-              <button onClick={handleToggleWishlist} className="border border-gray-300 bg-white text-gray-500 font-medium py-3 px-6 rounded-full hover:bg-gray-50 transition-colors flex items-center justify-center">
+              <button onClick={handleToggleWishlist} className="bg-transparent text-white border-2 border-white/30 hover:border-white/50 px-6 py-3 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-[0_8px_30px_rgba(77,163,255,0.8)] flex items-center justify-center">
                 <span className="mr-2">{isWishlisted ? 'Wishlisted' : 'Wishlist'}</span>
                 <Heart className="w-5 h-5" style={{ color: isWishlisted ? '#80A6F7' : undefined }} fill={isWishlisted ? '#80A6F7' : 'none'} />
               </button>
@@ -720,16 +771,16 @@ export default function ProductDetails() {
         {/* You May Also Like Section */}
         {relatedProducts.length > 0 && (
           <div className="mt-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8">You May Also Like</h2>
+            <h2 className="text-3xl font-bold text-gray-100 mb-8">You May Also Like</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {relatedProducts.map((relatedProduct) => (
                 <div
                   key={relatedProduct._id}
-                  className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer group"
+                  className="bg-white/5 backdrop-blur-[1px] border border-gray-800/40 rounded-lg hover:border-gray-700/60 transition-all duration-300 cursor-pointer group"
                   onClick={() => router.push(`/productdetails?id=${relatedProduct._id}`)}
                 >
                   {/* Product Image */}
-                  <div className="aspect-square bg-gray-100 rounded-t-lg overflow-hidden">
+                  <div className="aspect-square bg-gray-800/50 rounded-t-lg overflow-hidden">
                     <img
                       src={relatedProduct.images && relatedProduct.images.length > 0
                         ? (relatedProduct.images[0].startsWith('http') ? relatedProduct.images[0] : `http://localhost:5000${relatedProduct.images[0]}`)
@@ -742,7 +793,7 @@ export default function ProductDetails() {
 
                   {/* Product Info */}
                   <div className="p-4">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-[#536690] transition-colors">
+                    <h3 className="text-lg font-semibold text-white mb-2 line-clamp-2 group-hover:text-cyan-400 transition-colors">
                       {relatedProduct.name}
                     </h3>
 
@@ -759,13 +810,13 @@ export default function ProductDetails() {
                     {/* Stock Status */}
                     {relatedProduct.hasStock ? (
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span className="text-sm text-green-600 font-medium">In Stock</span>
+                        <div className="w-2 h-2 bg-cyan-400 rounded-full"></div>
+                        <span className="text-sm text-cyan-400 font-medium">In Stock</span>
                       </div>
                     ) : (
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                        <span className="text-sm text-red-600 font-medium">Out of Stock</span>
+                        <span className="text-sm text-red-400 font-medium">Out of Stock</span>
                       </div>
                     )}
                   </div>
@@ -778,7 +829,7 @@ export default function ProductDetails() {
         {/* Loading state for related products */}
         {relatedLoading && (
           <div className="mt-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8">You May Also Like</h2>
+            <h2 className="text-3xl font-bold text-gray-100 mb-8">You May Also Like</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {Array.from({ length: 4 }).map((_, index) => (
                 <div key={index} className="bg-white rounded-lg shadow-md animate-pulse">

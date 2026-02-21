@@ -81,7 +81,7 @@ export default function CrazyDeals() {
     }
 
     return (
-      <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-black p-6 rounded-2xl shadow-2xl border-2 border-orange-500">
+      <div className="bg-white/5 backdrop-blur-[2px] p-6 rounded-2xl border-[0.5px] border-gray-100/30">
         <div className="flex items-center justify-center gap-2 mb-4">
           <Clock className="w-5 h-5 text-[#80A6F7] animate-pulse" />
           <span className="text-[#80A6F7] font-bold text-sm uppercase tracking-widest">Ends In</span>
@@ -90,7 +90,7 @@ export default function CrazyDeals() {
         <div className="flex items-center justify-center gap-3">
           {timeLeft.days > 0 && (
             <>
-              <div className="flex flex-col items-center bg-gradient-to-b from-[#80A6F7] to-[#80A6F7] rounded-xl px-4 py-3 min-w-[70px] shadow-lg">
+              <div className="flex flex-col items-center bg-[rgba(30,58,138,0.3)] backdrop-blur-sm rounded-xl px-4 py-3 min-w-[70px] border border-blue-900/20">
                 <span className="text-3xl font-black text-white leading-none">
                   {String(timeLeft.days).padStart(2, '0')}
                 </span>
@@ -100,7 +100,7 @@ export default function CrazyDeals() {
             </>
           )}
           
-          <div className="flex flex-col items-center bg-gradient-to-b from-[#80A6F7] to-[#80A6F7] rounded-xl px-4 py-3 min-w-[70px] shadow-lg">
+          <div className="flex flex-col items-center bg-[rgba(30,58,138,0.3)] backdrop-blur-sm rounded-xl px-4 py-3 min-w-[70px] border border-blue-900/20">
             <span className="text-3xl font-black text-white leading-none">
               {String(timeLeft.hours).padStart(2, '0')}
             </span>
@@ -109,7 +109,7 @@ export default function CrazyDeals() {
           
           <span className="text-3xl font-bold text-orange-500 animate-pulse">:</span>
           
-          <div className="flex flex-col items-center bg-gradient-to-b from-[#80A6F7] to-[#80A6F7] rounded-xl px-4 py-3 min-w-[70px] shadow-lg">
+          <div className="flex flex-col items-center bg-[rgba(30,58,138,0.3)] backdrop-blur-sm rounded-xl px-4 py-3 min-w-[70px] border border-blue-900/20">
             <span className="text-3xl font-black text-white leading-none">
               {String(timeLeft.minutes).padStart(2, '0')}
             </span>
@@ -118,7 +118,7 @@ export default function CrazyDeals() {
           
           <span className="text-3xl font-bold text-orange-500 animate-pulse">:</span>
           
-          <div className="flex flex-col items-center bg-gradient-to-b from-[#80A6F7] to-[#80A6F7] rounded-xl px-4 py-3 min-w-[70px] shadow-lg">
+          <div className="flex flex-col items-center bg-[rgba(30,58,138,0.3)] backdrop-blur-sm rounded-xl px-4 py-3 min-w-[70px] border border-blue-900/20">
             <span className="text-3xl font-black text-white leading-none">
               {String(timeLeft.seconds).padStart(2, '0')}
             </span>
@@ -131,14 +131,14 @@ export default function CrazyDeals() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
         <div className="text-center">
           <div className="relative">
             <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-b-4 border-orange-500 mx-auto mb-6"></div>
             <Flame className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 text-orange-500 animate-pulse" />
           </div>
-          <p className="text-gray-700 text-xl font-semibold">Loading Crazy Deals...</p>
-          <p className="text-gray-500 text-sm mt-2">Preparing amazing offers for you 🎉</p>
+          <p className="text-white text-xl font-semibold">Loading Crazy Deals...</p>
+          <p className="text-gray-400 text-sm mt-2">Preparing amazing offers for you 🎉</p>
         </div>
       </div>
     );
@@ -146,11 +146,11 @@ export default function CrazyDeals() {
 
   if (deals.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
         <div className="text-center">
           <Flame className="w-24 h-24 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">No Active Deals</h2>
-          <p className="text-gray-600 mb-6">Check back soon for amazing offers!</p>
+          <h2 className="text-3xl font-bold text-white mb-2">No Active Deals</h2>
+          <p className="text-gray-400 mb-6">Check back soon for amazing offers!</p>
           <button
             onClick={() => router.push('/menu')}
             className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-xl font-semibold transition-all"
@@ -163,16 +163,38 @@ export default function CrazyDeals() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
-      {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-[#80A6F7] via-[#80A6F7] to-[#80A6F7] text-white py-24 overflow-hidden">
-        {/* Animated Background */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl animate-pulse delay-1000"></div>
+    <div className="min-h-screen relative" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+      {/* Global Stars Animation */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="stars-container">
+          {[...Array(60)].map((_, i) => (
+            <div
+              key={`global-star-${i}`}
+              className="star"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${2 + Math.random() * 3}s`
+              }}
+            />
+          ))}
         </div>
+      </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 text-center">
+      {/* Hero Section */}
+      <div 
+        className="relative text-white py-24 overflow-hidden"
+      >
+        {/* Cosmic Glow Effect */}
+        <div 
+          className="absolute right-0 top-1/4 w-1/2 h-1/2 opacity-20 blur-3xl pointer-events-none"
+          style={{
+            background: 'radial-gradient(circle, rgba(47,128,255,0.3) 0%, transparent 70%)'
+          }}
+        />
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 text-center">
           {/* Main Heading */}
           <div className="flex items-center justify-center gap-4 mb-4">
             <Flame className="w-14 h-14 md:w-16 md:h-16 animate-bounce text-yellow-300" />
@@ -184,11 +206,11 @@ export default function CrazyDeals() {
           
           {/* Feature Badges */}
           <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4 text-sm md:text-base font-semibold mb-10">
-            <span className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">⚡ Limited Time</span>
+            <span className="bg-white/10 backdrop-blur-sm border border-[rgba(77,163,255,0.4)] px-4 py-2 rounded-full">⚡ Limited Time</span>
             <span className="hidden md:inline text-white/60">•</span>
-            <span className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">💰 Unbeatable Prices</span>
+            <span className="bg-white/10 backdrop-blur-sm border border-[rgba(77,163,255,0.4)] px-4 py-2 rounded-full">💰 Unbeatable Prices</span>
             <span className="hidden md:inline text-white/60">•</span>
-            <span className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">🎯 Don't Miss Out</span>
+            <span className="bg-white/10 backdrop-blur-sm border border-[rgba(77,163,255,0.4)] px-4 py-2 rounded-full">🎯 Don't Miss Out</span>
           </div>
 
           {/* Deal Info & Timer */}
@@ -210,14 +232,13 @@ export default function CrazyDeals() {
               <div className="flex flex-col md:flex-row items-center justify-center gap-8 pt-4">
                 {/* Discount Badge */}
                 <div className="relative flex-shrink-0">
-                  <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-3xl blur-xl opacity-50 animate-pulse"></div>
-                  <div className="relative bg-gradient-to-br from-orange-500 via-red-500 to-pink-600 text-white px-8 py-4 rounded-3xl text-center shadow-2xl transform hover:scale-105 transition-transform">
-                    <div className="text-4xl font-black leading-none mb-2">
+                  <div className="relative bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-3xl text-center shadow-[0_0_30px_rgba(77,163,255,0.6)] border-2 border-[rgba(77,163,255,0.8)] glow-border">
+                    <div className="text-4xl font-black leading-none mb-2 relative z-10">
                       {selectedDeal.discountType === 'percentage' 
                         ? `${selectedDeal.discountPercentage}%` 
                         : `$${selectedDeal.discountAmount}`}
                     </div>
-                    <div className="text-xl font-bold uppercase tracking-widest">OFF</div>
+                    <div className="text-xl font-bold uppercase tracking-widest relative z-10">OFF</div>
                   </div>
                 </div>
 
@@ -293,7 +314,7 @@ export default function CrazyDeals() {
                   return (
                     <div
                       key={product._id}
-                      className="relative rounded-3xl border-2 border-gray-200 hover:shadow-xl transition-all bg-white overflow-hidden cursor-pointer w-full max-w-4xl mx-auto"
+                      className="relative rounded-3xl border border-gray-800/40 hover:border-gray-700/60 transition-all bg-white/5 backdrop-blur-[1px] overflow-hidden cursor-pointer w-full max-w-4xl mx-auto"
                       onClick={() => router.push(`/productdetails?id=${product._id}`)}
                     >
                       {/* Discount Badge */}
@@ -317,28 +338,22 @@ export default function CrazyDeals() {
 
                         {/* Details */}
                         <div className="w-full lg:w-3/5 p-6">
-                          <h3 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h3>
+                          <h3 className="text-2xl font-bold text-white mb-2">{product.name}</h3>
 
                           {/* Intensity Bar */}
                           {product.intensity && (
                             <div className="mb-4">
-                              <div className="flex items-center justify-between mb-1">
-                                <span className="text-sm text-gray-600">Intensity</span>
-                                <span className={`text-sm font-bold ${
-                                  product.intensity <= 3 ? 'text-green-600' :
-                                  product.intensity <= 7 ? 'text-yellow-600' : 'text-red-500'
-                                }`}>
-                                  {product.intensity <= 3 ? 'Mild' : product.intensity <= 7 ? 'Medium' : 'Strong'} ({product.intensity}/10)
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity</span>
+                                <span className="text-sm font-bold text-cyan-400">
+                                  {product.intensity}/10
                                 </span>
                               </div>
-                              <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div className="w-full bg-gray-700/30 rounded-full h-2">
                                 <div
-                                  className="h-2 rounded-full transition-all duration-300"
+                                  className="h-2 rounded-full transition-all duration-300 bg-gradient-to-r from-blue-400 via-blue-500 to-cyan-400"
                                   style={{
-                                    width: `${(product.intensity / 10) * 100}%`,
-                                    backgroundColor:
-                                      product.intensity <= 3 ? '#10B981' :
-                                      product.intensity <= 7 ? '#F59E0B' : '#EF4444'
+                                    width: `${(product.intensity / 10) * 100}%`
                                   }}
                                 ></div>
                               </div>
@@ -350,10 +365,10 @@ export default function CrazyDeals() {
                             <div className="flex flex-wrap gap-2 mb-4">
                               {product.reviewTags.slice(0, 4).map((tag, idx) => {
                                 const colors = [
-                                  { bg: '#FEF3C7', color: '#92400E' },
-                                  { bg: '#DBEAFE', color: '#1E40AF' },
-                                  { bg: '#FCE7F3', color: '#9F1239' },
-                                  { bg: '#D1FAE5', color: '#065F46' },
+                                  { bg: '#3B82F6', color: '#FFFFFF' },  // Blue
+                                  { bg: '#8B5CF6', color: '#FFFFFF' },  // Purple
+                                  { bg: '#EC4899', color: '#FFFFFF' },  // Pink
+                                  { bg: '#10B981', color: '#FFFFFF' },  // Green
                                 ];
                                 const color = colors[idx % colors.length];
                                 return (
@@ -383,25 +398,25 @@ export default function CrazyDeals() {
                               return (
                                 <div
                                   key={variant._id}
-                                  className="relative border-2 border-gray-900 rounded-2xl px-4 py-3 bg-white min-w-[110px]"
+                                  className="relative border border-gray-100/30 rounded-2xl px-4 py-3 bg-black/20 backdrop-blur-sm min-w-[110px]"
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   {/* Add to Cart Button */}
                                   <div className="absolute -top-2 -right-2">
                                     {isInCart ? (
-                                      <div className="flex items-center border-2 border-gray-900 rounded-full bg-white">
+                                      <div className="flex items-center border border-gray-200 rounded-full bg-white">
                                         <button
                                           onClick={(e) => {
                                             e.stopPropagation();
                                             updateCartItemQuantity(product._id, cartItem.quantity - 1, variant);
                                           }}
-                                          className="p-1 hover:bg-gray-50 rounded-l-full"
+                                          className="p-1 hover:bg-gray-100 rounded-l-full text-black"
                                         >
                                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                                             <path d="M5 12h14" />
                                           </svg>
                                         </button>
-                                        <span className="px-2 text-xs font-bold">{cartItem.quantity}</span>
+                                        <span className="px-2 text-xs font-bold text-black">{cartItem.quantity}</span>
                                         <button
                                           onClick={(e) => {
                                             e.stopPropagation();
@@ -412,7 +427,7 @@ export default function CrazyDeals() {
                                             }
                                           }}
                                           disabled={cartItem.quantity >= variantStock}
-                                          className="p-1 hover:bg-gray-50 rounded-r-full disabled:opacity-50"
+                                          className="p-1 hover:bg-gray-100 rounded-r-full disabled:opacity-50 text-black"
                                         >
                                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                                             <path d="M12 5v14M5 12h14" />
@@ -442,10 +457,10 @@ export default function CrazyDeals() {
                                         }}
                                         disabled={isOutOfStock}
                                         className={`w-8 h-8 rounded-full flex items-center justify-center shadow-md ${
-                                          isOutOfStock ? 'bg-gray-300 cursor-not-allowed' : 'bg-gray-900 hover:bg-gray-800'
+                                          isOutOfStock ? 'bg-gray-600/50 cursor-not-allowed' : 'bg-white hover:bg-gray-100'
                                         }`}
                                       >
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3">
                                           <path d="M12 5v14M5 12h14" />
                                         </svg>
                                       </button>
@@ -454,11 +469,11 @@ export default function CrazyDeals() {
 
                                   {/* Size and Price */}
                                   <div className="flex flex-col">
-                                    <span className="text-sm font-bold text-gray-900">
+                                    <span className="text-sm font-bold text-white">
                                       {variant.size.value}{variant.size.unit === 'grams' ? 'G' : variant.size.unit}
                                     </span>
                                     <div className="flex items-center gap-2">
-                                      <span className="text-base font-bold text-green-600">
+                                      <span className="text-base font-bold text-green-400">
                                         ${discountedPrice.toFixed(2)}
                                       </span>
                                       <span className="text-xs text-gray-400 line-through">
@@ -484,7 +499,7 @@ export default function CrazyDeals() {
                   return (
                     <div
                       key={product._id}
-                      className="relative rounded-3xl border-2 border-gray-200 hover:shadow-xl transition-all bg-white overflow-hidden cursor-pointer w-full max-w-4xl mx-auto"
+                      className="relative rounded-3xl border border-gray-800/40 hover:border-gray-700/60 transition-all bg-white/5 backdrop-blur-[1px] overflow-hidden cursor-pointer w-full max-w-4xl mx-auto"
                       onClick={() => router.push(`/productdetails?id=${product._id}`)}
                     >
                       {/* Discount Badge */}
@@ -508,28 +523,22 @@ export default function CrazyDeals() {
 
                         {/* Details */}
                         <div className="w-full lg:w-3/5 p-6">
-                          <h3 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h3>
+                          <h3 className="text-2xl font-bold text-white mb-2">{product.name}</h3>
 
                           {/* Intensity Bar */}
                           {product.intensity && (
                             <div className="mb-4">
-                              <div className="flex items-center justify-between mb-1">
-                                <span className="text-sm text-gray-600">Intensity</span>
-                                <span className={`text-sm font-bold ${
-                                  product.intensity <= 3 ? 'text-green-600' :
-                                  product.intensity <= 7 ? 'text-yellow-600' : 'text-red-500'
-                                }`}>
-                                  {product.intensity <= 3 ? 'Mild' : product.intensity <= 7 ? 'Medium' : 'Strong'} ({product.intensity}/10)
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity</span>
+                                <span className="text-sm font-bold text-cyan-400">
+                                  {product.intensity}/10
                                 </span>
                               </div>
-                              <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div className="w-full bg-gray-700/30 rounded-full h-2">
                                 <div
-                                  className="h-2 rounded-full transition-all duration-300"
+                                  className="h-2 rounded-full transition-all duration-300 bg-gradient-to-r from-blue-400 via-blue-500 to-cyan-400"
                                   style={{
-                                    width: `${(product.intensity / 10) * 100}%`,
-                                    backgroundColor:
-                                      product.intensity <= 3 ? '#10B981' :
-                                      product.intensity <= 7 ? '#F59E0B' : '#EF4444'
+                                    width: `${(product.intensity / 10) * 100}%`
                                   }}
                                 ></div>
                               </div>
@@ -541,10 +550,10 @@ export default function CrazyDeals() {
                             <div className="flex flex-wrap gap-2 mb-4">
                               {product.reviewTags.slice(0, 4).map((tag, idx) => {
                                 const colors = [
-                                  { bg: '#FEF3C7', color: '#92400E' },
-                                  { bg: '#DBEAFE', color: '#1E40AF' },
-                                  { bg: '#FCE7F3', color: '#9F1239' },
-                                  { bg: '#D1FAE5', color: '#065F46' },
+                                  { bg: '#3B82F6', color: '#FFFFFF' },  // Blue
+                                  { bg: '#8B5CF6', color: '#FFFFFF' },  // Purple
+                                  { bg: '#EC4899', color: '#FFFFFF' },  // Pink
+                                  { bg: '#10B981', color: '#FFFFFF' },  // Green
                                 ];
                                 const color = colors[idx % colors.length];
                                 return (
@@ -574,25 +583,25 @@ export default function CrazyDeals() {
                                 return (
                                   <div
                                     key={flavor._id}
-                                    className="relative border-2 border-gray-900 rounded-2xl px-4 py-3 bg-white min-w-[110px]"
+                                    className="relative border border-gray-100/30 rounded-2xl px-4 py-3 bg-black/20 backdrop-blur-sm min-w-[110px]"
                                     onClick={(e) => e.stopPropagation()}
                                   >
                                     {/* Add to Cart Button */}
                                     <div className="absolute -top-2 -right-2">
                                       {isInCart ? (
-                                        <div className="flex items-center border-2 border-gray-900 rounded-full bg-white">
+                                        <div className="flex items-center border border-gray-200 rounded-full bg-white">
                                           <button
                                             onClick={(e) => {
                                               e.stopPropagation();
                                               updateCartItemQuantity(product._id, cartItem.quantity - 1, null, flavor);
                                             }}
-                                            className="p-1 hover:bg-gray-50 rounded-l-full"
+                                            className="p-1 hover:bg-gray-100 rounded-l-full text-black"
                                           >
                                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                                               <path d="M5 12h14" />
                                             </svg>
                                           </button>
-                                          <span className="px-2 text-xs font-bold">{cartItem.quantity}</span>
+                                          <span className="px-2 text-xs font-bold text-black">{cartItem.quantity}</span>
                                           <button
                                             onClick={(e) => {
                                               e.stopPropagation();
@@ -603,7 +612,7 @@ export default function CrazyDeals() {
                                               }
                                             }}
                                             disabled={cartItem.quantity >= flavorStock}
-                                            className="p-1 hover:bg-gray-50 rounded-r-full disabled:opacity-50"
+                                            className="p-1 hover:bg-gray-100 rounded-r-full disabled:opacity-50 text-black"
                                           >
                                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                                               <path d="M12 5v14M5 12h14" />
@@ -633,10 +642,10 @@ export default function CrazyDeals() {
                                           }}
                                           disabled={isOutOfStock}
                                           className={`w-8 h-8 rounded-full flex items-center justify-center shadow-md ${
-                                            isOutOfStock ? 'bg-gray-300 cursor-not-allowed' : 'bg-gray-900 hover:bg-gray-800'
+                                            isOutOfStock ? 'bg-gray-600/50 cursor-not-allowed' : 'bg-white hover:bg-gray-100'
                                           }`}
                                         >
-                                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3">
                                             <path d="M12 5v14M5 12h14" />
                                           </svg>
                                         </button>
@@ -645,7 +654,7 @@ export default function CrazyDeals() {
 
                                     {/* Flavor Name and Price */}
                                     <div className="flex flex-col">
-                                      <span className="text-sm font-bold text-gray-900">
+                                      <span className="text-sm font-bold text-gray-100">
                                         {flavor.name}
                                       </span>
                                       <div className="flex items-center gap-2">
@@ -674,8 +683,69 @@ export default function CrazyDeals() {
             </div>
           </div>
         );
-        })}
+      })}
       </div>
+      
+      {/* CSS for Stars Animation */}
+      <style jsx>{`
+        .stars-container {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+        }
+        
+        .star {
+          position: absolute;
+          width: 2px;
+          height: 2px;
+          background: white;
+          border-radius: 50%;
+          animation: twinkle linear infinite;
+          box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
+        }
+        
+        @keyframes twinkle {
+          0%, 100% {
+            opacity: 0.2;
+            transform: scale(0.8);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.2);
+          }
+        }
+        
+        /* Medium sparkles */
+        .star:nth-child(3n) {
+          width: 3px;
+          height: 3px;
+          box-shadow: 0 0 6px rgba(124, 198, 255, 0.7);
+        }
+        
+        /* Larger sparkles */
+        .star:nth-child(5n) {
+          width: 4px;
+          height: 4px;
+          box-shadow: 0 0 8px rgba(47, 128, 255, 0.8);
+        }
+        
+        /* Glow Border Animation */
+        .glow-border {
+          animation: borderGlow 2s ease-in-out infinite;
+        }
+        
+        @keyframes borderGlow {
+          0%, 100% {
+            box-shadow: 0 0 20px rgba(77, 163, 255, 0.4),
+                        0 0 40px rgba(77, 163, 255, 0.2);
+          }
+          50% {
+            box-shadow: 0 0 30px rgba(77, 163, 255, 0.8),
+                        0 0 60px rgba(77, 163, 255, 0.4),
+                        0 0 80px rgba(77, 163, 255, 0.2);
+          }
+        }
+      `}</style>
     </div>
   );
 }

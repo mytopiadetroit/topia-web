@@ -195,7 +195,68 @@ export default function Home() {
   }, [sections]);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen relative overflow-x-hidden" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+      {/* Global Stars Animation */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="stars-container">
+          {[...Array(60)].map((_, i) => (
+            <div
+              key={`global-star-${i}`}
+              className="star"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${2 + Math.random() * 3}s`
+              }}
+            />
+          ))}
+        </div>
+      </div>
+      
+      {/* CSS for Stars Animation */}
+      <style jsx>{`
+        .stars-container {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+        }
+        
+        .star {
+          position: absolute;
+          width: 2px;
+          height: 2px;
+          background: white;
+          border-radius: 50%;
+          animation: twinkle linear infinite;
+          box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
+        }
+        
+        @keyframes twinkle {
+          0%, 100% {
+            opacity: 0.2;
+            transform: scale(0.8);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.2);
+          }
+        }
+        
+        /* Medium sparkles */
+        .star:nth-child(3n) {
+          width: 3px;
+          height: 3px;
+          box-shadow: 0 0 6px rgba(124, 198, 255, 0.7);
+        }
+        
+        /* Larger sparkles */
+        .star:nth-child(5n) {
+          width: 4px;
+          height: 4px;
+          box-shadow: 0 0 8px rgba(47, 128, 255, 0.8);
+        }
+      `}</style>
     
      {/* Debug Info - Remove in production */}
      {/* <div style={{ position: 'fixed', top: 10, right: 10, background: 'black', color: 'white', padding: '10px', zIndex: 9999, fontSize: '12px', borderRadius: '5px' }}>
@@ -211,71 +272,68 @@ export default function Home() {
      </div> */}
       
  {/* Hero Section */}
-<section className="relative h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-900 via-black to-gray-800">
-  {/* Background Image - Blue Mushrooms */}
-  <div className="absolute inset-0 z-0">
-    <Image 
-      src={homepageImages.hero}
-      alt="Glowing blue mushrooms"
-      className="w-full h-full object-cover opacity-60"
-      fill
-      priority={true}
-      sizes="100vw"
-    />
-    {/* Dark gradient overlay */}
-    <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent"></div>
-  </div>
+<section 
+  className="relative h-screen flex items-center justify-center overflow-hidden"
+  style={{
+    background: 'transparent'
+  }}
+>
+  {/* Cosmic Glow Effect - Right Side */}
+  <div 
+    className="absolute right-0 top-1/4 w-1/2 h-1/2 opacity-20 blur-3xl pointer-events-none"
+    style={{
+      background: 'radial-gradient(circle, rgba(47,128,255,0.3) 0%, transparent 70%)'
+    }}
+  />
   
   {/* Hero Content - Left Aligned */}
   <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 lg:px-16">
-    <div className={`max-w-xl transform transition-all duration-1000 ${
+    <div className={`max-w-2xl transform transition-all duration-1000 ${
       isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
     }`}>
-      <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-6 leading-tight tracking-tight">
-        ELEVATE YOUR<br />
-        WELLNESS<br />
-        NATURALLY
+      <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-6 leading-tight tracking-tight">
+        ELEVATED<br />
+        EXPERIENCES.
       </h1>
-      <p className="text-base md:text-lg lg:text-xl text-gray-300 mb-10 font-light leading-relaxed">
-        Discover the power of therapeutic<br />
-        mushrooms today!
+      <p className="text-base md:text-lg lg:text-xl text-gray-400 mb-10 font-light leading-relaxed">
+        Premium psychedelic wellness products<br />
+        designed for intentional journeys.
       </p>
-      <button 
-        onClick={() => {
-          if (isLoggedIn) {
-            router.push('/menu');
-          } else {
-            router.push('/auth/login');
-          }
-        }}
-        className="bg-white hover:bg-gray-100 text-black px-10 py-4 rounded-full text-base md:text-lg font-semibold transition-all duration-300 transform hover:scale-105 inline-block uppercase tracking-wider"
-      >
-        MENU
-      </button>
+      
+      {/* Buttons Container */}
+      <div className="flex flex-wrap gap-4">
+        {/* Primary Button */}
+        <button 
+          onClick={() => {
+            if (isLoggedIn) {
+              router.push('/menu');
+            } else {
+              router.push('/auth/login');
+            }
+          }}
+          className="bg-white hover:bg-gray-50 text-black px-8 py-4 rounded-full text-sm md:text-base font-semibold transition-all duration-300 transform hover:scale-105 uppercase tracking-wider hover:shadow-[0_8px_30px_rgba(77,163,255,0.8)]"
+        >
+          EXPLORE THE MENU
+        </button>
+        
+        {/* Secondary Button */}
+        <button 
+          onClick={() => router.push('/resourcecenter')}
+          className="bg-transparent text-white border-2 border-white/30 hover:border-white/50 px-8 py-4 rounded-full text-sm md:text-base font-semibold transition-all duration-300 transform hover:scale-105 uppercase tracking-wider hover:shadow-[0_8px_30px_rgba(77,163,255,0.8)]"
+        >
+          LEARN YOUR DOSAGE
+        </button>
+      </div>
     </div>
   </div>
-
-  {/* Decorative mushroom image on right - visible on larger screens */}
-  {/* <div className="absolute right-0 top-0 bottom-0 w-1/2 hidden lg:block pointer-events-none">
-    <div className="relative w-full h-full">
-      <Image 
-        src="/images/mush.webp"
-        alt="Blue mushrooms decoration"
-        className="object-contain object-right opacity-80"
-        fill
-        priority={true}
-        sizes="50vw"
-      />
-    </div>
-  </div> */}
 </section>
 
      {/* Content Section */}
-<section className="py-16 px-4 bg-white">
+<section className="py-16 px-4" style={{ background: 'transparent' }}>
   <div className="max-w-5xl mx-auto">
     {/* Discover Shroomtopia Header */}
     <div className="text-center mb-16">
-      <h2 className="text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-500 tracking-[0.1em] uppercase">
+      <h2 className="text-3xl lg:text-4xl xl:text-5xl font-bold text-white tracking-[0.1em] uppercase">
         DISCOVER SHROOMTOPIA
       </h2>
     </div>
@@ -303,9 +361,9 @@ export default function Home() {
         <p className="text-white text-base md:text-lg lg:text-xl leading-relaxed max-w-4xl mx-auto">
           At SHROOMTOPIA, we are dedicated to enhancing your wellness journey through the power of therapeutic mushrooms. We believe in blending nature&apos;s gifts with modern lifestyles to promote creativity, relaxation, and enjoyment.
         </p>
-         <button  onClick={() => router.push('/resourcecenter')} className="bg-gray-900 mt-8 border-white border mx-auto hover:bg-gray-800 text-white px-6 py-3 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2">
+         <button  onClick={() => router.push('/resourcecenter')} className="bg-white hover:bg-gray-50 text-black px-6 py-3 rounded-full text-sm font-semibold transition-all duration-300 transform hover:scale-105 uppercase tracking-wider hover:shadow-[0_8px_30px_rgba(77,163,255,0.8)] mx-auto flex items-center space-x-2 mt-8">
         <span>Access The Resource Center</span>
-        <ChevronRight className="w-5 h-5" />
+        <ChevronRight className="w-4 h-4" />
       </button>
       </div>
       
@@ -403,13 +461,13 @@ export default function Home() {
                   {/* <span className="text-sm text-gray-600 font-medium">Elevate Your Membership</span> */}
                 </div>
                 
-                <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
+                <h3 className="text-3xl lg:text-4xl font-bold text-white mb-6">
                  The Topia 
 <br />
                 Circle  
                 </h3>
                 
-                <p className="text-gray-600 text-lg mb-8 leading-relaxed">
+                <p className="text-gray-300 text-lg mb-8 leading-relaxed">
                  Step into a world of wellness, where exclusive rewards,  <br />
                  personalized benefits, and a community of growth await.
                 </p>
@@ -429,7 +487,7 @@ export default function Home() {
                     </div>
                     <button 
                       onClick={() => router.push('/profile')} 
-                      className="bg-[#80A6F7] hover:bg-sky-500 text-white px-8 py-4 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105"
+                      className="bg-white hover:bg-gray-50 text-black px-8 py-4 rounded-full text-sm md:text-base font-semibold transition-all duration-300 transform hover:scale-105 uppercase tracking-wider hover:shadow-[0_8px_30px_rgba(77,163,255,0.8)]"
                     >
                       Manage Subscription
                     </button>
@@ -437,7 +495,7 @@ export default function Home() {
                 ) : (
                   <button   
                     onClick={() => router.push('/topia-circle')} 
-                    className="bg-[#2E2E2E] hover:bg-[#2E2E2E] text-white px-8 py-4 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105"
+                    className="bg-white hover:bg-gray-50 text-black px-8 py-4 rounded-full text-sm md:text-base font-semibold transition-all duration-300 transform hover:scale-105 uppercase tracking-wider shadow-[0_4px_15px_rgba(77,163,255,0.4)] hover:shadow-[0_8px_30px_rgba(77,163,255,0.8)]"
                   >
                     Join Now 
                   </button>
@@ -458,12 +516,12 @@ export default function Home() {
                 <span className="text-sm text-gray-600 font-medium">Earn $15 For Each Stamp and Save up to $135 </span>
               </div>
               
-              <h3 className="text-3xl lg:text-4xl relative font-extrabold text-gray-900 mb-6">
+              <h3 className="text-3xl lg:text-4xl relative font-extrabold text-white mb-6">
                 Earn And Track Rewards<br />
                 As You Grow
               </h3>
               
-              <p className="text-gray-600 relative text-lg mb-8 leading-relaxed">
+              <p className="text-gray-300 relative text-lg mb-8 leading-relaxed">
                 Collect points through engagement, participation,<br />
                 sharing content, or contributing to our community.<br />
                 Track your rewards and redeem points.
@@ -540,31 +598,31 @@ export default function Home() {
           </div> */}
 
  {/* Contact Us Section - Break out of parent container */}
-<section className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen py-20 bg-gray-50">
+<section className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen py-20" style={{ background: 'transparent' }}>
   <div className="grid lg:grid-cols-2 gap-0">
     {/* Left Content */}
     <div className="px-4 md:px-8 lg:px-16 xl:px-24 flex items-center justify-end">
       <div className="max-w-xl w-full">
-        <h2 className="text-5xl lg:text-6xl font-bold text-gray-800 tracking-wider mb-12 uppercase">
+        <h2 className="text-5xl lg:text-6xl font-bold text-white tracking-wider mb-12 uppercase">
           CONTACT US
         </h2>
         
         <div className="space-y-10">
           <div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
+            <h3 className="text-2xl font-bold text-white mb-4">
               Better yet, see us in person!
             </h3>
-            <p className="text-gray-600 text-lg leading-relaxed">
+            <p className="text-gray-300 text-lg leading-relaxed">
               We love our customers, so feel free to visit during normal business hours.
             </p>
           </div>
 
           <div>
-            <h4 className="text-2xl font-bold text-gray-900 mb-6">
+            <h4 className="text-2xl font-bold text-white mb-6">
               SHROOMTOPIA
             </h4>
             
-            <div className="space-y-4 text-gray-700">
+            <div className="space-y-4 text-gray-300">
               <p className="text-lg">
                 8201 8 Mile Road, Detroit, MI, USA
               </p>
@@ -578,11 +636,11 @@ export default function Home() {
           </div>
 
           <div>
-            <h4 className="text-2xl font-bold text-gray-900 mb-4">
+            <h4 className="text-2xl font-bold text-white mb-4">
               Hours
             </h4>
             {todayTiming ? (
-              <div className="flex items-center space-x-2 text-gray-700">
+              <div className="flex items-center space-x-2 text-gray-300">
                 <span className="text-lg">
                   {todayTiming.isOpen ? 'Open today' : 'Closed today'}
                 </span>
@@ -600,7 +658,7 @@ export default function Home() {
                 </svg>
               </div>
             ) : (
-              <div className="flex items-center space-x-2 text-gray-700">
+              <div className="flex items-center space-x-2 text-gray-300">
                 <span className="text-lg">Loading hours...</span>
               </div>
             )}
@@ -617,7 +675,7 @@ export default function Home() {
                         const t = byDay[d];
                         const label = d.charAt(0).toUpperCase() + d.slice(1);
                         return (
-                          <div key={d} className="flex items-center justify-between text-gray-700">
+                          <div key={d} className="flex items-center justify-between text-gray-300">
                             <span className="text-sm">{label}</span>
                             {t ? (
                               t.isOpen ? (
@@ -677,16 +735,16 @@ export default function Home() {
       {/* Interactive Map */}
       <iframe
   id="map-iframe"
-  src="https://www.google.com/maps?q=42.4455298,-83.1537416&output=embed"
+  src="https://www.google.com/maps?q=42.4455298,-83.1537416&output=embed&style=feature:all|element:geometry|color:0x242f3e&style=feature:all|element:labels.text.stroke|color:0x242f3e&style=feature:all|element:labels.text.fill|color:0x746855&style=feature:water|element:geometry|color:0x17263c"
   className="w-full h-full"
-  style={{ border: 0, display: 'block', margin: 0, padding: 0, borderRadius: '12px' }}
+  style={{ border: 0, display: 'block', margin: 0, padding: 0, borderRadius: '12px', filter: 'invert(90%) hue-rotate(180deg)' }}
   allowFullScreen
   loading="lazy"
   title="ShroomTopia Location Map"
 />
       
       {/* Map Info Footer */}
-      <p className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 text-sm text-gray-600 bg-white/90 px-4 py-2 rounded-full shadow-lg backdrop-blur-sm">
+      <p className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 text-sm text-gray-300 bg-black/70 px-4 py-2 rounded-full shadow-lg backdrop-blur-sm">
         Use mouse wheel or pinch to zoom • Drag to pan
       </p>
     </div>

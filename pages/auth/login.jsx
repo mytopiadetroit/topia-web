@@ -244,9 +244,69 @@ const Login = () => {
   const isFormFilled = phoneNumber.length >= 10 && !error && formData.phone;
 
   return (
-    <div className="h-screen flex overflow-hidden">
+    <div className="h-screen flex overflow-hidden relative" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+      {/* Animated stars background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="stars-container">
+          {[...Array(60)].map((_, i) => (
+            <div
+              key={`star-${i}`}
+              className="star"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${2 + Math.random() * 3}s`
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* CSS for Stars Animation */}
+      <style jsx>{`
+        .stars-container {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+        }
+        
+        .star {
+          position: absolute;
+          width: 2px;
+          height: 2px;
+          background: white;
+          border-radius: 50%;
+          animation: twinkle linear infinite;
+          box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
+        }
+        
+        @keyframes twinkle {
+          0%, 100% {
+            opacity: 0.2;
+            transform: scale(0.8);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.2);
+          }
+        }
+        
+        .star:nth-child(3n) {
+          width: 3px;
+          height: 3px;
+          box-shadow: 0 0 6px rgba(124, 198, 255, 0.7);
+        }
+        
+        .star:nth-child(5n) {
+          width: 4px;
+          height: 4px;
+          box-shadow: 0 0 8px rgba(47, 128, 255, 0.8);
+        }
+      `}</style>
+
       {/* Left Side - Mushroom Image */}
-      <div className="hidden lg:block lg:w-1/2 relative">
+      <div className="hidden lg:block lg:w-1/2 relative z-10">
         <img
           src={loginImage?.image || "/images/auth.png"}
           alt="Mushroom in forest"
@@ -255,17 +315,17 @@ const Login = () => {
       </div>
 
       {/* Right Side - Login Form */}
-      <div className="w-full lg:w-2/3 bg-white flex items-center justify-center p-8 overflow-y-auto">
+      <div className="w-full lg:w-2/3 bg-white/5 backdrop-blur-[1px] flex items-center justify-center p-8 overflow-y-auto relative z-10">
         <div className="w-full max-w-md">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-5xl font-bold text-gray-900 mb-2 break-words">Welcome to your <br /> Topia </h1>
+            <h1 className="text-5xl font-bold text-white mb-2 break-words">Welcome to your <br /> Topia </h1>
           </div>
 
           <div className="space-y-4">
             {/* Phone Number Label */}
             <div className="mb-4">
-              <div className="block text-gray-700 text-sm font-medium mb-3">Check-in with your registered phone number</div>
+              <div className="block text-gray-300 text-sm font-medium mb-3">Check-in with your registered phone number</div>
 
               {/* Phone Field with react-phone-input-2 */}
               <PhoneInput
@@ -277,7 +337,7 @@ const Login = () => {
                   required: true,
                   autoFocus: true,
                   placeholder: 'Enter phone number',
-                  className: 'w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 placeholder-gray-500'
+                  className: 'w-full px-4 py-3 border border-white/30 bg-white/10 rounded-full focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-white placeholder-gray-400 shadow-[0_0_15px_rgba(34,211,238,0.3)]'
                 }}
                 containerClass="w-full"
                 buttonStyle={{
@@ -314,7 +374,7 @@ const Login = () => {
 
             {/* Error Message */}
             {error && (
-              <div className="text-red-500 text-sm mb-4">
+              <div className="text-red-300 text-sm mb-4">
                 {error}
               </div>
             )}
@@ -324,20 +384,17 @@ const Login = () => {
               type="button"
               onClick={handleLogin}
               disabled={loading}
-              className={`${isFormFilled
-                ? 'bg-[#6B92E8] hover:bg-[#5A81D7]'
-                : 'bg-[#80A6F7] hover:bg-[#8EAFF6CC]'
-                } text-white font-medium py-2 px-6 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#8EAFF6CC] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed`}
+              className="bg-transparent text-white border-2 border-white/50 hover:border-white font-medium py-3 px-6 rounded-full transition-all duration-200 focus:outline-none shadow-[0_8px_30px_rgba(77,163,255,0.8)] hover:shadow-[0_12px_40px_rgba(77,163,255,1)] transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Checking...' : 'Check-In'}
             </button>
 
             {/* Footer Text */}
             <div className="text-center mt-16">
-              <p className="text-gray-600 text-sm">
+              <p className="text-gray-300 text-sm">
                 Do not have an account ?
                 <Link href="/auth/register">
-                  <span className="bg-[#8EAFF6CC] text-white font-medium cursor-pointer hover:bg-[#6B94F5] ml-2 px-4 py-2 rounded-full transition-colors duration-200">Register</span>
+                  <span className="bg-transparent text-white border-2 border-white/50 hover:border-white font-medium cursor-pointer ml-2 px-4 py-2 rounded-full transition-all duration-200 inline-block shadow-[0_8px_30px_rgba(77,163,255,0.8)] hover:shadow-[0_12px_40px_rgba(77,163,255,1)] transform hover:scale-105">Register</span>
                 </Link>
               </p>
             </div>

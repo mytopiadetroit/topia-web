@@ -266,15 +266,75 @@ const ResourceCenter = () => {
         <meta name="keywords" content="mushrooms, wellness, health, blogs, videos, resources" />
       </Head>
 
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen relative" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+        {/* Global Stars Animation */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+          <div className="stars-container">
+            {[...Array(60)].map((_, i) => (
+              <div
+                key={`global-star-${i}`}
+                className="star"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                  animationDelay: `${Math.random() * 3}s`,
+                  animationDuration: `${2 + Math.random() * 3}s`
+                }}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* CSS for Stars Animation */}
+        <style jsx>{`
+          .stars-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+          }
+          
+          .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle linear infinite;
+            box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
+          }
+          
+          @keyframes twinkle {
+            0%, 100% {
+              opacity: 0.2;
+              transform: scale(0.8);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(1.2);
+            }
+          }
+          
+          .star:nth-child(3n) {
+            width: 3px;
+            height: 3px;
+            box-shadow: 0 0 6px rgba(124, 198, 255, 0.7);
+          }
+          
+          .star:nth-child(5n) {
+            width: 4px;
+            height: 4px;
+            box-shadow: 0 0 8px rgba(47, 128, 255, 0.8);
+          }
+        `}</style>
+
         {/* Hero Section */}
-        <div className="bg-gradient-to-r from-[#80A6F7] to-[#80A6F7] text-white">
+        <div className="relative z-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
             <div className="text-center">
-              <h1 className="text-4xl md:text-6xl font-bold mb-6">
+              <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white">
                 Resource Center
               </h1>
-              <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
+              <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto text-gray-300">
                 Discover the world of functional mushrooms through our curated collection of blogs, videos, and educational content
               </p>
 
@@ -298,7 +358,7 @@ const ResourceCenter = () => {
             {/* Gallery Visual Guides Section */}
             {galleryImages.length > 0 && (
               <div className="mt-12">
-                <h2 className="text-2xl md:text-3xl font-bold tracking-[0.5em] uppercase mb-6 text-center">
+                <h2 className="text-2xl md:text-3xl font-bold tracking-[0.5em] uppercase mb-6 text-center text-cyan-400" style={{ textShadow: '0 0 20px rgba(34, 211, 238, 0.6)' }}>
                   Visual Guides
                 </h2>
                 <div
@@ -308,10 +368,10 @@ const ResourceCenter = () => {
                 >
                   {/* Main Image Display */}
                   <div
-                    className="relative overflow-hidden rounded-2xl shadow-2xl bg-white/10 cursor-pointer h-[500px] md:h-[1100px]"
+                    className="relative overflow-hidden rounded-2xl shadow-2xl bg-transparent border border-gray-800/40 cursor-pointer h-[500px] md:h-[1100px]"
                     onMouseEnter={() => setIsPaused(true)}
                     onMouseLeave={() => setIsPaused(false)}
-                    onClick={() => handleImageClick(galleryImages[currentImageIndex], currentImageIndex)} // Move onClick here
+                    onClick={() => handleImageClick(galleryImages[currentImageIndex], currentImageIndex)}
                   >
                     {galleryImages.map((image, index) => (
                       <div
@@ -385,34 +445,34 @@ const ResourceCenter = () => {
 
         {/* Filters */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+          <div className="bg-white/5 backdrop-blur-sm rounded-lg border border-gray-800/40 p-6 mb-8">
             <div className="flex flex-col lg:flex-row lg:items-center gap-4">
               <div className="flex flex-col sm:flex-row gap-4 flex-1">
                 <select
                   value={filters.type}
                   onChange={(e) => handleFilterChange('type', e.target.value)}
-                  className="px-4 py-2 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="px-4 py-2 border border-white/30 bg-transparent text-white rounded-lg focus:ring-2 focus:ring-cyan-400/30 focus:border-cyan-400"
                 >
-                  <option value="">All Content Types</option>
-                  <option value="blog">Blog Posts</option>
-                  <option value="video">Videos</option>
+                  <option value="" className="bg-gray-900 text-white">All Content Types</option>
+                  <option value="blog" className="bg-gray-900 text-white">Blog Posts</option>
+                  <option value="video" className="bg-gray-900 text-white">Videos</option>
                 </select>
 
                 <select
                   value={filters.category}
                   onChange={(e) => handleFilterChange('category', e.target.value)}
-                  className="px-4 py-2 border text-gray-700  border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="px-4 py-2 border border-white/30 bg-transparent text-white rounded-lg focus:ring-2 focus:ring-cyan-400/30 focus:border-cyan-400"
                 >
-                  <option value="">All Categories</option>
+                  <option value="" className="bg-gray-900 text-white">All Categories</option>
                   {categories.map((category, index) => (
-                    <option key={index} value={category}>
+                    <option key={index} value={category} className="bg-gray-900 text-white">
                       {category}
                     </option>
                   ))}
                 </select>
               </div>
 
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-cyan-400 font-medium">
                 {pagination.totalItems || 0} results found
               </div>
             </div>
@@ -434,7 +494,7 @@ const ResourceCenter = () => {
               {content.map((item) => (
                 <div
                   key={item._id}
-                  className="bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden cursor-pointer group"
+                  className="bg-white/5 backdrop-blur-sm rounded-lg border border-gray-800/40 hover:border-gray-700/60 transition-all duration-300 overflow-hidden cursor-pointer group"
                   onClick={() => openContentModal(item)}
                 >
                   {/* Image */}
@@ -479,15 +539,15 @@ const ResourceCenter = () => {
                       </span>
                     </div>
 
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-green-600 transition-colors">
+                    <h3 className="text-lg font-semibold text-white mb-2 line-clamp-2 group-hover:text-cyan-400 transition-colors">
                       {item.title}
                     </h3>
 
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                    <p className="text-gray-300 text-sm mb-4 line-clamp-3">
                       {item.description}
                     </p>
 
-                    <div className="flex items-center justify-between text-sm text-gray-500">
+                    <div className="flex items-center justify-between text-sm text-gray-400">
                       <div className="flex items-center space-x-4">
                         <span>👁 {item.views}</span>
                         <span>❤️ {item.likes}</span>
@@ -501,7 +561,7 @@ const ResourceCenter = () => {
                         {item.tags.slice(0, 3).map((tag, index) => (
                           <span
                             key={index}
-                            className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded"
+                            className="px-2 py-1 bg-transparent border border-cyan-400/40 text-cyan-400 text-xs rounded"
                           >
                             #{tag}
                           </span>
@@ -564,9 +624,9 @@ const ResourceCenter = () => {
         {/* Content Modal */}
         {showModal && selectedContent && (
           <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg w-[95vw] h-[95vh] overflow-y-auto shadow-2xl">
+            <div className="bg-gray-900/95 backdrop-blur-sm rounded-lg w-[95vw] h-[95vh] overflow-y-auto shadow-2xl border border-gray-800/40">
               {/* Modal Header */}
-              <div className="sticky top-0 bg-white border-b p-6 flex items-center justify-between z-10">
+              <div className="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-gray-800/40 p-6 flex items-center justify-between z-10">
                 <div>
                   <span className={`px-3 py-1 text-sm font-medium rounded-full ${selectedContent.type === 'video'
                       ? 'bg-red-100 text-red-800'
@@ -643,7 +703,7 @@ const ResourceCenter = () => {
                     {selectedContent.tags.map((tag, index) => (
                       <span
                         key={index}
-                        className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full"
+                        className="px-3 py-1 bg-transparent border border-cyan-400/40 text-cyan-400 text-sm rounded-full"
                       >
                         #{tag}
                       </span>

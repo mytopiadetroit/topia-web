@@ -9,7 +9,6 @@
 
 
 
-// // Add request interceptor to include token in headers
 // axios.interceptors.request.use(
 //   (config) => {
 //     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;

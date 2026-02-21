@@ -518,12 +518,72 @@ const Profile = () => {
   return orderNumber;
 };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  if (error) return <div className="min-h-screen flex items-center justify-center text-red-500">{error}</div>;
+  if (loading) return <div className="min-h-screen relative flex items-center justify-center" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}><span className="text-white">Loading...</span></div>;
+  if (error) return <div className="min-h-screen relative flex items-center justify-center text-red-300" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>{error}</div>;
 
   return (
-    <div className="min-h-screen p-4 md:p-6 lg:p-8 bg-gradient-to-b from-white to-blue-100">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen p-4 md:p-6 lg:p-8 relative" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+      {/* Animated stars background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="stars-container">
+          {[...Array(60)].map((_, i) => (
+            <div
+              key={`star-${i}`}
+              className="star"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${2 + Math.random() * 3}s`
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* CSS for Stars Animation */}
+      <style jsx>{`
+        .stars-container {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+        }
+        
+        .star {
+          position: absolute;
+          width: 2px;
+          height: 2px;
+          background: white;
+          border-radius: 50%;
+          animation: twinkle linear infinite;
+          box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
+        }
+        
+        @keyframes twinkle {
+          0%, 100% {
+            opacity: 0.2;
+            transform: scale(0.8);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.2);
+          }
+        }
+        
+        .star:nth-child(3n) {
+          width: 3px;
+          height: 3px;
+          box-shadow: 0 0 6px rgba(124, 198, 255, 0.7);
+        }
+        
+        .star:nth-child(5n) {
+          width: 4px;
+          height: 4px;
+          box-shadow: 0 0 8px rgba(47, 128, 255, 0.8);
+        }
+      `}</style>
+
+      <div className="max-w-7xl mx-auto relative z-10">
         {/* Profile Picture positioned on the left */}
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Profile Picture Section */}
@@ -584,14 +644,14 @@ const Profile = () => {
           {/* Main Content */}
           <div className="flex-1 space-y-6">
             {/* Personal Information Section */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <div className="bg-white/5 backdrop-blur-[1px] rounded-2xl p-6 border border-gray-800/40">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-semibold text-gray-900">Personal Information</h2>
+                <h2 className="text-lg font-semibold text-white">Personal Information</h2>
 
                
                 <button 
                   onClick={toggleEditMode}
-                  className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-transparent text-white border border-white/50 hover:border-white rounded-lg text-sm font-medium transition-all shadow-[0_0_10px_rgba(77,163,255,0.3)] hover:shadow-[0_0_15px_rgba(77,163,255,0.5)] transform hover:scale-105"
                 >
                   {editMode ? 'Cancel' : 'Edit'}
                   <Edit size={16} />
@@ -602,39 +662,39 @@ const Profile = () => {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-1">Name</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">Name</label>
                   {editMode ? (
                     <input
                       type="text"
                       name="fullName"
                       value={updatedProfile.fullName}
                       onChange={handleProfileChange}
-                      className="w-full p-2 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full p-2 border border-white/30 bg-white/10 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-white placeholder-gray-400 shadow-[0_0_15px_rgba(34,211,238,0.3)]"
                     />
                   ) : (
-                    <p className="text-gray-900">{profile.fullName}</p>
+                    <p className="text-gray-300">{profile.fullName}</p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-1">Phone Number</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">Phone Number</label>
                   {editMode ? (
                     <input
                       type="text"
                       name="phone"
                       value={updatedProfile.phone}
                       onChange={handleProfileChange}
-                      className="w-full p-2 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full p-2 border border-white/30 bg-white/10 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-white placeholder-gray-400 shadow-[0_0_15px_rgba(34,211,238,0.3)]"
                     />
                   ) : (
-                    <p className="text-gray-900">{profile.phone}</p>
+                    <p className="text-gray-300">{profile.phone}</p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-1">Email</label>
-                  <p className="text-gray-900">{profile.email}</p>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
+                  <p className="text-gray-300">{profile.email}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-1">Date of Birth</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">Date of Birth</label>
                   {editMode ? (
                     <div className="grid grid-cols-3 gap-2">
                       <input
@@ -643,7 +703,7 @@ const Profile = () => {
                         placeholder="Day"
                         value={updatedProfile.birthday.day}
                         onChange={handleProfileChange}
-                        className="w-full p-2 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full p-2 border border-white/30 bg-white/10 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-white placeholder-gray-400 shadow-[0_0_15px_rgba(34,211,238,0.3)]"
                       />
                       <input
                         type="text"
@@ -651,7 +711,7 @@ const Profile = () => {
                         placeholder="Month"
                         value={updatedProfile.birthday.month}
                         onChange={handleProfileChange}
-                        className="w-full p-2 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full p-2 border border-white/30 bg-white/10 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-white placeholder-gray-400 shadow-[0_0_15px_rgba(34,211,238,0.3)]"
                       />
                       <input
                         type="text"
@@ -659,11 +719,11 @@ const Profile = () => {
                         placeholder="Year"
                         value={updatedProfile.birthday.year}
                         onChange={handleProfileChange}
-                        className="w-full p-2 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full p-2 border border-white/30 bg-white/10 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-white placeholder-gray-400 shadow-[0_0_15px_rgba(34,211,238,0.3)]"
                       />
                     </div>
                   ) : (
-                    <p className="text-gray-900">{formatBirthday()}</p>
+                    <p className="text-gray-300">{formatBirthday()}</p>
                   )}
                 </div>
                 {editMode && (
@@ -671,7 +731,7 @@ const Profile = () => {
                     <button
                       onClick={updateProfile}
                       disabled={updating}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                      className="px-4 py-2 bg-transparent text-white border border-white/50 hover:border-white rounded-lg transition-all shadow-[0_0_10px_rgba(77,163,255,0.3)] hover:shadow-[0_0_15px_rgba(77,163,255,0.5)] transform hover:scale-105 flex items-center gap-2"
                     >
                       {updating ? 'Updating...' : 'Save Changes'}
                       {!updating && <Check size={16} />}
@@ -682,12 +742,12 @@ const Profile = () => {
             </div>
 
             {/* Document Submitted Section */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <div className="bg-white/5 backdrop-blur-[1px] rounded-2xl p-6 border border-gray-800/40">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-semibold text-gray-900">Document Submitted</h2>
+                <h2 className="text-lg font-semibold text-white">Document Submitted</h2>
                 <button 
                   onClick={toggleDocumentEditMode}
-                  className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-transparent text-white border border-white/50 hover:border-white rounded-lg text-sm font-medium transition-all shadow-[0_0_10px_rgba(77,163,255,0.3)] hover:shadow-[0_0_15px_rgba(77,163,255,0.5)] transform hover:scale-105"
                 >
                   {documentEditMode ? 'Cancel' : 'Edit'}
                   <Edit size={16} />
@@ -717,7 +777,7 @@ const Profile = () => {
                         className="w-40 h-24 border-2 border-dashed border-gray-300 rounded-md flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 transition-colors"
                       >
                         <Upload size={20} className="text-gray-400" />
-                        <span className="mt-1 text-xs text-gray-500">Upload ID</span>
+                        <span className="mt-1 text-xs text-gray-400">Upload ID</span>
                       </div>
                     )}
                     <input 
@@ -732,7 +792,7 @@ const Profile = () => {
                     <button
                       onClick={updateDocument}
                       disabled={updating || !documentFile}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-50"
+                      className="px-4 py-2 bg-transparent text-white border border-white/50 hover:border-white rounded-lg transition-all shadow-[0_0_10px_rgba(77,163,255,0.3)] hover:shadow-[0_0_15px_rgba(77,163,255,0.5)] flex items-center gap-2 disabled:opacity-50 transform hover:scale-105"
                     >
                       {updating ? 'Updating...' : 'Save Document'}
                       {!updating && documentFile && <Check size={16} />}
@@ -745,10 +805,10 @@ const Profile = () => {
                     <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
                       <FileText size={24} className="text-gray-600" />
                     </div>
-                    <span className="text-gray-900 font-medium">Document</span>
+                    <span className="text-white font-medium">Document</span>
                   </div>
                   <div className="text-right">
-                    <span className="text-sm text-gray-500">Status: </span>
+                    <span className="text-sm text-gray-300">Status: </span>
                     <span className={`font-medium ${
                       profile.status === 'verified' ? 'text-green-600' :
                       profile.status === 'pending' ? 'text-yellow-600' :
@@ -766,16 +826,16 @@ const Profile = () => {
             <SubscriptionStatus user={profile} />
 
             {/* SMS Preferences Section */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <div className="bg-white/5 backdrop-blur-[1px] rounded-2xl p-6 border border-gray-800/40">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-semibold text-gray-900">SMS Notifications</h2>
+                <h2 className="text-lg font-semibold text-white">SMS Notifications</h2>
               </div>
               
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between p-4 bg-white/10 rounded-lg">
                   <div className="flex-1">
-                    <h3 className="font-medium text-gray-900">SMS Notifications</h3>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <h3 className="font-medium text-white">SMS Notifications</h3>
+                    <p className="text-sm text-gray-300 mt-1">
                       Receive SMS notifications for birthday wishes, promotions, and special offers
                     </p>
                   </div>
@@ -793,64 +853,64 @@ const Profile = () => {
                 </div>
                 
                 {profile.smsOptOut && profile.smsOptOutDate && (
-                  <div className="text-sm text-gray-500 bg-yellow-50 p-3 rounded-lg">
+                  <div className="text-sm text-gray-300 bg-yellow-900/30 p-3 rounded-lg border border-yellow-700/50">
                     <p>SMS notifications disabled on {new Date(profile.smsOptOutDate).toLocaleDateString()}</p>
                     <p className="mt-1">You can re-enable them anytime by toggling the switch above.</p>
                   </div>
                 )}
                 
-                {/* <div className="text-xs text-gray-500 bg-blue-50 p-3 rounded-lg">
+                {/* <div className="text-xs text-gray-400 bg-blue-900/30 p-3 rounded-lg border border-blue-700/50">
                   <p><strong>Note:</strong> You can also text "STOP" to our SMS number to unsubscribe, or "START" to resubscribe.</p>
                 </div> */}
               </div>
             </div>
 
             {/* My Rewards Section */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <div className="bg-white/5 backdrop-blur-[1px] rounded-2xl p-6 border border-gray-800/40">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-semibold text-gray-900">My Rewards</h2>
-                <button onClick={() => router.push('/rewards')} className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                <h2 className="text-lg font-semibold text-white">My Rewards</h2>
+                <button onClick={() => router.push('/rewards')} className="px-4 py-2 bg-transparent text-white border border-white/50 hover:border-white rounded-lg text-sm font-medium transition-all shadow-[0_0_10px_rgba(77,163,255,0.3)] hover:shadow-[0_0_15px_rgba(77,163,255,0.5)] transform hover:scale-105">
                   View All
                 </button>
               </div>
               <img src="/images/line.png" alt="edit" className='w-full h-[1px] mb-10'  />
               
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-xl">
+                <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-purple-500/30 shadow-[0_0_10px_rgba(168,85,247,0.2)]">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-purple-600 font-medium mb-1">Points Balance</p>
-                      <p className="text-2xl font-bold text-purple-700">${pointsBalance}</p>
+                      <p className="text-sm text-purple-300 font-medium mb-1">Points Balance</p>
+                      <p className="text-2xl font-bold text-purple-200">${pointsBalance}</p>
                     </div>
                     <div className="text-3xl">💎</div>
                   </div>
                 </div>
                 
-                <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl">
+                <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-green-500/30 shadow-[0_0_10px_rgba(34,197,94,0.2)]">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-green-600 font-medium mb-1">Total Earned</p>
-                      <p className="text-2xl font-bold text-green-700">${rewardStats.totalEarned}</p>
+                      <p className="text-sm text-green-300 font-medium mb-1">Total Earned</p>
+                      <p className="text-2xl font-bold text-green-200">${rewardStats.totalEarned}</p>
                     </div>
                     <div className="text-3xl">💰</div>
                   </div>
                 </div>
                 
-                <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-4 rounded-xl">
+                <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-yellow-500/30 shadow-[0_0_10px_rgba(234,179,8,0.2)]">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-yellow-600 font-medium mb-1">Pending</p>
-                      <p className="text-2xl font-bold text-yellow-700">{rewardStats.pendingRequests}</p>
+                      <p className="text-sm text-yellow-300 font-medium mb-1">Pending</p>
+                      <p className="text-2xl font-bold text-yellow-200">{rewardStats.pendingRequests}</p>
                     </div>
                     <div className="text-3xl">⏳</div>
                   </div>
                 </div>
                 
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl">
+                <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-blue-500/30 shadow-[0_0_10px_rgba(59,130,246,0.2)]">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-blue-600 font-medium mb-1">Approved</p>
-                      <p className="text-2xl font-bold text-blue-700">{rewardStats.approvedRequests}</p>
+                      <p className="text-sm text-blue-300 font-medium mb-1">Approved</p>
+                      <p className="text-2xl font-bold text-blue-200">{rewardStats.approvedRequests}</p>
                     </div>
                     <div className="text-3xl">✅</div>
                   </div>
@@ -860,7 +920,7 @@ const Profile = () => {
               <div className="text-center">
                 <button 
                   onClick={() => router.push('/rewards')}
-                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-md hover:shadow-lg font-medium"
+                  className="px-6 py-3 bg-transparent text-white border border-white/50 hover:border-white rounded-lg transition-all shadow-[0_0_10px_rgba(77,163,255,0.3)] hover:shadow-[0_0_15px_rgba(77,163,255,0.5)] font-medium transform hover:scale-105"
                 >
                   Claim More Rewards 🎁
                 </button>
@@ -868,10 +928,10 @@ const Profile = () => {
             </div>
 
             {/* My Orders Section */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <div className="bg-white/5 backdrop-blur-[1px] rounded-2xl p-6 border border-gray-800/40">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-semibold text-gray-900">My Orders</h2>
-                <button onClick={() => router.push('/myorders')} className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                <h2 className="text-lg font-semibold text-white">My Orders</h2>
+                <button onClick={() => router.push('/myorders')} className="px-4 py-2 bg-transparent text-white border border-white/50 hover:border-white rounded-lg text-sm font-medium transition-all shadow-[0_0_10px_rgba(77,163,255,0.3)] hover:shadow-[0_0_15px_rgba(77,163,255,0.5)] transform hover:scale-105">
                   View All
                 </button>
               </div>
@@ -882,15 +942,15 @@ const Profile = () => {
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                   </div>
                 ) : orders.length === 0 ? (
-                  <div className="text-center text-gray-500 py-8">No orders yet</div>
+                  <div className="text-center text-gray-300 py-8">No orders yet</div>
                 ) : (
                  orders.slice(0, 2).map((order, idx) => (
-  <div key={order._id || idx} className="bg-[#E7E7E7] rounded-xl shadow-lg border p-4">
+  <div key={order._id || idx} className="bg-white/10 backdrop-blur-sm rounded-xl border border-gray-700/50 p-4 shadow-[0_0_10px_rgba(77,163,255,0.15)]">
     <div className="flex justify-between items-start mb-3">
-     <span className="text-sm font-medium text-gray-700">Order ID: {getDisplayOrderNumber(order.orderNumber) || (order._id || '').slice(8)}</span>
+     <span className="text-sm font-medium text-gray-300">Order ID: {getDisplayOrderNumber(order.orderNumber) || (order._id || '').slice(8)}</span>
       <div className="text-right">
-        <span className="text-sm text-gray-500">Total: </span>
-        <span className="font-semibold text-gray-900">$ {Number(order.totalAmount || 0).toFixed(2)}</span>
+        <span className="text-sm text-gray-300">Total: </span>
+        <span className="font-semibold text-white">$ {Number(order.totalAmount || 0).toFixed(2)}</span>
       </div>
     </div>
     <div className="flex items-center justify-between">
@@ -902,22 +962,22 @@ const Profile = () => {
             className="w-12 h-12 object-cover rounded-lg" 
           />
         ) : (
-          <div className="w-12 h-12 bg-[#2E2E2E40] rounded-lg"></div>
+          <div className="w-12 h-12 bg-white/10 rounded-lg"></div>
         )}
-        <span className="text-gray-900 font-medium">
+        <span className="text-white font-medium">
           {(order.items && order.items[0]?.name) || 'Order Items'}
         </span>
       </div>
       <div className="text-right">
         <div className="mb-1">
-          <span className="text-sm text-gray-500">Status: </span>
-          <span className="text-blue-600 font-medium">
+          <span className="text-sm text-gray-300">Status: </span>
+          <span className="text-cyan-400 font-medium">
             {order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : 'Pending'}
           </span>
         </div>
         <div>
-          <span className="text-sm text-gray-500">Items: </span>
-          <span className="font-semibold text-gray-900">{order.items ? order.items.length : 0}</span>
+          <span className="text-sm text-gray-300">Items: </span>
+          <span className="font-semibold text-white">{order.items ? order.items.length : 0}</span>
         </div>
       </div>
     </div>

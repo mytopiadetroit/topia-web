@@ -47,15 +47,9 @@ const Menu = () => {
   const [showPendingMessage, setShowPendingMessage] = useState(false);
   const ITEMS_PER_PAGE = 15;
 
-  // Debug logs
-  console.log('Auth State:', {
-    loading,
-    isLoggedIn,
-    user: user ? { ...user, status: user.status } : null,
-    currentTime: new Date().toISOString()
-  });
+  
 
-  // Handle user status and loading state in useEffect
+ 
   const [initialLoad, setInitialLoad] = useState(true);
   const [userStatusChecked, setUserStatusChecked] = useState(false);
 
@@ -628,7 +622,7 @@ const Menu = () => {
   if (isLoading) {
     console.log('Showing loading state - waiting for user data');
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
@@ -637,19 +631,19 @@ const Menu = () => {
 // Only block suspended users, allow pending and incomplete
 if (isLoggedIn && user?.status === 'suspend') {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-8 text-center">
+      <div className="min-h-screen p-6" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+        <div className="max-w-4xl mx-auto bg-gray-800 rounded-lg shadow-md p-8 text-center">
           <div className="flex justify-center mb-6">
-            <div className="bg-red-100 p-4 rounded-full">
-              <AlertCircle className="h-12 w-12 text-red-600" />
+            <div className="bg-red-900/30 p-4 rounded-full">
+              <AlertCircle className="h-12 w-12 text-red-400" />
             </div>
           </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Account Suspended</h2>
-          <p className="text-gray-600 mb-6">
+          <h2 className="text-2xl font-bold text-white mb-4">Account Suspended</h2>
+          <p className="text-gray-300 mb-6">
             Thank you for signing up! Your account is currently under review by our team.
             You'll be able to browse our menu once your account is verified.
           </p>
-          <p className="text-gray-500 text-sm">
+          <p className="text-gray-400 text-sm">
             Please check back later or contact support if you have any questions.
           </p>
         </div>
@@ -659,10 +653,10 @@ if (isLoggedIn && user?.status === 'suspend') {
 
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Please Login</h2>
-          <p className="text-gray-600 mb-6">You need to be logged in to view the menu.</p>
+          <h2 className="text-2xl font-bold text-white mb-4">Please Login</h2>
+          <p className="text-gray-300 mb-6">You need to be logged in to view the menu.</p>
           <button
             onClick={() => router.push('/auth/login')}
             className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-lg transition-colors"
@@ -676,10 +670,10 @@ if (isLoggedIn && user?.status === 'suspend') {
 
   if (loadingData) {
     return (
-      <div className="min-h-screen lg:px-14 bg-white flex items-center justify-center">
+      <div className="min-h-screen lg:px-14 flex items-center justify-center" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#536690] mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading menu...</p>
+          <p className="mt-4 text-gray-300">Loading menu...</p>
         </div>
       </div>
     );
@@ -777,13 +771,13 @@ if (isLoggedIn && user?.status === 'suspend') {
 
   
   const FilterSidebar = ({ className = "" }) => (
-   <div className={`bg-white p-6 ${className} overflow-visible`}>
+   <div className={`bg-transparent p-6 ${className} overflow-visible`}>
       {/* Header for mobile drawer */}
       <div className="flex items-center justify-between mb-6 lg:hidden">
-        <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
+        <h3 className="text-lg font-semibold text-white">Filters</h3>
         <button
           onClick={() => setIsDrawerOpen(false)}
-          className="p-2 text-gray-500 hover:text-gray-700"
+          className="p-2 text-gray-400 hover:text-white"
         >
           <X size={20} />
         </button>
@@ -791,9 +785,9 @@ if (isLoggedIn && user?.status === 'suspend') {
 
       {/* Active filters indicator */}
       {activeFilterCount > 0 && (
-        <div className="mb-6 p-3 bg-blue-50 rounded-lg">
+        <div className="mb-6 p-3 bg-blue-900/30 rounded-lg border border-blue-700/30">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-blue-700 font-medium">
+            <span className="text-sm text-blue-300 font-medium">
               {activeFilterCount} filter{activeFilterCount > 1 ? 's' : ''} active
             </span>
             <button
@@ -810,7 +804,7 @@ if (isLoggedIn && user?.status === 'suspend') {
       <div className="mb-8">
         <button
           onClick={() => setCategoryOpen(!categoryOpen)}
-          className="flex items-center justify-between w-full text-left font-medium text-gray-900 mb-4"
+          className="flex items-center justify-between w-full text-left font-medium text-gray-100 mb-4"
         >
           Category
           {categoryOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -839,7 +833,7 @@ if (isLoggedIn && user?.status === 'suspend') {
                       />
                     </div>
                   )}
-                  <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 transition-colors truncate">
+                  <span className="ml-3 text-sm text-gray-100 group-hover:text-white transition-colors truncate">
                     {category.category}
                   </span>
                 </div>
@@ -853,7 +847,7 @@ if (isLoggedIn && user?.status === 'suspend') {
       <div>
         <button
           onClick={() => setPrimaryUseOpen(!primaryUseOpen)}
-          className="flex items-center justify-between w-full text-left font-medium text-gray-900 mb-4"
+          className="flex items-center justify-between w-full text-left font-medium text-gray-100 mb-4"
         >
           Primary Use
           {primaryUseOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -868,7 +862,7 @@ if (isLoggedIn && user?.status === 'suspend') {
                 onChange={() => handlePrimaryUseChange('therapeutic')}
                 className="w-4 h-4 text-[#536690] border-gray-300 rounded focus:ring-[#536690] focus:ring-2"
               />
-              <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
+              <span className="ml-3 text-sm text-gray-100 group-hover:text-white transition-colors">
                 Therapeutic
               </span>
             </label>
@@ -879,7 +873,7 @@ if (isLoggedIn && user?.status === 'suspend') {
                 onChange={() => handlePrimaryUseChange('functional')}
                 className="w-4 h-4 text-[#536690] border-gray-300 rounded focus:ring-[#536690] focus:ring-2"
               />
-              <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
+              <span className="ml-3 text-sm text-gray-100 group-hover:text-white transition-colors">
                 Functional / Medicinal
               </span>
             </label>
@@ -891,7 +885,7 @@ if (isLoggedIn && user?.status === 'suspend') {
       <div className="mt-6">
         <button
           onClick={() => setIntensityOpen(!intensityOpen)}
-          className="flex items-center justify-between w-full text-left font-medium text-gray-900 mb-4"
+          className="flex items-center justify-between w-full text-left font-medium text-gray-100 mb-4"
         >
           Intensity
           {intensityOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -911,7 +905,7 @@ if (isLoggedIn && user?.status === 'suspend') {
                   onChange={() => handleIntensityChange(intensity.id)}
                   className="w-4 h-4 text-[#536690] border-gray-300 rounded focus:ring-[#536690] focus:ring-2"
                 />
-                <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
+                <span className="ml-3 text-sm text-gray-100 group-hover:text-white transition-colors">
                   {intensity.label}
                 </span>
               </label>
@@ -924,7 +918,7 @@ if (isLoggedIn && user?.status === 'suspend') {
       <div className="mt-6">
         <button
           onClick={() => setReviewTagsOpen(!reviewTagsOpen)}
-          className="flex items-center justify-between w-full text-left font-medium text-gray-900 mb-4"
+          className="flex items-center justify-between w-full text-left font-medium text-gray-100 mb-4"
         >
           <span className="flex items-center">
             <Tag size={16} className="mr-2" />
@@ -946,13 +940,13 @@ if (isLoggedIn && user?.status === 'suspend') {
                       onChange={() => handleReviewTagToggle(tag._id)}
                       className="w-4 h-4 text-[#536690] border-gray-300 rounded focus:ring-[#536690] focus:ring-2"
                     />
-                    <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
+                    <span className="ml-3 text-sm text-gray-100 group-hover:text-white transition-colors">
                       {tag.label}
                     </span>
                   </label>
                 ))
             ) : (
-              <p className="text-sm text-gray-500">No review tags available</p>
+              <p className="text-sm text-gray-400">No review tags available</p>
             )}
           </div>
         )}
@@ -962,7 +956,7 @@ if (isLoggedIn && user?.status === 'suspend') {
       <div className="mt-6">
         <button
           onClick={() => setPriceRangeOpen(!priceRangeOpen)}
-          className="flex items-center justify-between w-full text-left font-medium text-gray-900 mb-4"
+          className="flex items-center justify-between w-full text-left font-medium text-gray-100 mb-4"
         >
           Price Range
           {priceRangeOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -988,7 +982,7 @@ if (isLoggedIn && user?.status === 'suspend') {
                     onChange={() => handlePriceRangeChange([...priceOption.range])}
                     className="w-4 h-4 text-[#536690] border-gray-300 rounded focus:ring-[#536690] focus:ring-2"
                   />
-                  <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
+                  <span className="ml-3 text-sm text-gray-100 group-hover:text-white transition-colors">
                     {priceOption.label}
                   </span>
                 </label>
@@ -997,7 +991,7 @@ if (isLoggedIn && user?.status === 'suspend') {
             {(priceRange[0] > 0 || priceRange[1] < 9999) && (
               <button
                 onClick={resetPriceRange}
-                className="text-xs text-[#536690] hover:underline mt-2 block"
+                className="text-xs text-gray-100 hover:underline mt-2 block"
               >
                 Reset Price Filter
               </button>
@@ -1008,97 +1002,6 @@ if (isLoggedIn && user?.status === 'suspend') {
     </div>
   );
 
-
-  // const PaginationControls = () => {
-  //   const maxVisiblePages = 5;
-
-  //   const handlePageChange = (pageNum) => {
-  //     setCurrentPage(pageNum);
-  //     // Scroll to top smoothly
-  //     window.scrollTo({ top: 0, behavior: 'smooth' });
-  //   };
-
-  //   const getPageNumbers = () => {
-  //     const pages = [];
-  //     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-  //     let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
-  //     if (endPage - startPage < maxVisiblePages - 1) {
-  //       startPage = Math.max(1, endPage - maxVisiblePages + 1);
-  //     }
-
-  //     for (let i = startPage; i <= endPage; i++) {
-  //       pages.push(i);
-  //     }
-
-  //     return pages;
-  //   };
-
-  //   if (totalPages <= 1) return null;
-
-  //   return (
-  //     <div className="flex items-center justify-center space-x-2 mt-8 mb-6">
-  //       <button
-  //         onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-  //         disabled={currentPage === 1}
-  //         className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${currentPage === 1
-  //           ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-  //           : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-  //           }`}
-  //       >
-  //         Previous
-  //       </button>
-
-  //       {currentPage > 3 && (
-  //         <>
-  //           <button
-  //             onClick={() => handlePageChange(1)}
-  //             className="px-3 py-2 rounded-lg text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
-  //           >
-  //             1
-  //           </button>
-  //           {currentPage > 4 && <span className="text-gray-400">...</span>}
-  //         </>
-  //       )}
-
-  //       {getPageNumbers().map(pageNum => (
-  //         <button
-  //           key={pageNum}
-  //           onClick={() => handlePageChange(pageNum)}
-  //           className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${currentPage === pageNum
-  //             ? 'bg-[#536690] text-white'
-  //             : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-  //             }`}
-  //         >
-  //           {pageNum}
-  //         </button>
-  //       ))}
-
-  //       {currentPage < totalPages - 2 && (
-  //         <>
-  //           {currentPage < totalPages - 3 && <span className="text-gray-400">...</span>}
-  //           <button
-  //             onClick={() => handlePageChange(totalPages)}
-  //             className="px-3 py-2 rounded-lg text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
-  //           >
-  //             {totalPages}
-  //           </button>
-  //         </>
-  //       )}
-
-  //       <button
-  //         onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-  //         disabled={currentPage === totalPages}
-  //         className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${currentPage === totalPages
-  //           ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-  //           : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-  //           }`}
-  //       >
-  //         Next
-  //       </button>
-  //     </div>
-  //   );
-  // };
 
   <div className="mb-6">
     <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
@@ -1116,10 +1019,10 @@ if (isLoggedIn && user?.status === 'suspend') {
 
   if (loadingData) {
     return (
-      <div className="min-h-screen lg:px-14 bg-white flex items-center justify-center">
+      <div className="min-h-screen lg:px-14 flex items-center justify-center" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#536690] mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading menu...</p>
+          <p className="mt-4 text-gray-300">Loading menu...</p>
         </div>
       </div>
     );
@@ -1128,26 +1031,88 @@ if (isLoggedIn && user?.status === 'suspend') {
   // Render loading state for data
   if (loadingData) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen lg:px-14 bg-white">
+    <div className="min-h-screen lg:px-14 relative" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+      {/* Global Stars Animation */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="stars-container">
+          {[...Array(60)].map((_, i) => (
+            <div
+              key={`global-star-${i}`}
+              className="star"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${2 + Math.random() * 3}s`
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* CSS for Stars Animation */}
+      <style jsx>{`
+        .stars-container {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+        }
+        
+        .star {
+          position: absolute;
+          width: 2px;
+          height: 2px;
+          background: white;
+          border-radius: 50%;
+          animation: twinkle linear infinite;
+          box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
+        }
+        
+        @keyframes twinkle {
+          0%, 100% {
+            opacity: 0.2;
+            transform: scale(0.8);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.2);
+          }
+        }
+        
+        /* Medium sparkles */
+        .star:nth-child(3n) {
+          width: 3px;
+          height: 3px;
+          box-shadow: 0 0 6px rgba(124, 198, 255, 0.7);
+        }
+        
+        /* Larger sparkles */
+        .star:nth-child(5n) {
+          width: 4px;
+          height: 4px;
+          box-shadow: 0 0 8px rgba(47, 128, 255, 0.8);
+        }
+      `}</style>
+      
       {/* Navigation */}
-      <nav className="bg-white border-b border-gray-200 px-4 py-3">
+      <nav className="bg-gray-900/50 backdrop-blur-sm border-b border-gray-700/50 px-4 py-3 relative z-10">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4 text-sm text-gray-600">
+          <div className="flex items-center space-x-4 text-sm text-gray-300">
             <span
-              className="hover:text-gray-900 cursor-pointer"
+              className="hover:text-white cursor-pointer"
               onClick={handleHomeClick}
             >
               Home
             </span>
-            <span className="text-gray-400">/</span>
-            <span className="text-gray-900 font-medium">Menu</span>
+            <span className="text-gray-500">/</span>
+            <span className="text-white font-medium">Menu</span>
           </div>
 
           {/* Mobile filter button */}
@@ -1207,13 +1172,13 @@ if (isLoggedIn && user?.status === 'suspend') {
 
           {/* Results Count */}
           <div className="mb-6">
-            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
+            <h1 className="text-2xl lg:text-3xl font-bold text-gray-100">
               Menu
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-gray-100 mt-1">
               {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} available
               {totalPages > 1 && (
-                <span className="text-gray-500">
+                <span className="text-gray-100">
                   {' '}• Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} - {Math.min(currentPage * ITEMS_PER_PAGE, filteredProducts.length)} of {filteredProducts.length}
                 </span>
               )}
@@ -1247,12 +1212,12 @@ if (isLoggedIn && user?.status === 'suspend') {
                       onMouseLeave={() => setHoveredProductId(null)}
                     >
                       <div
-                        className="relative rounded-3xl border border-gray-200 hover:shadow-lg transition-shadow bg-white overflow-hidden w-full max-w-4xl mx-auto"
+                        className="relative rounded-3xl border border-gray-800/40 hover:border-gray-700/60 transition-all bg-white/5 backdrop-blur-[1px] overflow-hidden w-full max-w-4xl mx-auto"
                         onClick={() => handleProductClick(product)}
                       >
                         {/* Left side - Product Image */}
                         <div className="flex flex-col lg:flex-row">
-                          <div className="w-full lg:w-2/5 h-64 lg:h-80 bg-gray-100 relative">
+                          <div className="w-full lg:w-2/5 h-64 lg:h-80 bg-gray-800 relative">
                             {product.images && product.images.length > 0 ? (
                               <>
                                 <img
@@ -1344,29 +1309,22 @@ if (isLoggedIn && user?.status === 'suspend') {
 
                           {/* Right side - Product Details */}
                           <div className="w-full md:w-3/5 p-6">
-                            <h3 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h3>
+                            <h3 className="text-2xl font-bold text-gray-100 mb-2">{product.name}</h3>
 
                             {/* Intensity Bar */}
                             {product.intensity && (
                               <div className="mb-4">
-                                <div className="flex items-center justify-between mb-1">
-                                  <span className="text-sm text-gray-600">Intensity</span>
-                                  <span className={`text-sm font-bold ${product.intensity <= 3 ? 'text-green-600' :
-                                    product.intensity <= 7 ? 'text-yellow-600' :
-                                      'text-red-500'
-                                    }`}>
-                                    {product.intensity <= 3 ? 'Mild' : product.intensity <= 7 ? 'Medium' : 'Strong'} ({product.intensity}/10)
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity</span>
+                                  <span className="text-sm font-bold text-cyan-400">
+                                    {product.intensity}/10
                                   </span>
                                 </div>
-                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div className="w-full bg-gray-700/30 rounded-full h-2">
                                   <div
-                                    className="h-2 rounded-full transition-all duration-300"
+                                    className="h-2 rounded-full transition-all duration-300 bg-gradient-to-r from-blue-400 via-blue-500 to-cyan-400"
                                     style={{
-                                      width: `${(product.intensity / 10) * 100}%`,
-                                      backgroundColor:
-                                        product.intensity <= 3 ? '#10B981' :
-                                          product.intensity <= 7 ? '#F59E0B' :
-                                            '#EF4444'
+                                      width: `${(product.intensity / 10) * 100}%`
                                     }}
                                   ></div>
                                 </div>
@@ -1376,12 +1334,10 @@ if (isLoggedIn && user?.status === 'suspend') {
                             {/* Review Tags */}
                             <div className="flex flex-wrap gap-2 mb-4">
                               {(product.reviewTags || []).slice(0, 4).map((tag, idx) => {
-                                const color = colors[idx % colors.length];
                                 return (
                                   <span
                                     key={tag._id}
-                                    className="px-3 py-1.5 text-sm rounded-full font-medium"
-                                    style={{ backgroundColor: color.bg, color: color.color }}
+                                    className="px-3 py-1.5 text-sm rounded-full font-medium bg-white/5 backdrop-blur-sm border border-blue-400/40 hover:border-2 hover:border-blue-400 transition-all text-white"
                                   >
                                     {tag.label}
                                   </span>
@@ -1409,7 +1365,8 @@ if (isLoggedIn && user?.status === 'suspend') {
                                   return (
                                     <div
                                       key={variant._id}
-                                      className="relative border-2 border-gray-900 rounded-2xl px-4 py-3 bg-white min-w-[120px]"
+                                   className="relative border border-gray-100/30 rounded-2xl px-4 py-3 bg-black/20 backdrop-blur-sm min-w-[110px]"
+
                                       onClick={(e) => e.stopPropagation()}
                                     >
                                       {/* Add to Cart Button - Top Right */}
@@ -1459,11 +1416,11 @@ if (isLoggedIn && user?.status === 'suspend') {
                                             }}
                                             disabled={isOutOfStock}
                                             className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-md ${isOutOfStock
-                                              ? 'bg-gray-300 cursor-not-allowed'
-                                              : 'bg-gray-900 hover:bg-gray-800'
+                                              ? 'bg-gray-600/50 cursor-not-allowed'
+                                              : 'bg-white hover:bg-gray-100'
                                               }`}
                                           >
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3">
                                               <path d="M12 5v14M5 12h14" />
                                             </svg>
                                           </button>
@@ -1472,10 +1429,10 @@ if (isLoggedIn && user?.status === 'suspend') {
 
                                       {/* Size and Price */}
                                       <div className="flex flex-col">
-                                        <span className="text-sm font-bold text-gray-900">
+                                        <span className="text-sm font-bold text-white">
                                           {variant.size.value}{variant.size.unit === 'grams' ? 'G' : variant.size.unit === 'pieces' ? ' pcs' : variant.size.unit.toUpperCase()}
                                         </span>
-                                        <span className="text-base font-bold text-gray-900">
+                                        <span className="text-base font-bold text-white">
                                           ${variant.price}
                                         </span>
                                       </div>
@@ -1485,7 +1442,7 @@ if (isLoggedIn && user?.status === 'suspend') {
 
                                 {/* Wishlist Button */}
                                 <div
-                                  className="flex items-center space-x-2 cursor-pointer hover:text-red-500 transition-colors"
+                                  className="flex text-white items-center space-x-2 cursor-pointer hover:text-red-500 transition-colors"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     if (!isLoggedIn) {
@@ -1515,7 +1472,7 @@ if (isLoggedIn && user?.status === 'suspend') {
                                     );
                                   }}
                                 >
-                                  <span className="text-sm font-medium">Wishlist</span>
+                                  <span className="text-sm text-gray-100 font-medium">Wishlist</span>
                                   <svg
                                     width="20"
                                     height="20"
@@ -1545,7 +1502,7 @@ if (isLoggedIn && user?.status === 'suspend') {
                       onMouseLeave={() => setHoveredProductId(null)}
                     >
                       <div
-                        className="relative rounded-3xl border border-gray-200 hover:shadow-lg transition-shadow bg-white overflow-hidden w-full max-w-4xl mx-auto"
+                        className="relative rounded-3xl border border-gray-800/40 hover:border-gray-700/60 transition-all bg-white/5 backdrop-blur-[1px] overflow-hidden w-full max-w-4xl mx-auto"
                         onClick={() => handleProductClick(product)}
                       >
                         <div className="flex flex-col lg:flex-row">
@@ -1604,29 +1561,22 @@ if (isLoggedIn && user?.status === 'suspend') {
 
                           {/* Right side - Product Details */}
                           <div className="w-full lg:w-3/5 p-6">
-                            <h3 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h3>
-                            {product?.short_description && <p className="text-gray-700 -mt-1  mb-2">{product.short_description}</p>}
+                            <h3 className="text-2xl font-bold text-gray-100 mb-2">{product.name}</h3>
+                            {product?.short_description && <p className="text-gray-300 -mt-1  mb-2">{product.short_description}</p>}
                             {/* Intensity Bar */}
                             {product.intensity && (
                               <div className="mb-4">
-                                <div className="flex items-center justify-between mb-1">
-                                  <span className="text-sm text-gray-600">Intensity</span>
-                                  <span className={`text-sm font-bold ${product.intensity <= 3 ? 'text-green-600' :
-                                    product.intensity <= 7 ? 'text-yellow-600' :
-                                      'text-red-500'
-                                    }`}>
-                                    {product.intensity <= 3 ? 'Mild' : product.intensity <= 7 ? 'Medium' : 'Strong'} ({product.intensity}/10)
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity</span>
+                                  <span className="text-sm font-bold text-cyan-400">
+                                    {product.intensity}/10
                                   </span>
                                 </div>
-                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div className="w-full bg-gray-700/30 rounded-full h-2">
                                   <div
-                                    className="h-2 rounded-full transition-all duration-300"
+                                    className="h-2 rounded-full transition-all duration-300 bg-gradient-to-r from-blue-400 via-blue-500 to-cyan-400"
                                     style={{
-                                      width: `${(product.intensity / 10) * 100}%`,
-                                      backgroundColor:
-                                        product.intensity <= 3 ? '#10B981' :
-                                          product.intensity <= 7 ? '#F59E0B' :
-                                            '#EF4444'
+                                      width: `${(product.intensity / 10) * 100}%`
                                     }}
                                   ></div>
                                 </div>
@@ -1636,12 +1586,10 @@ if (isLoggedIn && user?.status === 'suspend') {
                             {/* Review Tags */}
                             <div className="flex flex-wrap gap-2 mb-4">
                               {(product.reviewTags || []).slice(0, 4).map((tag, idx) => {
-                                const color = colors[idx % colors.length];
                                 return (
                                   <span
                                     key={tag._id}
-                                    className="px-3 py-1.5 text-sm rounded-full font-medium"
-                                    style={{ backgroundColor: color.bg, color: color.color }}
+                                    className="px-3 py-1.5 text-sm rounded-full font-medium bg-white/5 backdrop-blur-sm border border-blue-400/40 hover:border-2 hover:border-blue-400 transition-all text-white"
                                   >
                                     {tag.label}
                                   </span>
@@ -1667,7 +1615,8 @@ if (isLoggedIn && user?.status === 'suspend') {
                                   return (
                                     <div
                                       key={flavor._id}
-                                      className="relative border-2 border-gray-900 rounded-2xl px-4 py-3 bg-white min-w-[120px]"
+                                     className="relative border border-gray-100/30 rounded-2xl px-4 py-3 bg-black/20 backdrop-blur-sm min-w-[110px]"
+
                                       onClick={(e) => e.stopPropagation()}
                                     >
                                       {/* Add to Cart Button - Top Right */}
@@ -1717,11 +1666,11 @@ if (isLoggedIn && user?.status === 'suspend') {
                                             }}
                                             disabled={isOutOfStock}
                                             className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-md ${isOutOfStock
-                                              ? 'bg-gray-300 cursor-not-allowed'
-                                              : 'bg-gray-900 hover:bg-gray-800'
+                                              ? 'bg-gray-600/50 cursor-not-allowed'
+                                              : 'bg-white hover:bg-gray-100'
                                               }`}
                                           >
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3">
                                               <path d="M12 5v14M5 12h14" />
                                             </svg>
                                           </button>
@@ -1730,10 +1679,10 @@ if (isLoggedIn && user?.status === 'suspend') {
 
                                       {/* Flavor Name and Price */}
                                       <div className="flex flex-col">
-                                        <span className="text-sm font-bold text-gray-900">
+                                        <span className="text-sm font-bold text-white">
                                           {flavor.name}
                                         </span>
-                                        <span className="text-base font-bold text-gray-900">
+                                        <span className="text-base font-bold text-white">
                                           ${flavor.price}
                                         </span>
                                       </div>
@@ -1773,7 +1722,7 @@ if (isLoggedIn && user?.status === 'suspend') {
                                     );
                                   }}
                                 >
-                                  <span className="text-sm font-medium">Wishlist</span>
+                                  <span className="text-sm text-gray-100 font-medium">Wishlist</span>
                                   <svg
                                     width="20"
                                     height="20"
@@ -1804,7 +1753,7 @@ return (
     onMouseLeave={() => setHoveredProductId(null)}
   >
     <div
-      className="relative rounded-3xl border border-gray-200 hover:shadow-lg transition-shadow bg-white overflow-hidden w-full max-w-4xl mx-auto"
+      className="relative rounded-3xl border border-gray-800/40 hover:border-gray-700/60 transition-all bg-white/5 backdrop-blur-[1px] overflow-hidden w-full max-w-4xl mx-auto"
       onClick={() => handleProductClick(product)}
     >
       <div className="flex flex-col lg:flex-row">
@@ -1898,31 +1847,23 @@ return (
 
         {/* Right side - Product Details */}
         <div className="w-full lg:w-3/5 p-6">
-          <h3 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h3>
-          {product?.short_description && <p className="text-gray-700 -mt-1 mb-2">{product.short_description}</p>}
+          <h3 className="text-2xl font-bold text-gray-100 mb-2">{product.name}</h3>
+          {product?.short_description && <p className="text-gray-300 -mt-1 mb-2">{product.short_description}</p>}
           
           {/* Intensity Bar */}
           {product.intensity && (
             <div className="mb-4">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-sm text-gray-600">Intensity</span>
-                <span className={`text-sm font-bold ${
-                  product.intensity <= 3 ? 'text-green-600' :
-                  product.intensity <= 7 ? 'text-yellow-600' :
-                  'text-red-500'
-                }`}>
-                  {product.intensity <= 3 ? 'Mild' : product.intensity <= 7 ? 'Medium' : 'Strong'} ({product.intensity}/10)
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity</span>
+                <span className="text-sm font-bold text-cyan-400">
+                  {product.intensity}/10
                 </span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="w-full bg-gray-700/30 rounded-full h-2">
                 <div
-                  className="h-2 rounded-full transition-all duration-300"
+                  className="h-2 rounded-full transition-all duration-300 bg-gradient-to-r from-blue-400 via-blue-500 to-cyan-400"
                   style={{
-                    width: `${(product.intensity / 10) * 100}%`,
-                    backgroundColor:
-                      product.intensity <= 3 ? '#10B981' :
-                      product.intensity <= 7 ? '#F59E0B' :
-                      '#EF4444'
+                    width: `${(product.intensity / 10) * 100}%`
                   }}
                 ></div>
               </div>
@@ -1932,12 +1873,10 @@ return (
           {/* Review Tags */}
           <div className="flex flex-wrap gap-2 mb-4">
             {(product.reviewTags || []).slice(0, 4).map((tag, idx) => {
-              const color = colors[idx % colors.length];
               return (
                 <span
                   key={tag._id}
-                  className="px-3 py-1.5 text-sm rounded-full font-medium"
-                  style={{ backgroundColor: color.bg, color: color.color }}
+                  className="px-3 py-1.5 text-sm rounded-full font-medium bg-white/5 backdrop-blur-sm border border-blue-400/40 hover:border-2 hover:border-blue-400 transition-all text-white"
                 >
                   {tag.label}
                 </span>
@@ -1965,7 +1904,8 @@ return (
                     return (
                       <div
                         key={variant._id}
-                        className="relative border-2 border-gray-900 rounded-2xl px-4 py-3 bg-white min-w-[120px]"
+                       className="relative border border-gray-100/30 rounded-2xl px-4 py-3 bg-black/20 backdrop-blur-sm min-w-[110px]"
+
                         onClick={(e) => e.stopPropagation()}
                       >
                         <div className="absolute -top-2 -right-2">
@@ -2011,20 +1951,20 @@ return (
                               }}
                               disabled={isOutOfStock}
                               className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-md ${
-                                isOutOfStock ? 'bg-gray-300 cursor-not-allowed' : 'bg-gray-900 hover:bg-gray-800'
+                                isOutOfStock ? 'bg-gray-600/50 cursor-not-allowed' : 'bg-white hover:bg-gray-100'
                               }`}
                             >
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3">
                                 <path d="M12 5v14M5 12h14" />
                               </svg>
                             </button>
                           )}
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-sm font-bold text-gray-900">
+                          <span className="text-sm font-bold text-white">
                             {variant.size.value}{variant.size.unit === 'grams' ? 'G' : variant.size.unit === 'pieces' ? ' pcs' : variant.size.unit.toUpperCase()}
                           </span>
-                          <span className="text-base font-bold text-gray-900">${variant.price}</span>
+                          <span className="text-base font-bold text-white">${variant.price}</span>
                         </div>
                       </div>
                     );
@@ -2049,7 +1989,8 @@ return (
                     return (
                       <div
                         key={flavor._id}
-                        className="relative border-2 border-gray-900 rounded-2xl px-4 py-3 bg-white min-w-[120px]"
+                       className="relative border border-gray-100/30 rounded-2xl px-4 py-3 bg-black/20 backdrop-blur-sm min-w-[110px]"
+
                         onClick={(e) => e.stopPropagation()}
                       >
                         <div className="absolute -top-2 -right-2">
@@ -2095,18 +2036,18 @@ return (
                               }}
                               disabled={isOutOfStock}
                               className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-md ${
-                                isOutOfStock ? 'bg-gray-300 cursor-not-allowed' : 'bg-gray-900 hover:bg-gray-800'
+                                isOutOfStock ? 'bg-gray-600/50 cursor-not-allowed' : 'bg-white hover:bg-gray-100'
                               }`}
                             >
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3">
                                 <path d="M12 5v14M5 12h14" />
                               </svg>
                             </button>
                           )}
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-sm font-bold text-gray-900">{flavor.name}</span>
-                          <span className="text-base font-bold text-gray-900">${flavor.price}</span>
+                          <span className="text-sm font-bold text-white">{flavor.name}</span>
+                          <span className="text-base font-bold text-white">${flavor.price}</span>
                         </div>
                       </div>
                     );
@@ -2117,7 +2058,7 @@ return (
               {/* Simple product - show only if NO variants AND NO flavors */}
               {(!product.hasVariants || !product.variants || product.variants.length === 0) && 
                (!product.flavors || product.flavors.length === 0 || !product.flavors.some(f => f.isActive)) && (
-                <div className="relative border-2 border-gray-900 rounded-2xl px-4 py-3 bg-white min-w-[120px]" onClick={(e) => e.stopPropagation()}>
+                <div className="relative border border-gray-100/30 rounded-2xl px-4 py-3 bg-black/20 backdrop-blur-sm min-w-[120px]" onClick={(e) => e.stopPropagation()}>
                   <div className="absolute -top-2 -right-2">
                     {(() => {
                       const stock = Number(product.stock || 0);
@@ -2171,10 +2112,10 @@ return (
                             }}
                             disabled={isOutOfStock}
                             className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-md ${
-                              isOutOfStock ? 'bg-gray-300 cursor-not-allowed' : 'bg-gray-900 hover:bg-gray-800'
+                              isOutOfStock ? 'bg-gray-600/50 cursor-not-allowed' : 'bg-white hover:bg-gray-100'
                             }`}
                           >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3">
                               <path d="M12 5v14M5 12h14" />
                             </svg>
                           </button>
@@ -2183,14 +2124,14 @@ return (
                     })()}
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-base font-bold text-gray-900">${product.price}</span>
+                    <span className="text-base font-bold text-gray-100">${product.price}</span>
                   </div>
                 </div>
               )}
 
               {/* Wishlist Button */}
               <div
-                className="flex items-center space-x-2 cursor-pointer hover:text-red-500 transition-colors"
+                className="flex text-white items-center space-x-2 cursor-pointer hover:text-red-500 transition-colors"
                 onClick={(e) => {
                   e.stopPropagation();
                   if (!isLoggedIn) {
@@ -2202,7 +2143,7 @@ return (
                   toast.success(wasInWishlist ? 'Removed from wishlist' : 'Added to wishlist!');
                 }}
               >
-                <span className="text-sm font-medium">Wishlist</span>
+                <span className="text-sm text-gray-100 font-medium">Wishlist</span>
                 <svg
                   width="20"
                   height="20"
