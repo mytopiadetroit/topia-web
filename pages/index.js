@@ -195,68 +195,8 @@ export default function Home() {
   }, [sections]);
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
-      {/* Global Stars Animation */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="stars-container">
-          {[...Array(60)].map((_, i) => (
-            <div
-              key={`global-star-${i}`}
-              className="star"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 3}s`,
-                animationDuration: `${2 + Math.random() * 3}s`
-              }}
-            />
-          ))}
-        </div>
-      </div>
-      
-      {/* CSS for Stars Animation */}
-      <style jsx>{`
-        .stars-container {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-        }
-        
-        .star {
-          position: absolute;
-          width: 2px;
-          height: 2px;
-          background: white;
-          border-radius: 50%;
-          animation: twinkle linear infinite;
-          box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
-        }
-        
-        @keyframes twinkle {
-          0%, 100% {
-            opacity: 0.2;
-            transform: scale(0.8);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(1.2);
-          }
-        }
-        
-        /* Medium sparkles */
-        .star:nth-child(3n) {
-          width: 3px;
-          height: 3px;
-          box-shadow: 0 0 6px rgba(124, 198, 255, 0.7);
-        }
-        
-        /* Larger sparkles */
-        .star:nth-child(5n) {
-          width: 4px;
-          height: 4px;
-          box-shadow: 0 0 8px rgba(47, 128, 255, 0.8);
-        }
-      `}</style>
+    <div className="min-h-screen relative overflow-x-hidden" style={{ background: 'transparent' }}>
+      {/* Global Background Image - Applied via body in globals.css */}
     
      {/* Debug Info - Remove in production */}
      {/* <div style={{ position: 'fixed', top: 10, right: 10, background: 'black', color: 'white', padding: '10px', zIndex: 9999, fontSize: '12px', borderRadius: '5px' }}>

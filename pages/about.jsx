@@ -1,8 +1,8 @@
-import React from 'react';
+﻿import React from 'react';
 
 export default function ShroomtopiaAbout() {
   return (
-    <div className="relative min-h-screen py-12 px-4 sm:px-6 lg:px-8" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+    <div className="relative min-h-screen py-12 px-4 sm:px-6 lg:px-8" style={{ background: 'transparent' }}>
       {/* Animated stars background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="stars-container">

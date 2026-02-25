@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { Heart } from 'lucide-react';
@@ -148,7 +148,7 @@ export default function WishlistPage() {
 
   if (userLoading || !isLoggedIn || loadingCategories) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'transparent' }}>
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-400"></div>
       </div>
     );
@@ -156,7 +156,7 @@ export default function WishlistPage() {
 
   if (categoryError) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'transparent' }}>
         <div className="text-center">
           <p className="text-red-500 mb-4">{categoryError}</p>
           <button 
@@ -201,7 +201,7 @@ export default function WishlistPage() {
   }
 
   return (
-    <div className="min-h-screen relative" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+    <div className="min-h-screen relative" style={{ background: 'transparent' }}>
       {/* Animated stars background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="stars-container">

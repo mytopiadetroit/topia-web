@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import { useUser } from '../context/UserContext';
@@ -118,7 +118,7 @@ const Cart = () => {
 
   if (cart.length === 0) {
     return (
-      <div className="min-h-screen relative pt-20 p-4" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+      <div className="min-h-screen relative pt-20 p-4" style={{ background: 'transparent' }}>
         {/* Animated stars background */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
           <div className="stars-container">
@@ -198,7 +198,7 @@ const Cart = () => {
   }
   
   return (
-    <div className="min-h-screen relative pt-20 p-4" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+    <div className="min-h-screen relative pt-20 p-4" style={{ background: 'transparent' }}>
       {/* Animated stars background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="stars-container">

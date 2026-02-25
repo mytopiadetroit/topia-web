@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -266,7 +266,7 @@ const ResourceCenter = () => {
         <meta name="keywords" content="mushrooms, wellness, health, blogs, videos, resources" />
       </Head>
 
-      <div className="min-h-screen relative" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+      <div className="min-h-screen relative" style={{ background: 'transparent' }}>
         {/* Global Stars Animation */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
           <div className="stars-container">

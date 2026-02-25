@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/router';
@@ -55,7 +55,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col relative" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+    <div className="min-h-screen flex flex-col relative" style={{ background: 'transparent' }}>
       {/* Global Stars Animation */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="stars-container">

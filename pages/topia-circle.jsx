@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+﻿import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { useUser } from '../context/UserContext'
 import { Star, Check, CreditCard, Shield, Gift } from 'lucide-react'
@@ -109,7 +109,7 @@ export default function TopiaCircle() {
 
   if (loading) {
     return (
-      <div className="min-h-screen relative flex items-center justify-center" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+      <div className="min-h-screen relative flex items-center justify-center" style={{ background: 'transparent' }}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-400 mx-auto mb-4"></div>
           <p className="text-gray-300">Loading...</p>
@@ -128,7 +128,7 @@ export default function TopiaCircle() {
   ]
 
   return (
-    <div className="min-h-screen relative" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+    <div className="min-h-screen relative" style={{ background: 'transparent' }}>
       {/* Animated stars background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="stars-container">

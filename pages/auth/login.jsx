@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { Api, ConstantsUrl } from '../../service/service';
@@ -244,7 +244,7 @@ const Login = () => {
   const isFormFilled = phoneNumber.length >= 10 && !error && formData.phone;
 
   return (
-    <div className="h-screen flex overflow-hidden relative" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+    <div className="h-screen flex overflow-hidden relative" style={{ background: 'transparent' }}>
       {/* Animated stars background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="stars-container">

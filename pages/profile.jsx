@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { Edit, FileText, Upload, X, Check, Camera } from 'lucide-react';
 import { Api } from '../service/service';
 import { updateSMSPreferences } from '../service/service';
@@ -518,11 +518,11 @@ const Profile = () => {
   return orderNumber;
 };
 
-  if (loading) return <div className="min-h-screen relative flex items-center justify-center" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}><span className="text-white">Loading...</span></div>;
-  if (error) return <div className="min-h-screen relative flex items-center justify-center text-red-300" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>{error}</div>;
+  if (loading) return <div className="min-h-screen relative flex items-center justify-center" style={{ background: 'transparent' }}><span className="text-white">Loading...</span></div>;
+  if (error) return <div className="min-h-screen relative flex items-center justify-center text-red-300" style={{ background: 'transparent' }}>{error}</div>;
 
   return (
-    <div className="min-h-screen p-4 md:p-6 lg:p-8 relative" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+    <div className="min-h-screen p-4 md:p-6 lg:p-8 relative" style={{ background: 'transparent' }}>
       {/* Animated stars background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="stars-container">

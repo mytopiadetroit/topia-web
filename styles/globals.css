@@ -21,6 +21,12 @@
 
 body {
   font-family: var(--font-poppins), sans-serif;
+  background-image: url('/images/bgimage.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-attachment: fixed !important;
+  min-height: 100vh !important;
 }
 
 /* Tawk.io widget positioning adjustment */

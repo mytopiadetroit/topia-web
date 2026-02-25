@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+﻿import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { debounce } from 'lodash';
 import { ChevronDown, ChevronUp, Filter, X, Menu as MenuIcon, Tag, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/router';
@@ -622,7 +622,7 @@ const Menu = () => {
   if (isLoading) {
     console.log('Showing loading state - waiting for user data');
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'transparent' }}>
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
@@ -631,7 +631,7 @@ const Menu = () => {
 // Only block suspended users, allow pending and incomplete
 if (isLoggedIn && user?.status === 'suspend') {
     return (
-      <div className="min-h-screen p-6" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+      <div className="min-h-screen p-6" style={{ background: 'transparent' }}>
         <div className="max-w-4xl mx-auto bg-gray-800 rounded-lg shadow-md p-8 text-center">
           <div className="flex justify-center mb-6">
             <div className="bg-red-900/30 p-4 rounded-full">
@@ -653,7 +653,7 @@ if (isLoggedIn && user?.status === 'suspend') {
 
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'transparent' }}>
         <div className="text-center">
           <h2 className="text-2xl font-bold text-white mb-4">Please Login</h2>
           <p className="text-gray-300 mb-6">You need to be logged in to view the menu.</p>
@@ -670,7 +670,7 @@ if (isLoggedIn && user?.status === 'suspend') {
 
   if (loadingData) {
     return (
-      <div className="min-h-screen lg:px-14 flex items-center justify-center" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+      <div className="min-h-screen lg:px-14 flex items-center justify-center" style={{ background: 'transparent' }}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#536690] mx-auto"></div>
           <p className="mt-4 text-gray-300">Loading menu...</p>
@@ -1019,7 +1019,7 @@ if (isLoggedIn && user?.status === 'suspend') {
 
   if (loadingData) {
     return (
-      <div className="min-h-screen lg:px-14 flex items-center justify-center" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+      <div className="min-h-screen lg:px-14 flex items-center justify-center" style={{ background: 'transparent' }}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#536690] mx-auto"></div>
           <p className="mt-4 text-gray-300">Loading menu...</p>
@@ -1031,14 +1031,14 @@ if (isLoggedIn && user?.status === 'suspend') {
   // Render loading state for data
   if (loadingData) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'transparent' }}>
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen lg:px-14 relative" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+    <div className="min-h-screen lg:px-14 relative" style={{ background: 'transparent' }}>
       {/* Global Stars Animation */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="stars-container">

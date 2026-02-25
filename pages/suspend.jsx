@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+﻿import React, { useEffect } from 'react';
 import { AlertTriangle, Mail, Phone, Clock, LogOut } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { useUser } from '../context/UserContext';
@@ -72,7 +72,7 @@ export default function SuspendedAccount() {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center p-4" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+    <div className="min-h-screen relative flex items-center justify-center p-4" style={{ background: 'transparent' }}>
       {/* Animated stars background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="stars-container">

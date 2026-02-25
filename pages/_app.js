@@ -112,6 +112,19 @@ function AppContent({ Component, pageProps }) {
 
 export default function App({ Component, pageProps }) {
   useEffect(() => {
+    // Debug: Check if background image is loading
+    console.log('🎨 Checking background image...');
+    const img = new Image();
+    img.onload = () => {
+      console.log('✅ Background image loaded successfully: /images/bgimage.png');
+    };
+    img.onerror = () => {
+      console.error('❌ Failed to load background image: /images/bgimage.png');
+    };
+    img.src = '/images/bgimage.png';
+  }, []);
+
+  useEffect(() => {
     // Only run on client side
     if (typeof window === 'undefined') return;
 

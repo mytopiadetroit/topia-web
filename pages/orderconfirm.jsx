@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Check, ChevronLeft } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
@@ -95,7 +95,7 @@ export default function OrderConfirm() {
   // Loading state
   if (loadingOrder) {
     return (
-      <div className="min-h-screen relative flex items-center justify-center" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+      <div className="min-h-screen relative flex items-center justify-center" style={{ background: 'transparent' }}>
         {/* Animated stars background */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
           <div className="stars-container">
@@ -166,7 +166,7 @@ export default function OrderConfirm() {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen relative flex items-center justify-center" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+      <div className="min-h-screen relative flex items-center justify-center" style={{ background: 'transparent' }}>
         <div className="text-center relative z-10">
           <p className="text-red-400 text-lg mb-4">{error}</p>
           <button 
@@ -183,7 +183,7 @@ export default function OrderConfirm() {
   // No order state
   if (!orderData) {
     return (
-      <div className="min-h-screen relative flex items-center justify-center" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+      <div className="min-h-screen relative flex items-center justify-center" style={{ background: 'transparent' }}>
         <div className="text-center relative z-10">
           <p className="text-gray-400 text-lg mb-4">Order not found</p>
           <button 
@@ -208,7 +208,7 @@ export default function OrderConfirm() {
   };
 
   return (
-    <div className="min-h-screen relative" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+    <div className="min-h-screen relative" style={{ background: 'transparent' }}>
       {/* Animated stars background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="stars-container">

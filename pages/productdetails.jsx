@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { Heart, Package } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -294,7 +294,7 @@ export default function ProductDetails() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'transparent' }}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#536690] mx-auto"></div>
           <p className="mt-4 text-gray-300">Loading product...</p>
@@ -306,7 +306,7 @@ export default function ProductDetails() {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'transparent' }}>
         <div className="text-center">
           <p className="text-red-400 text-lg mb-4">{error}</p>
           <button
@@ -323,7 +323,7 @@ export default function ProductDetails() {
   // No product state
   if (!product) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'transparent' }}>
         <div className="text-center">
           <p className="text-gray-300 text-lg mb-4">Product not found</p>
           <button
@@ -357,7 +357,7 @@ export default function ProductDetails() {
   // };
 
   return (
-    <div className="min-h-screen relative" style={{ background: 'radial-gradient(circle at 70% 40%, #101826 0%, #0B0F1A 40%, #060A12 100%)' }}>
+    <div className="min-h-screen relative" style={{ background: 'transparent' }}>
       {/* Global Stars Animation */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="stars-container">
