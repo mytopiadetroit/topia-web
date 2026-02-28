@@ -819,20 +819,8 @@ if (isLoggedIn && user?.status === 'suspend') {
                     type="checkbox"
                     checked={categoryFilters[category._id] || false}
                     onChange={() => handleCategoryChange(category._id)}
-                    className="w-4 h-4 text-[#536690] border-gray-300 rounded focus:ring-[#536690] focus:ring-2 flex-shrink-0"
+                    className="w-4 h-4 text-[#86D1F8] border-gray-300 rounded focus:ring-[#86D1F8] focus:ring-2 flex-shrink-0"
                   />
-                  {category.image && (
-                    <div className="ml-3 w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
-                      <img
-                        src={category.image}
-                        alt={category.category}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                        }}
-                      />
-                    </div>
-                  )}
                   <span className="ml-3 text-sm text-gray-100 group-hover:text-white transition-colors truncate">
                     {category.category}
                   </span>
@@ -860,7 +848,7 @@ if (isLoggedIn && user?.status === 'suspend') {
                 type="checkbox"
                 checked={primaryUseFilters.therapeutic}
                 onChange={() => handlePrimaryUseChange('therapeutic')}
-                className="w-4 h-4 text-[#536690] border-gray-300 rounded focus:ring-[#536690] focus:ring-2"
+                className="w-4 h-4 text-[#86D1F8] border-gray-300 rounded focus:ring-[#86D1F8] focus:ring-2"
               />
               <span className="ml-3 text-sm text-gray-100 group-hover:text-white transition-colors">
                 Therapeutic
@@ -871,7 +859,7 @@ if (isLoggedIn && user?.status === 'suspend') {
                 type="checkbox"
                 checked={primaryUseFilters.functional}
                 onChange={() => handlePrimaryUseChange('functional')}
-                className="w-4 h-4 text-[#536690] border-gray-300 rounded focus:ring-[#536690] focus:ring-2"
+                className="w-4 h-4 text-[#86D1F8] border-gray-300 rounded focus:ring-[#86D1F8] focus:ring-2"
               />
               <span className="ml-3 text-sm text-gray-100 group-hover:text-white transition-colors">
                 Functional / Medicinal
@@ -903,7 +891,7 @@ if (isLoggedIn && user?.status === 'suspend') {
                   type="checkbox"
                   checked={intensityFilters[intensity.id] || false}
                   onChange={() => handleIntensityChange(intensity.id)}
-                  className="w-4 h-4 text-[#536690] border-gray-300 rounded focus:ring-[#536690] focus:ring-2"
+                  className="w-4 h-4 text-[#86D1F8] border-gray-300 rounded focus:ring-[#86D1F8] focus:ring-2"
                 />
                 <span className="ml-3 text-sm text-gray-100 group-hover:text-white transition-colors">
                   {intensity.label}
@@ -932,19 +920,23 @@ if (isLoggedIn && user?.status === 'suspend') {
             {reviewTags.length > 0 ? (
               reviewTags
                 .filter(tag => tag.isActive) // Only show active tags
-                .map(tag => (
-                  <label key={tag._id} className="flex items-center cursor-pointer group">
-                    <input
-                      type="checkbox"
-                      checked={selectedReviewTags[tag._id] || false}
-                      onChange={() => handleReviewTagToggle(tag._id)}
-                      className="w-4 h-4 text-[#536690] border-gray-300 rounded focus:ring-[#536690] focus:ring-2"
-                    />
-                    <span className="ml-3 text-sm text-gray-100 group-hover:text-white transition-colors">
-                      {tag.label}
-                    </span>
-                  </label>
-                ))
+                .map(tag => {
+                  // Remove emojis from label
+                  const labelWithoutEmoji = tag.label.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
+                  return (
+                    <label key={tag._id} className="flex items-center cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        checked={selectedReviewTags[tag._id] || false}
+                        onChange={() => handleReviewTagToggle(tag._id)}
+                        className="w-4 h-4 text-[#86D1F8] border-gray-300 rounded focus:ring-[#86D1F8] focus:ring-2"
+                      />
+                      <span className="ml-3 text-sm text-gray-100 group-hover:text-white transition-colors">
+                        {labelWithoutEmoji}
+                      </span>
+                    </label>
+                  );
+                })
             ) : (
               <p className="text-sm text-gray-400">No review tags available</p>
             )}
@@ -980,7 +972,7 @@ if (isLoggedIn && user?.status === 'suspend') {
                     type="checkbox"
                     checked={isActive}
                     onChange={() => handlePriceRangeChange([...priceOption.range])}
-                    className="w-4 h-4 text-[#536690] border-gray-300 rounded focus:ring-[#536690] focus:ring-2"
+                    className="w-4 h-4 text-[#86D1F8] border-gray-300 rounded focus:ring-[#86D1F8] focus:ring-2"
                   />
                   <span className="ml-3 text-sm text-gray-100 group-hover:text-white transition-colors">
                     {priceOption.label}
@@ -1102,7 +1094,7 @@ if (isLoggedIn && user?.status === 'suspend') {
       `}</style>
       
       {/* Navigation */}
-      <nav className="bg-gray-900/50 backdrop-blur-sm border-b border-gray-700/50 px-4 py-3 relative z-10">
+      <nav className=" mt-5 px-4 py-3 relative z-10">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4 text-sm text-gray-300">
             <span
@@ -1133,7 +1125,13 @@ if (isLoggedIn && user?.status === 'suspend') {
 
       <div className="flex flex-col lg:flex-row relative">
         {/* Desktop Sidebar - Hidden on mobile */}
-        <div className="hidden lg:block w-64 border-r border-gray-200">
+        <div 
+          className="hidden lg:block w-72 m-4 rounded-2xl self-start"
+          style={{
+            background: 'rgba(20, 20, 20, 0.4)',
+            border: '1.2px solid rgba(134, 209, 248, 0.2)'
+          }}
+        >
           <FilterSidebar />
         </div>
 
@@ -1146,8 +1144,14 @@ if (isLoggedIn && user?.status === 'suspend') {
         )}
 
         {/* Mobile Drawer */}
-        <div className={`lg:hidden fixed inset-y-0 left-0 w-80 max-w-[85vw] bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out ${isDrawerOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}>
+        <div 
+          className={`lg:hidden fixed inset-y-0 left-0 w-80 max-w-[85vw] shadow-xl z-50 transform transition-transform duration-300 ease-in-out ${isDrawerOpen ? 'translate-x-0' : '-translate-x-full'}`}
+          style={{
+            background: 'rgba(20, 20, 20, 0.4)',
+            border: '1.2px solid rgba(134, 209, 248, 0.2)',
+            backdropFilter: 'blur(10px)'
+          }}
+        >
           <FilterSidebar />
         </div>
 
@@ -1212,7 +1216,11 @@ if (isLoggedIn && user?.status === 'suspend') {
                       onMouseLeave={() => setHoveredProductId(null)}
                     >
                       <div
-                        className="relative rounded-3xl border border-gray-800/40 hover:border-gray-700/60 transition-all bg-white/5 backdrop-blur-[1px] overflow-hidden w-full max-w-4xl mx-auto"
+                        className="relative rounded-3xl overflow-hidden w-full max-w-4xl mx-auto"
+                        style={{
+                          background: 'rgba(20, 20, 20, 0.4)',
+                          border: '1.2px solid rgba(134, 209, 248, 0.2)'
+                        }}
                         onClick={() => handleProductClick(product)}
                       >
                         {/* Left side - Product Image */}
@@ -1322,9 +1330,11 @@ if (isLoggedIn && user?.status === 'suspend') {
                                 </div>
                                 <div className="w-full bg-gray-700/30 rounded-full h-2">
                                   <div
-                                    className="h-2 rounded-full transition-all duration-300 bg-gradient-to-r from-blue-400 via-blue-500 to-cyan-400"
+                                    className="h-2 rounded-full transition-all duration-300"
                                     style={{
-                                      width: `${(product.intensity / 10) * 100}%`
+                                      width: `${(product.intensity / 10) * 100}%`,
+                                      background: 'linear-gradient(90deg, #1D5BC7 0%, #86D1F8 82%, #97E2F8 94.12%, #CAF7FF 100%)',
+                                      boxShadow: '0px 1px 17px 0px #86D1F8'
                                     }}
                                   ></div>
                                 </div>
@@ -1334,12 +1344,15 @@ if (isLoggedIn && user?.status === 'suspend') {
                             {/* Review Tags */}
                             <div className="flex flex-wrap gap-2 mb-4">
                               {(product.reviewTags || []).slice(0, 4).map((tag, idx) => {
+                                // Remove emojis from label
+                                const labelWithoutEmoji = tag.label.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
                                 return (
                                   <span
                                     key={tag._id}
-                                    className="px-3 py-1.5 text-sm rounded-full font-medium bg-white/5 backdrop-blur-sm border border-blue-400/40 hover:border-2 hover:border-blue-400 transition-all text-white"
+                                    className="px-3 py-1.5 text-sm rounded-full font-medium bg-white/5 backdrop-blur-sm border border-blue-400/40 hover:border-2 hover:border-blue-400 transition-all text-white flex items-center gap-2"
                                   >
-                                    {tag.label}
+                                    <img src="/images/dots.png" alt="" className="w-4 h-4" />
+                                    {labelWithoutEmoji}
                                   </span>
                                 );
                               })}
@@ -1365,8 +1378,12 @@ if (isLoggedIn && user?.status === 'suspend') {
                                   return (
                                     <div
                                       key={variant._id}
-                                   className="relative border border-gray-100/30 rounded-2xl px-4 py-3 bg-black/20 backdrop-blur-sm min-w-[110px]"
-
+                                      className="relative px-4 py-3 min-w-[110px]"
+                                      style={{
+                                        background: 'transparent',
+                                        border: '1.26px solid rgba(134, 209, 248, 0.6)',
+                                        borderRadius: '14.7px'
+                                      }}
                                       onClick={(e) => e.stopPropagation()}
                                     >
                                       {/* Add to Cart Button - Top Right */}
@@ -1502,7 +1519,11 @@ if (isLoggedIn && user?.status === 'suspend') {
                       onMouseLeave={() => setHoveredProductId(null)}
                     >
                       <div
-                        className="relative rounded-3xl border border-gray-800/40 hover:border-gray-700/60 transition-all bg-white/5 backdrop-blur-[1px] overflow-hidden w-full max-w-4xl mx-auto"
+                        className="relative rounded-3xl overflow-hidden w-full max-w-4xl mx-auto"
+                        style={{
+                          background: 'rgba(20, 20, 20, 0.4)',
+                          border: '1.2px solid rgba(134, 209, 248, 0.2)'
+                        }}
                         onClick={() => handleProductClick(product)}
                       >
                         <div className="flex flex-col lg:flex-row">
@@ -1574,9 +1595,11 @@ if (isLoggedIn && user?.status === 'suspend') {
                                 </div>
                                 <div className="w-full bg-gray-700/30 rounded-full h-2">
                                   <div
-                                    className="h-2 rounded-full transition-all duration-300 bg-gradient-to-r from-blue-400 via-blue-500 to-cyan-400"
+                                    className="h-2 rounded-full transition-all duration-300"
                                     style={{
-                                      width: `${(product.intensity / 10) * 100}%`
+                                      width: `${(product.intensity / 10) * 100}%`,
+                                      background: 'linear-gradient(90deg, #1D5BC7 0%, #86D1F8 82%, #97E2F8 94.12%, #CAF7FF 100%)',
+                                      boxShadow: '0px 1px 17px 0px #86D1F8'
                                     }}
                                   ></div>
                                 </div>
@@ -1586,12 +1609,15 @@ if (isLoggedIn && user?.status === 'suspend') {
                             {/* Review Tags */}
                             <div className="flex flex-wrap gap-2 mb-4">
                               {(product.reviewTags || []).slice(0, 4).map((tag, idx) => {
+                                // Remove emojis from label
+                                const labelWithoutEmoji = tag.label.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
                                 return (
                                   <span
                                     key={tag._id}
-                                    className="px-3 py-1.5 text-sm rounded-full font-medium bg-white/5 backdrop-blur-sm border border-blue-400/40 hover:border-2 hover:border-blue-400 transition-all text-white"
+                                    className="px-3 py-1.5 text-sm rounded-full font-medium bg-white/5 backdrop-blur-sm border border-blue-400/40 hover:border-2 hover:border-blue-400 transition-all text-white flex items-center gap-2"
                                   >
-                                    {tag.label}
+                                    <img src="/images/dots.png" alt="" className="w-4 h-4" />
+                                    {labelWithoutEmoji}
                                   </span>
                                 );
                               })}
@@ -1615,8 +1641,12 @@ if (isLoggedIn && user?.status === 'suspend') {
                                   return (
                                     <div
                                       key={flavor._id}
-                                     className="relative border border-gray-100/30 rounded-2xl px-4 py-3 bg-black/20 backdrop-blur-sm min-w-[110px]"
-
+                                      className="relative px-4 py-3 min-w-[110px]"
+                                      style={{
+                                        background: 'transparent',
+                                        border: '1.26px solid rgba(134, 209, 248, 0.6)',
+                                        borderRadius: '14.7px'
+                                      }}
                                       onClick={(e) => e.stopPropagation()}
                                     >
                                       {/* Add to Cart Button - Top Right */}
@@ -1753,7 +1783,11 @@ return (
     onMouseLeave={() => setHoveredProductId(null)}
   >
     <div
-      className="relative rounded-3xl border border-gray-800/40 hover:border-gray-700/60 transition-all bg-white/5 backdrop-blur-[1px] overflow-hidden w-full max-w-4xl mx-auto"
+      className="relative rounded-3xl overflow-hidden w-full max-w-4xl mx-auto"
+      style={{
+        background: 'rgba(20, 20, 20, 0.4)',
+        border: '1.2px solid rgba(134, 209, 248, 0.2)'
+      }}
       onClick={() => handleProductClick(product)}
     >
       <div className="flex flex-col lg:flex-row">
@@ -1861,9 +1895,11 @@ return (
               </div>
               <div className="w-full bg-gray-700/30 rounded-full h-2">
                 <div
-                  className="h-2 rounded-full transition-all duration-300 bg-gradient-to-r from-blue-400 via-blue-500 to-cyan-400"
+                  className="h-2 rounded-full transition-all duration-300"
                   style={{
-                    width: `${(product.intensity / 10) * 100}%`
+                    width: `${(product.intensity / 10) * 100}%`,
+                    background: 'linear-gradient(90deg, #1D5BC7 0%, #86D1F8 82%, #97E2F8 94.12%, #CAF7FF 100%)',
+                    boxShadow: '0px 1px 17px 0px #86D1F8'
                   }}
                 ></div>
               </div>
@@ -1873,12 +1909,15 @@ return (
           {/* Review Tags */}
           <div className="flex flex-wrap gap-2 mb-4">
             {(product.reviewTags || []).slice(0, 4).map((tag, idx) => {
+              // Remove emojis from label
+              const labelWithoutEmoji = tag.label.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
               return (
                 <span
                   key={tag._id}
-                  className="px-3 py-1.5 text-sm rounded-full font-medium bg-white/5 backdrop-blur-sm border border-blue-400/40 hover:border-2 hover:border-blue-400 transition-all text-white"
+                  className="px-3 py-1.5 text-sm rounded-full font-medium bg-white/5 backdrop-blur-sm border border-blue-400/40 hover:border-2 hover:border-blue-400 transition-all text-white flex items-center gap-2"
                 >
-                  {tag.label}
+                  <img src="/images/dots.png" alt="" className="w-4 h-4" />
+                  {labelWithoutEmoji}
                 </span>
               );
             })}
@@ -1904,8 +1943,12 @@ return (
                     return (
                       <div
                         key={variant._id}
-                       className="relative border border-gray-100/30 rounded-2xl px-4 py-3 bg-black/20 backdrop-blur-sm min-w-[110px]"
-
+                        className="relative px-4 py-3 min-w-[110px]"
+                        style={{
+                          background: 'transparent',
+                          border: '1.26px solid rgba(134, 209, 248, 0.6)',
+                          borderRadius: '14.7px'
+                        }}
                         onClick={(e) => e.stopPropagation()}
                       >
                         <div className="absolute -top-2 -right-2">
@@ -1989,8 +2032,12 @@ return (
                     return (
                       <div
                         key={flavor._id}
-                       className="relative border border-gray-100/30 rounded-2xl px-4 py-3 bg-black/20 backdrop-blur-sm min-w-[110px]"
-
+                        className="relative px-4 py-3 min-w-[110px]"
+                        style={{
+                          background: 'transparent',
+                          border: '1.26px solid rgba(134, 209, 248, 0.6)',
+                          borderRadius: '14.7px'
+                        }}
                         onClick={(e) => e.stopPropagation()}
                       >
                         <div className="absolute -top-2 -right-2">
@@ -2058,7 +2105,15 @@ return (
               {/* Simple product - show only if NO variants AND NO flavors */}
               {(!product.hasVariants || !product.variants || product.variants.length === 0) && 
                (!product.flavors || product.flavors.length === 0 || !product.flavors.some(f => f.isActive)) && (
-                <div className="relative border border-gray-100/30 rounded-2xl px-4 py-3 bg-black/20 backdrop-blur-sm min-w-[120px]" onClick={(e) => e.stopPropagation()}>
+                <div 
+                  className="relative px-4 py-3 min-w-[120px]" 
+                  style={{
+                    background: 'transparent',
+                    border: '1.26px solid rgba(134, 209, 248, 0.6)',
+                    borderRadius: '14.7px'
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <div className="absolute -top-2 -right-2">
                     {(() => {
                       const stock = Number(product.stock || 0);

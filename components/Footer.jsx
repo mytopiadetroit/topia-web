@@ -63,7 +63,7 @@ function App() {
   return (
     <div>
       {/* Footer Component */}
-      <footer className="text-white" style={{ background: '#060A12', boxShadow: '0 -8px 60px rgba(34, 211, 238, 0.6), 0 -4px 30px rgba(34, 211, 238, 0.4)' }}>
+      <footer className="text-white" style={{ background: '#060A12', boxShadow: '0 -8px 60px rgba(134, 209, 248, 0.6), 0 -4px 30px rgba(134, 209, 248, 0.4)' }}>
         <div className="container mx-auto px-6 py-16">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             

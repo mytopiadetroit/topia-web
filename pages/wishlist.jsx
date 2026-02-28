@@ -305,7 +305,11 @@ export default function WishlistPage() {
                 return (
                   <div key={product._id} className="w-full">
                     <div
-                      className="relative rounded-3xl border border-gray-800/40 hover:border-gray-700/60 transition-all bg-white/5 backdrop-blur-[1px] overflow-hidden w-full max-w-4xl mx-auto"
+                      className="relative rounded-3xl overflow-hidden w-full max-w-4xl mx-auto cursor-pointer"
+                      style={{
+                        background: 'rgba(20, 20, 20, 0.4)',
+                        border: '1.2px solid rgba(134, 209, 248, 0.2)'
+                      }}
                       onClick={() => router.push(`/productdetails?id=${product._id}`)}
                     >
                       <div className="flex flex-col lg:flex-row">
@@ -352,9 +356,11 @@ export default function WishlistPage() {
                               </div>
                               <div className="w-full bg-gray-700/30 rounded-full h-2">
                                 <div 
-                                  className="h-2 rounded-full transition-all duration-300 bg-gradient-to-r from-blue-400 via-blue-500 to-cyan-400"
+                                  className="h-2 rounded-full transition-all duration-300"
                                   style={{ 
-                                    width: `${(product.intensity / 10) * 100}%`
+                                    width: `${(product.intensity / 10) * 100}%`,
+                                    background: 'linear-gradient(90deg, #1D5BC7 0%, #86D1F8 82%, #97E2F8 94.12%, #CAF7FF 100%)',
+                                    boxShadow: '0px 1px 17px 0px #86D1F8'
                                   }}
                                 ></div>
                               </div>
@@ -366,12 +372,15 @@ export default function WishlistPage() {
                             {(product.reviewTags || []).slice(0, 4).map((tagId, idx) => {
                               const tagName = getTagName(tagId);
                               if (!tagName) return null;
+                              // Remove emojis from tag name
+                              const labelWithoutEmoji = tagName.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
                               return (
                                 <span 
                                   key={tagId}
-                                  className="px-3 py-1.5 text-sm rounded-full font-medium bg-white/5 backdrop-blur-sm border border-blue-400/40 hover:border-2 hover:border-blue-400 transition-all text-white"
+                                  className="px-3 py-1.5 text-sm rounded-full font-medium bg-white/5 backdrop-blur-sm border border-blue-400/40 hover:border-2 hover:border-blue-400 transition-all text-white flex items-center gap-2"
                                 >
-                                  {tagName}
+                                  <img src="/images/dots.png" alt="" className="w-4 h-4" />
+                                  {labelWithoutEmoji}
                                 </span>
                               );
                             })}
@@ -394,7 +403,12 @@ export default function WishlistPage() {
                                 return (
                                   <div 
                                     key={variant._id} 
-                                    className="relative border-2 border-gray-700/50 rounded-2xl px-4 py-3 bg-white/10 backdrop-blur-sm min-w-[120px]"
+                                    className="relative px-4 py-3 min-w-[110px]"
+                                    style={{
+                                      background: 'transparent',
+                                      border: '1.26px solid rgba(134, 209, 248, 0.6)',
+                                      borderRadius: '14.7px'
+                                    }}
                                     onClick={(e) => e.stopPropagation()}
                                   >
                                     {/* Add to Cart Button - Top Right */}
@@ -490,7 +504,11 @@ export default function WishlistPage() {
                 return (
                   <div key={product._id} className="w-full">
                     <div
-                      className="relative rounded-3xl border border-gray-800/40 hover:border-gray-700/60 transition-all bg-white/5 backdrop-blur-[1px] overflow-hidden w-full max-w-4xl mx-auto"
+                      className="relative rounded-3xl overflow-hidden w-full max-w-4xl mx-auto cursor-pointer"
+                      style={{
+                        background: 'rgba(20, 20, 20, 0.4)',
+                        border: '1.2px solid rgba(134, 209, 248, 0.2)'
+                      }}
                       onClick={() => router.push(`/productdetails?id=${product._id}`)}
                     >
                       <div className="flex flex-col lg:flex-row">
@@ -538,9 +556,11 @@ export default function WishlistPage() {
                               </div>
                               <div className="w-full bg-gray-700/30 rounded-full h-2">
                                 <div 
-                                  className="h-2 rounded-full transition-all duration-300 bg-gradient-to-r from-blue-400 via-blue-500 to-cyan-400"
+                                  className="h-2 rounded-full transition-all duration-300"
                                   style={{ 
-                                    width: `${(product.intensity / 10) * 100}%`
+                                    width: `${(product.intensity / 10) * 100}%`,
+                                    background: 'linear-gradient(90deg, #1D5BC7 0%, #86D1F8 82%, #97E2F8 94.12%, #CAF7FF 100%)',
+                                    boxShadow: '0px 1px 17px 0px #86D1F8'
                                   }}
                                 ></div>
                               </div>
@@ -552,12 +572,15 @@ export default function WishlistPage() {
                             {(product.reviewTags || []).slice(0, 4).map((tagId, idx) => {
                               const tagName = getTagName(tagId);
                               if (!tagName) return null;
+                              // Remove emojis from tag name
+                              const labelWithoutEmoji = tagName.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
                               return (
                                 <span 
                                   key={tagId}
-                                  className="px-3 py-1.5 text-sm rounded-full font-medium bg-white/5 backdrop-blur-sm border border-blue-400/40 hover:border-2 hover:border-blue-400 transition-all text-white"
+                                  className="px-3 py-1.5 text-sm rounded-full font-medium bg-white/5 backdrop-blur-sm border border-blue-400/40 hover:border-2 hover:border-blue-400 transition-all text-white flex items-center gap-2"
                                 >
-                                  {tagName}
+                                  <img src="/images/dots.png" alt="" className="w-4 h-4" />
+                                  {labelWithoutEmoji}
                                 </span>
                               );
                             })}
@@ -580,7 +603,12 @@ export default function WishlistPage() {
                                 return (
                                   <div 
                                     key={flavor._id} 
-                                    className="relative border-2 border-gray-700/50 rounded-2xl px-4 py-3 bg-white/10 backdrop-blur-sm min-w-[120px]"
+                                    className="relative px-4 py-3 min-w-[110px]"
+                                    style={{
+                                      background: 'transparent',
+                                      border: '1.26px solid rgba(134, 209, 248, 0.6)',
+                                      borderRadius: '14.7px'
+                                    }}
                                     onClick={(e) => e.stopPropagation()}
                                   >
                                     {/* Add to Cart Button - Top Right */}
@@ -679,7 +707,11 @@ export default function WishlistPage() {
               return (
                 <div
                   key={product._id || product.id}
-                  className="relative rounded-3xl border border-gray-800/40 hover:border-gray-700/60 transition-all bg-white/5 backdrop-blur-[1px] overflow-hidden w-full max-w-4xl mx-auto"
+                  className="relative rounded-3xl overflow-hidden w-full max-w-4xl mx-auto cursor-pointer"
+                  style={{
+                    background: 'rgba(20, 20, 20, 0.4)',
+                    border: '1.2px solid rgba(134, 209, 248, 0.2)'
+                  }}
                   onClick={() => router.push(`/productdetails?id=${product._id || product.id}`)}
                 >
                   <div className="flex flex-col md:flex-row">

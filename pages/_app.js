@@ -46,7 +46,6 @@ function AppContent({ Component, pageProps }) {
       return;
     }
 
-    // Skip if still loading
     if (loading) {
       console.log('App loading, skipping redirection check');
       return;
@@ -57,17 +56,16 @@ function AppContent({ Component, pageProps }) {
         const status = await checkUserStatus();
         console.log('User status from API:', status);
         
-        // Allow suspended users to access these pages
+    
         const allowedPagesForSuspended = ['/suspend', '/terms', '/privacypolicy', '/contact'];
         const isAllowedPage = allowedPagesForSuspended.includes(router.pathname);
         
-        // Only redirect to suspend page if user is logged in AND status is 'suspend'
-        // and not already on an allowed page
+        
         if (isLoggedIn && status === 'suspend' && !isAllowedPage) {
           console.log('User is suspended, redirecting to suspend page');
           router.push('/suspend');
         }
-        // If user is not suspended and somehow on suspend page, redirect them away
+      
         else if (isLoggedIn && status !== 'suspend' && router.pathname === '/suspend') {
           console.log('User is not suspended, redirecting to home');
           router.push('/');
@@ -121,7 +119,7 @@ export default function App({ Component, pageProps }) {
     img.onerror = () => {
       console.error('❌ Failed to load background image: /images/bgimage.png');
     };
-    img.src = '/images/bgimage.png';
+    img.src = '/bgimage.png';
   }, []);
 
   useEffect(() => {

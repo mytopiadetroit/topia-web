@@ -21,12 +21,43 @@
 
 body {
   font-family: var(--font-poppins), sans-serif;
-  background-image: url('/images/bgimage.png') !important;
+  background-image: url('/newbg.png') !important;
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
   background-attachment: fixed !important;
   min-height: 100vh !important;
+  -webkit-backface-visibility: hidden !important;
+  backface-visibility: hidden !important;
+  -webkit-perspective: 1000 !important;
+  perspective: 1000 !important;
+}
+
+/* Custom checkbox styling */
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: transparent !important;
+  border: 1.5px solid rgba(134, 209, 248, 0.5) !important;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  position: relative;
+}
+
+input[type="checkbox"]:checked {
+  background-color: transparent !important;
+  border-color: #86D1F8 !important;
+}
+
+input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  color: #86D1F8;
+  font-size: 14px;
+  font-weight: bold;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 /* Tawk.io widget positioning adjustment */

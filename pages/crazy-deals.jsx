@@ -46,7 +46,7 @@ export default function CrazyDeals() {
         
         if (newTimeLeft.total <= 0) {
           clearInterval(timer);
-          loadActiveDeals(); // Refresh deals when timer expires
+          loadActiveDeals();
         }
       }, 1000);
 
@@ -81,49 +81,88 @@ export default function CrazyDeals() {
     }
 
     return (
-      <div className="bg-white/5 backdrop-blur-[2px] p-6 rounded-2xl border-[0.5px] border-gray-100/30">
+      <div 
+        className="p-6 rounded-2xl relative"
+        style={{
+          background: 'rgba(20, 20, 20, 0.4)',
+          border: '0.8px solid #86D1F8'
+        }}
+      >
         <div className="flex items-center justify-center gap-2 mb-4">
-          <Clock className="w-5 h-5 text-[#80A6F7] animate-pulse" />
-          <span className="text-[#80A6F7] font-bold text-sm uppercase tracking-widest">Ends In</span>
+          <Clock className="w-5 h-5 text-white animate-pulse" />
+          <span className="text-white font-bold text-sm uppercase tracking-widest">Ends In</span>
         </div>
         
         <div className="flex items-center justify-center gap-3">
           {timeLeft.days > 0 && (
             <>
-              <div className="flex flex-col items-center bg-[rgba(30,58,138,0.3)] backdrop-blur-sm rounded-xl px-4 py-3 min-w-[70px] border border-blue-900/20">
+              <div 
+                className="flex flex-col items-center rounded-xl px-4 py-3 min-w-[70px]"
+                style={{
+                  background: 'transparent',
+                  border: '1.26px solid rgba(134, 209, 248, 0.6)',
+                  borderRadius: '14.7px'
+                }}
+              >
                 <span className="text-3xl font-black text-white leading-none">
                   {String(timeLeft.days).padStart(2, '0')}
                 </span>
                 <span className="text-xs font-semibold text-white/90 uppercase mt-1">Days</span>
               </div>
-              <span className="text-3xl font-bold text-orange-500 animate-pulse">:</span>
+              <span className="text-3xl font-bold animate-pulse" style={{ color: '#86D1F8' }}>:</span>
             </>
           )}
           
-          <div className="flex flex-col items-center bg-[rgba(30,58,138,0.3)] backdrop-blur-sm rounded-xl px-4 py-3 min-w-[70px] border border-blue-900/20">
+          <div 
+            className="flex flex-col items-center rounded-xl px-4 py-3 min-w-[70px]"
+            style={{
+              background: 'transparent',
+              border: '1.26px solid rgba(134, 209, 248, 0.6)',
+              borderRadius: '14.7px'
+            }}
+          >
             <span className="text-3xl font-black text-white leading-none">
               {String(timeLeft.hours).padStart(2, '0')}
             </span>
             <span className="text-xs font-semibold text-white/90 uppercase mt-1">Hours</span>
           </div>
           
-          <span className="text-3xl font-bold text-orange-500 animate-pulse">:</span>
+          <span className="text-3xl font-bold animate-pulse" style={{ color: '#86D1F8' }}>:</span>
           
-          <div className="flex flex-col items-center bg-[rgba(30,58,138,0.3)] backdrop-blur-sm rounded-xl px-4 py-3 min-w-[70px] border border-blue-900/20">
+          <div 
+            className="flex flex-col items-center rounded-xl px-4 py-3 min-w-[70px]"
+            style={{
+              background: 'transparent',
+              border: '1.26px solid rgba(134, 209, 248, 0.6)',
+              borderRadius: '14.7px'
+            }}
+          >
             <span className="text-3xl font-black text-white leading-none">
               {String(timeLeft.minutes).padStart(2, '0')}
             </span>
             <span className="text-xs font-semibold text-white/90 uppercase mt-1">Mins</span>
           </div>
           
-          <span className="text-3xl font-bold text-orange-500 animate-pulse">:</span>
+          <span className="text-3xl font-bold animate-pulse" style={{ color: '#86D1F8' }}>:</span>
           
-          <div className="flex flex-col items-center bg-[rgba(30,58,138,0.3)] backdrop-blur-sm rounded-xl px-4 py-3 min-w-[70px] border border-blue-900/20">
+          <div 
+            className="flex flex-col items-center rounded-xl px-4 py-3 min-w-[70px]"
+            style={{
+              background: 'transparent',
+              border: '1.26px solid rgba(134, 209, 248, 0.6)',
+              borderRadius: '14.7px'
+            }}
+          >
             <span className="text-3xl font-black text-white leading-none">
               {String(timeLeft.seconds).padStart(2, '0')}
             </span>
             <span className="text-xs font-semibold text-white/90 uppercase mt-1">Secs</span>
           </div>
+        </div>
+        
+        {/* Bottom Center Image */}
+        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2">
+          <img src="/images/endinline.png" alt="" className="h-10 w-auto" />
         </div>
       </div>
     );
@@ -183,9 +222,7 @@ export default function CrazyDeals() {
       </div>
 
       {/* Hero Section */}
-      <div 
-        className="relative text-white py-24 overflow-hidden"
-      >
+      <div className="relative text-white py-16 overflow-hidden">
         {/* Cosmic Glow Effect */}
         <div 
           className="absolute right-0 top-1/4 w-1/2 h-1/2 opacity-20 blur-3xl pointer-events-none"
@@ -197,42 +234,45 @@ export default function CrazyDeals() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 text-center">
           {/* Main Heading */}
           <div className="flex items-center justify-center gap-4 mb-4">
-            <Flame className="w-14 h-14 md:w-16 md:h-16 animate-bounce text-yellow-300" />
-            <h1 className="text-5xl md:text-7xl font-black tracking-tight">
-              CRAZY DEALS
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
+              DEAL OF THE WEEK
             </h1>
-            <Flame className="w-14 h-14 md:w-16 md:h-16 animate-bounce text-yellow-300" />
           </div>
           
           {/* Feature Badges */}
           <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4 text-sm md:text-base font-semibold mb-10">
-            <span className="bg-white/10 backdrop-blur-sm border border-[rgba(77,163,255,0.4)] px-4 py-2 rounded-full">⚡ Limited Time</span>
+            <span className="bg-transparent backdrop-blur-sm border border-[rgba(77,163,255,0.4)] px-4 py-2 rounded-full flex items-center gap-2">
+              <img src="/images/creazydots.png" alt="" className="w-4 h-4" />
+              Limited Time
+            </span>
             <span className="hidden md:inline text-white/60">•</span>
-            <span className="bg-white/10 backdrop-blur-sm border border-[rgba(77,163,255,0.4)] px-4 py-2 rounded-full">💰 Unbeatable Prices</span>
+            <span className="bg-transparent backdrop-blur-sm border border-[rgba(77,163,255,0.4)] px-4 py-2 rounded-full flex items-center gap-2">
+              <img src="/images/creazydots.png" alt="" className="w-4 h-4" />
+              Unbeatable Prices
+            </span>
             <span className="hidden md:inline text-white/60">•</span>
-            <span className="bg-white/10 backdrop-blur-sm border border-[rgba(77,163,255,0.4)] px-4 py-2 rounded-full">🎯 Don't Miss Out</span>
+            <span className="bg-transparent backdrop-blur-sm border border-[rgba(77,163,255,0.4)] px-4 py-2 rounded-full flex items-center gap-2">
+              <img src="/images/creazydots.png" alt="" className="w-4 h-4" />
+              Don't Miss Out
+            </span>
           </div>
 
-          {/* Deal Info & Timer */}
+          {/* ✅ UPDATED ORDER: Discount Badge + Timer PEHLE, phir Buttons, phir Title + Description */}
           {selectedDeal && (
             <div className="max-w-6xl mx-auto space-y-6">
-              {/* Deal Name */}
-              <div>
-                <h2 className="text-3xl md:text-5xl font-black text-white mb-3 uppercase tracking-wide">
-                  🔥 {selectedDeal.title}
-                </h2>
-                {selectedDeal.description && (
-                  <p className="text-white/90 text-base md:text-lg font-medium max-w-3xl mx-auto">
-                    {selectedDeal.description}
-                  </p>
-                )}
-              </div>
 
-              {/* Discount & Timer Row */}
-              <div className="flex flex-col md:flex-row items-center justify-center gap-8 pt-4">
+              {/* 1️⃣ Discount Badge + Timer - UPAR */}
+              <div className="flex flex-col md:flex-row items-center justify-center gap-8">
                 {/* Discount Badge */}
                 <div className="relative flex-shrink-0">
-                  <div className="relative bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-3xl text-center shadow-[0_0_30px_rgba(77,163,255,0.6)] border-2 border-[rgba(77,163,255,0.8)] glow-border">
+                  <div 
+                    className="relative text-white px-8 py-4 text-center"
+                    style={{
+                      background: 'transparent',
+                      border: '1.26px solid rgba(134, 209, 248, 0.6)',
+                      borderRadius: '14.7px'
+                    }}
+                  >
                     <div className="text-4xl font-black leading-none mb-2 relative z-10">
                       {selectedDeal.discountType === 'percentage' 
                         ? `${selectedDeal.discountPercentage}%` 
@@ -247,6 +287,35 @@ export default function CrazyDeals() {
                   <CountdownTimer endDate={selectedDeal.endDate} />
                 </div>
               </div>
+
+              {/* 2️⃣ Title + Description - BEECH MEIN */}
+              <div className="pt-4">
+                <h2 className="text-3xl md:text-5xl font-black text-white mb-3 uppercase tracking-wide">
+                  🔥 {selectedDeal.title}
+                </h2>
+                {selectedDeal.description && (
+                  <p className="text-white/90 text-base md:text-lg font-medium max-w-3xl mx-auto">
+                    {selectedDeal.description}
+                  </p>
+                )}
+              </div>
+
+              {/* 3️⃣ Action Buttons - NEECHE */}
+              <div className="flex flex-wrap items-center justify-center gap-4">
+                <button
+                  onClick={() => router.push('/menu')}
+                  className="bg-white text-black px-12 py-3 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all shadow-lg"
+                >
+                  SHOP DEALS
+                </button>
+                <button
+                  onClick={() => router.push('/menu')}
+                  className="bg-transparent border-1 border-gray-400 text-white px-14 py-3 rounded-xl font-bold text-lg hover:bg-white/10 transition-all"
+                >
+                  VIEW ELIGIBLE STRAINS
+                </button>
+              </div>
+
             </div>
           )}
         </div>
@@ -255,31 +324,24 @@ export default function CrazyDeals() {
       {/* Deals Section */}
       <div className="max-w-6xl mx-auto px-4 py-12">
         {deals.map((deal) => {
-          // Helper function to check if a variant is on sale
           const isVariantOnSale = (productId, variantId) => {
             if (!deal.dealItems || deal.dealItems.length === 0) {
-              // Old format: all products are on sale
               return deal.products.some(p => p._id === productId);
             }
-            // New format: check specific variants
             return deal.dealItems.some(
               item => item.product._id === productId && item.variantId && item.variantId.toString() === variantId.toString()
             );
           };
 
-          // Helper function to check if a flavor is on sale
           const isFlavorOnSale = (productId, flavorId) => {
             if (!deal.dealItems || deal.dealItems.length === 0) {
-              // Old format: all products are on sale
               return deal.products.some(p => p._id === productId);
             }
-            // New format: check specific flavors
             return deal.dealItems.some(
               item => item.product._id === productId && item.flavorId && item.flavorId.toString() === flavorId.toString()
             );
           };
 
-          // Get unique products from dealItems
           const productsToShow = deal.dealItems && deal.dealItems.length > 0
             ? [...new Set(deal.dealItems.map(item => item.product._id))].map(productId => 
                 deal.dealItems.find(item => item.product._id === productId).product
@@ -288,12 +350,10 @@ export default function CrazyDeals() {
 
           return (
             <div key={deal._id} className="mb-16">
-              {/* Products List - Single Column like Menu */}
               <div className="space-y-6">
                 {productsToShow.map((product) => {
                 const hasVariants = product.hasVariants && product.variants && product.variants.length > 0;
                 
-                // Calculate discount based on deal type
                 const calculateDiscountedPrice = (originalPrice) => {
                   if (deal.discountType === 'percentage') {
                     return originalPrice - (originalPrice * deal.discountPercentage / 100);
@@ -314,7 +374,11 @@ export default function CrazyDeals() {
                   return (
                     <div
                       key={product._id}
-                      className="relative rounded-3xl border border-gray-800/40 hover:border-gray-700/60 transition-all bg-white/5 backdrop-blur-[1px] overflow-hidden cursor-pointer w-full max-w-4xl mx-auto"
+                      className="relative rounded-3xl overflow-hidden cursor-pointer w-full max-w-4xl mx-auto"
+                      style={{
+                        background: 'rgba(20, 20, 20, 0.4)',
+                        border: '1.2px solid rgba(134, 209, 248, 0.2)'
+                      }}
                       onClick={() => router.push(`/productdetails?id=${product._id}`)}
                     >
                       {/* Discount Badge */}
@@ -323,9 +387,7 @@ export default function CrazyDeals() {
                         {getDiscountDisplay()} OFF
                       </div>
 
-                      {/* Horizontal Layout */}
                       <div className="flex flex-col lg:flex-row">
-                        {/* Image */}
                         <div className="w-full lg:w-2/5 h-64 lg:h-80 bg-gray-100 relative">
                           {product.images && product.images.length > 0 && (
                             <img
@@ -336,11 +398,9 @@ export default function CrazyDeals() {
                           )}
                         </div>
 
-                        {/* Details */}
                         <div className="w-full lg:w-3/5 p-6">
                           <h3 className="text-2xl font-bold text-white mb-2">{product.name}</h3>
 
-                          {/* Intensity Bar */}
                           {product.intensity && (
                             <div className="mb-4">
                               <div className="flex items-center justify-between mb-2">
@@ -351,40 +411,33 @@ export default function CrazyDeals() {
                               </div>
                               <div className="w-full bg-gray-700/30 rounded-full h-2">
                                 <div
-                                  className="h-2 rounded-full transition-all duration-300 bg-gradient-to-r from-blue-400 via-blue-500 to-cyan-400"
+                                  className="h-2 rounded-full transition-all duration-300"
                                   style={{
-                                    width: `${(product.intensity / 10) * 100}%`
+                                    width: `${(product.intensity / 10) * 100}%`,
+                                    background: 'linear-gradient(90deg, #1D5BC7 0%, #86D1F8 82%, #97E2F8 94.12%, #CAF7FF 100%)',
+                                    boxShadow: '0px 1px 17px 0px #86D1F8'
                                   }}
                                 ></div>
                               </div>
                             </div>
                           )}
 
-                          {/* Review Tags */}
                           {product.reviewTags && product.reviewTags.length > 0 && (
                             <div className="flex flex-wrap gap-2 mb-4">
                               {product.reviewTags.slice(0, 4).map((tag, idx) => {
-                                const colors = [
-                                  { bg: '#3B82F6', color: '#FFFFFF' },  // Blue
-                                  { bg: '#8B5CF6', color: '#FFFFFF' },  // Purple
-                                  { bg: '#EC4899', color: '#FFFFFF' },  // Pink
-                                  { bg: '#10B981', color: '#FFFFFF' },  // Green
-                                ];
-                                const color = colors[idx % colors.length];
                                 return (
                                   <span
                                     key={tag._id}
-                                    className="px-3 py-1.5 text-sm rounded-full font-medium"
-                                    style={{ backgroundColor: color.bg, color: color.color }}
+                                    className="px-3 py-1.5 text-sm rounded-full font-medium bg-white/5 backdrop-blur-sm border border-blue-400/40 hover:border-2 hover:border-blue-400 transition-all text-white flex items-center gap-2"
                                   >
-                                    {tag.label}
+                                    <img src="/images/dots.png" alt="" className="w-4 h-4" />
+                                    {tag.label.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim()}
                                   </span>
                                 );
                               })}
                             </div>
                           )}
 
-                          {/* Variants */}
                           <div className="mt-4">
                             <div className="flex flex-wrap items-center gap-3">
                             {product.variants.filter(variant => isVariantOnSale(product._id, variant._id)).map((variant) => {
@@ -398,10 +451,14 @@ export default function CrazyDeals() {
                               return (
                                 <div
                                   key={variant._id}
-                                  className="relative border border-gray-100/30 rounded-2xl px-4 py-3 bg-black/20 backdrop-blur-sm min-w-[110px]"
+                                  className="relative px-4 py-3 min-w-[110px]"
+                                  style={{
+                                    background: 'transparent',
+                                    border: '1.26px solid rgba(134, 209, 248, 0.6)',
+                                    borderRadius: '14.7px'
+                                  }}
                                   onClick={(e) => e.stopPropagation()}
                                 >
-                                  {/* Add to Cart Button */}
                                   <div className="absolute -top-2 -right-2">
                                     {isInCart ? (
                                       <div className="flex items-center border border-gray-200 rounded-full bg-white">
@@ -467,7 +524,6 @@ export default function CrazyDeals() {
                                     )}
                                   </div>
 
-                                  {/* Size and Price */}
                                   <div className="flex flex-col">
                                     <span className="text-sm font-bold text-white">
                                       {variant.size.value}{variant.size.unit === 'grams' ? 'G' : variant.size.unit}
@@ -492,25 +548,26 @@ export default function CrazyDeals() {
                   );
                 }
 
-                // Handle flavors or simple products
                 const hasFlavors = product.flavors && product.flavors.length > 0 && product.flavors.some(f => f.isActive);
                 
                 if (hasFlavors) {
                   return (
                     <div
                       key={product._id}
-                      className="relative rounded-3xl border border-gray-800/40 hover:border-gray-700/60 transition-all bg-white/5 backdrop-blur-[1px] overflow-hidden cursor-pointer w-full max-w-4xl mx-auto"
+                      className="relative rounded-3xl overflow-hidden cursor-pointer w-full max-w-4xl mx-auto"
+                      style={{
+                        background: 'rgba(20, 20, 20, 0.4)',
+                        border: '1.2px solid rgba(134, 209, 248, 0.2)'
+                      }}
                       onClick={() => router.push(`/productdetails?id=${product._id}`)}
                     >
                       {/* Discount Badge */}
-                      <div className="absolute top-4 left-4 z-20 bg-gradient-to-r from-[#80A6F7] to-[#80A6F7]  text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-2">
+                      <div className="absolute top-4 left-4 z-20 bg-gradient-to-r from-[#80A6F7] to-[#80A6F7] text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-2">
                         <Tag className="w-4 h-4" />
                         {getDiscountDisplay()} OFF
                       </div>
 
-                      {/* Horizontal Layout */}
                       <div className="flex flex-col lg:flex-row">
-                        {/* Image */}
                         <div className="w-full lg:w-2/5 h-64 lg:h-80 bg-gray-100 relative">
                           {product.images && product.images.length > 0 && (
                             <img
@@ -521,11 +578,9 @@ export default function CrazyDeals() {
                           )}
                         </div>
 
-                        {/* Details */}
                         <div className="w-full lg:w-3/5 p-6">
                           <h3 className="text-2xl font-bold text-white mb-2">{product.name}</h3>
 
-                          {/* Intensity Bar */}
                           {product.intensity && (
                             <div className="mb-4">
                               <div className="flex items-center justify-between mb-2">
@@ -536,40 +591,33 @@ export default function CrazyDeals() {
                               </div>
                               <div className="w-full bg-gray-700/30 rounded-full h-2">
                                 <div
-                                  className="h-2 rounded-full transition-all duration-300 bg-gradient-to-r from-blue-400 via-blue-500 to-cyan-400"
+                                  className="h-2 rounded-full transition-all duration-300"
                                   style={{
-                                    width: `${(product.intensity / 10) * 100}%`
+                                    width: `${(product.intensity / 10) * 100}%`,
+                                    background: 'linear-gradient(90deg, #1D5BC7 0%, #86D1F8 82%, #97E2F8 94.12%, #CAF7FF 100%)',
+                                    boxShadow: '0px 1px 17px 0px #86D1F8'
                                   }}
                                 ></div>
                               </div>
                             </div>
                           )}
 
-                          {/* Review Tags */}
                           {product.reviewTags && product.reviewTags.length > 0 && (
                             <div className="flex flex-wrap gap-2 mb-4">
                               {product.reviewTags.slice(0, 4).map((tag, idx) => {
-                                const colors = [
-                                  { bg: '#3B82F6', color: '#FFFFFF' },  // Blue
-                                  { bg: '#8B5CF6', color: '#FFFFFF' },  // Purple
-                                  { bg: '#EC4899', color: '#FFFFFF' },  // Pink
-                                  { bg: '#10B981', color: '#FFFFFF' },  // Green
-                                ];
-                                const color = colors[idx % colors.length];
                                 return (
                                   <span
                                     key={tag._id}
-                                    className="px-3 py-1.5 text-sm rounded-full font-medium"
-                                    style={{ backgroundColor: color.bg, color: color.color }}
+                                    className="px-3 py-1.5 text-sm rounded-full font-medium bg-white/5 backdrop-blur-sm border border-blue-400/40 hover:border-2 hover:border-blue-400 transition-all text-white flex items-center gap-2"
                                   >
-                                    {tag.label}
+                                    <img src="/images/dots.png" alt="" className="w-4 h-4" />
+                                    {tag.label.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim()}
                                   </span>
                                 );
                               })}
                             </div>
                           )}
 
-                          {/* Flavors - Same style as variants */}
                           <div className="mt-4">
                             <div className="flex flex-wrap items-center gap-3">
                               {product.flavors.filter(f => f.isActive && isFlavorOnSale(product._id, f._id)).map((flavor) => {
@@ -583,10 +631,14 @@ export default function CrazyDeals() {
                                 return (
                                   <div
                                     key={flavor._id}
-                                    className="relative border border-gray-100/30 rounded-2xl px-4 py-3 bg-black/20 backdrop-blur-sm min-w-[110px]"
+                                    className="relative px-4 py-3 min-w-[110px]"
+                                    style={{
+                                      background: 'transparent',
+                                      border: '1.26px solid rgba(134, 209, 248, 0.6)',
+                                      borderRadius: '14.7px'
+                                    }}
                                     onClick={(e) => e.stopPropagation()}
                                   >
-                                    {/* Add to Cart Button */}
                                     <div className="absolute -top-2 -right-2">
                                       {isInCart ? (
                                         <div className="flex items-center border border-gray-200 rounded-full bg-white">
@@ -652,7 +704,6 @@ export default function CrazyDeals() {
                                       )}
                                     </div>
 
-                                    {/* Flavor Name and Price */}
                                     <div className="flex flex-col">
                                       <span className="text-sm font-bold text-gray-100">
                                         {flavor.name}
@@ -677,7 +728,6 @@ export default function CrazyDeals() {
                   );
                 }
 
-                // Simple product (no variants, no flavors) - shouldn't show in deals normally
                 return null;
               })}
             </div>
@@ -715,21 +765,18 @@ export default function CrazyDeals() {
           }
         }
         
-        /* Medium sparkles */
         .star:nth-child(3n) {
           width: 3px;
           height: 3px;
           box-shadow: 0 0 6px rgba(124, 198, 255, 0.7);
         }
         
-        /* Larger sparkles */
         .star:nth-child(5n) {
           width: 4px;
           height: 4px;
           box-shadow: 0 0 8px rgba(47, 128, 255, 0.8);
         }
         
-        /* Glow Border Animation */
         .glow-border {
           animation: borderGlow 2s ease-in-out infinite;
         }

@@ -144,9 +144,9 @@ export default function Home() {
     };
     
     loadInitialData();
-  }, [isLoggedIn]); // Re-run when login status changes
+  }, [isLoggedIn]); 
 
-  // Removed duplicate polling - settings are loaded once on mount
+  
 
   const formatTime = (time) => {
     if (!time) return '';
@@ -213,7 +213,7 @@ export default function Home() {
       
  {/* Hero Section */}
 <section 
-  className="relative h-screen flex items-center justify-center overflow-hidden"
+  className="relative min-h-[600px] flex items-center justify-center overflow-hidden py-20"
   style={{
     background: 'transparent'
   }}
@@ -268,19 +268,20 @@ export default function Home() {
   </div>
 </section>
 
-     {/* Content Section */}
+     {/* Content Section - DISCOVER SHROOMTOPIA - COMMENTED OUT */}
+     {/*
 <section className="py-16 px-4" style={{ background: 'transparent' }}>
   <div className="max-w-5xl mx-auto">
-    {/* Discover Shroomtopia Header */}
+    {/* Discover Shroomtopia Header *-/}
     <div className="text-center mb-16">
       <h2 className="text-3xl lg:text-4xl xl:text-5xl font-bold text-white tracking-[0.1em] uppercase">
         DISCOVER SHROOMTOPIA
       </h2>
     </div>
 
-    {/* Mission Card with Background Image */}
+    {/* Mission Card with Background Image *-/}
     <div className="relative rounded-3xl overflow-hidden shadow-2xl">
-      {/* Background Image */}
+      {/* Background Image *-/}
       <div className="absolute inset-0 z-0">
         <Image 
           src={homepageImages.mission}
@@ -289,11 +290,11 @@ export default function Home() {
           fill
           sizes="(max-width: 768px) 100vw, 1200px"
         />
-        {/* Light overlay for better text visibility */}
+        {/* Light overlay for better text visibility *-/}
         <div className="absolute inset-0 bg-black/50"></div>
       </div>
 
-      {/* Mission Content */}
+      {/* Mission Content *-/}
       <div className="relative z-10 py-20 md:py-24 lg:py-28 px-8 md:px-16 lg:px-24 text-center">
         <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-8 tracking-wide uppercase">
           OUR MISSION
@@ -310,6 +311,7 @@ export default function Home() {
     </div>
   </div>
 </section>
+     */}
 
     
       
@@ -359,17 +361,11 @@ export default function Home() {
   </div> */}
 </div>
 
-
-          {/* Second Row */}
+          {/* Second Row - The Topia Circle Section - COMMENTED OUT */}
+          {/*
           <div className="grid relative lg:grid-cols-2 gap-12 items-center ">
-              {/* <div className="absolute inset-0 z-0 flex justify-center items-center pointer-events-none">
-    <div className="w-full h-full bg-[url('/images/over.png')] bg-no-repeat bg-center bg-contain"></div>
-  </div> */}
-            {/* Left Image - Rounded Rectangle */}
             <div className="order-2  lg:order-1">
-              
               <div className="relative">
-                
                 <Image 
                   src={homepageImages.circle}
                   alt="Wellness products and tools"
@@ -378,40 +374,20 @@ export default function Home() {
                   height={400}
                 />
               </div>
-                     
             </div>
-   
-
-            {/* Right Content */}
             <div className="order-1  lg:order-2">
-                          
-              <div
-                className=" rounded-4xl p-8 lg:p-10 relative"
-                style={{
-                 
-                }}
-              >
-                
-                {/* Badge */}
-                {/* <div className="absolute -top-10 -right-1">
-                <Image src='/images/offer.png' alt="Special offer badge" width={150} height={150} />
-                </div> */}
-                
+              <div className=" rounded-4xl p-8 lg:p-10 relative">
                 <div className="mb-4">
-                  {/* <span className="text-sm text-gray-600 font-medium">Elevate Your Membership</span> */}
                 </div>
-                
                 <h3 className="text-3xl lg:text-4xl font-bold text-white mb-6">
                  The Topia 
 <br />
                 Circle  
                 </h3>
-                
                 <p className="text-gray-300 text-lg mb-8 leading-relaxed">
                  Step into a world of wellness, where exclusive rewards,  <br />
-                 personalized benefits, and a community of growth await.
+                 personalized benefits, and a community of growth await.
                 </p>
-                
                 {profileLoading ? (
                   <div className="flex items-center space-x-2">
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600"></div>
@@ -440,6 +416,99 @@ export default function Home() {
                     Join Now 
                   </button>
                 )}
+              </div>
+            </div>
+          </div>
+          */}
+
+          {/* New Images Section - Replacing Topia Circle */}
+          <div className="grid lg:grid-cols-2 gap-8 items-center my-12">
+            <div className="relative min-h-[400px] overflow-hidden rounded-lg">
+              <Image 
+                src="/images/mission.png"
+                alt="Mission Image"
+                className="w-full object-cover rounded-lg"
+                width={600}
+                height={400}
+              />
+              {/* Bottom Border Line - Mission */}
+              <div className="hidden md:block absolute -bottom-6 md:-bottom-11 left-1/2 transform -translate-x-1/2 w-48 md:w-80 h-12 md:h-24">
+                <Image 
+                  src="/linessss.png"
+                  alt="Decorative line"
+                  width={1224}
+                  height={200}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              {/* Text Overlay on Mission Image */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center rounded-lg px-4 md:px-6 pt-8 md:pt-28">
+                <p className="text-white leading-relaxed max-w-md mx-auto text-center mb-6 md:mb-12 text-sm md:text-[22px]">
+                  At SHROOMTOPIA, we are dedicated to enhancing your wellness journey through the power of therapeutic mushrooms. We believe in blending nature&apos;s gifts with modern lifestyles to promote creativity, relaxation, and enjoyment.
+                </p>
+                <button 
+                  onClick={() => router.push('/resourcecenter')} 
+                  className="px-4 md:px-10 py-2 md:py-3 rounded-full text-[10px] md:text-base font-semibold uppercase tracking-wider transition-all duration-300 transform hover:scale-105 whitespace-nowrap"
+                  style={{
+                    background: 'linear-gradient(90deg, #86D1F8 0%, #CFEFFF 50%, #86D1F8 100%)',
+                    color: '#000',
+                    boxShadow: '0 4px 15px rgba(134, 209, 248, 0.5)'
+                  }}
+                >
+                  <span className="hidden md:inline">ACCESS THE RESOURCE CENTER</span>
+                  <span className="md:hidden">RESOURCE CENTER</span>
+                  <ChevronRight className="inline-block w-3 h-3 md:w-5 md:h-5 ml-1 md:ml-2" />
+                </button>
+              </div>
+            </div>
+            <div className="relative min-h-[400px] overflow-hidden rounded-lg">
+              <Image 
+                src="/images/topianew.png"
+                alt="Topia New"
+                className="w-full object-cover rounded-lg"
+                width={600}
+                height={400}
+              />
+              {/* Bottom Border Line - Topia */}
+              <div className="hidden md:block absolute -bottom-2 md:-bottom-3 left-1/2 transform -translate-x-1/2 w-40 md:w-56 h-8 md:h-8">
+                <Image 
+                  src="/linessss.png"
+                  alt="Decorative line"
+                  width={224}
+                  height={32}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              {/* Text Overlay on Topia New Image */}
+              <div className="absolute inset-0 flex items-center justify-center rounded-lg px-4 md:px-6 pt-0 md:pt-0">
+                <p className="text-white leading-relaxed mx-auto text-center text-sm md:text-[22px] max-w-[280px] md:max-w-md">
+                  Step into a world of wellness, where exclusive rewards, personalized benefits, and a community of growth await.
+                </p>
+              </div>
+              {/* Button positioned separately - Mobile: 160px, Desktop: 370px */}
+              <div className="absolute inset-0 flex items-center justify-center rounded-lg pt-[160px] md:pt-[370px]">
+                <button 
+                  onClick={() => {
+                    if (userProfile?.subscriptionStatus === 'paused') {
+                      router.push('/profile');
+                    } else {
+                      router.push('/topia-circle');
+                    }
+                  }}
+                  className="px-6 md:px-10 py-2 md:py-3 rounded-full text-xs md:text-base font-semibold uppercase tracking-wider transition-all duration-300 transform hover:scale-105"
+                  style={{
+                    background: 'linear-gradient(90deg, #86D1F8 0%, #CFEFFF 50%, #86D1F8 100%)',
+                    color: '#000',
+                    boxShadow: '0 4px 15px rgba(134, 209, 248, 0.5)'
+                  }}
+                >
+                  {userProfile?.subscriptionStatus === 'paused' 
+                    ? 'SUBSCRIPTION PAUSED' 
+                    : userProfile?.isTopiaCircleMember && userProfile?.subscriptionStatus === 'active' 
+                      ? 'MANAGE SUBSCRIPTION' 
+                      : 'JOIN NOW'}
+                  <ChevronRight className="inline-block w-3 h-3 md:w-5 md:h-5 ml-1 md:ml-2" />
+                </button>
               </div>
             </div>
           </div>
@@ -654,7 +723,7 @@ export default function Home() {
         <span>GET DIRECTIONS</span>
       </button>
 
-      {/* Zoom Controls with Google Maps links */}
+      
       <div className="absolute top-4 right-6 z-20 flex flex-col space-y-2">
         <button
           onClick={() => window.open('https://www.google.com/maps/@42.4455298,-83.1537416,18z', '_blank')}

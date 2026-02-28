@@ -141,6 +141,11 @@ export default function SubscriptionStatus({ user }) {
     )
   }
 
+  // Don't show subscription details if paused
+  if (user?.subscriptionStatus === 'paused') {
+    return null
+  }
+
   return (
     <>
       <div className="bg-white/5 backdrop-blur-[1px] rounded-xl p-6 border border-gray-800/40">
@@ -204,8 +209,8 @@ export default function SubscriptionStatus({ user }) {
       </div>
 
       {showManage && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#0B0F1A] border border-gray-700/50 rounded-xl max-w-2xl w-full max-h-[85vh] flex flex-col">
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+          <div className="bg-[#0B0F1A] border border-gray-700/50 rounded-xl max-w-2xl w-full flex flex-col" style={{ maxHeight: '90vh' }}>
             <div className="flex items-center justify-between p-6 border-b border-gray-700/50 flex-shrink-0">
               <h2 className="text-xl font-semibold text-white">Manage Subscription</h2>
               <button
