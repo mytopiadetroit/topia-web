@@ -185,10 +185,10 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             {/* Logo */}
-            <div className="flex-shrink-0 -ml-4">
+            <div className="flex-shrink-0 -ml-4 md:ml-0">
               <div className="flex items-center space-x-2">
                 <a href="/" className="flex items-center">
-                  <img src="/newlogo.png" alt="Logo" className="h-14 w-auto" />
+                  <span className="text-xl md:text-2xl font-medium text-white uppercase ml-4 md:ml-0">Shroomtopia</span>
                 </a>
               </div>
             </div>
@@ -208,10 +208,7 @@ export default function Navbar() {
                 </button>
                 {hasActiveDeals && isLoggedIn && (
                   <a href="/crazy-deals" className="nav-link relative text-white/70 hover:text-white/70 px-3 py-2 text-sm font-medium transition-all duration-300">
-                    DEALS OF THE WEEK
-                    <span className="absolute -top-2 -right-3 text-[10px] font-bold px-1.5 py-0.5 rounded z-10" style={{ backgroundColor: 'white', color: '#86D1F8' }}>
-                      🔥
-                    </span>
+                    DEALS
                   </a>
                 )}
                 <a href="/resourcecenter" className="nav-link text-white/70 hover:text-white/70 px-3 py-2 text-sm font-medium transition-all duration-300">

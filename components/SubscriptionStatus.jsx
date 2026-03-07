@@ -40,6 +40,25 @@ export default function SubscriptionStatus({ user }) {
     }
   }, [user])
 
+  // Handle body scroll when modal opens/closes
+  useEffect(() => {
+    if (showManage) {
+      // Calculate scrollbar width
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
+      document.documentElement.style.setProperty('--scrollbar-width', `${scrollbarWidth}px`)
+      document.body.classList.add('modal-open')
+    } else {
+      document.body.classList.remove('modal-open')
+      document.documentElement.style.removeProperty('--scrollbar-width')
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      document.body.classList.remove('modal-open')
+      document.documentElement.style.removeProperty('--scrollbar-width')
+    }
+  }, [showManage])
+
   const checkPendingChanges = async () => {
     try {
       const response = await Api('get', 'pending-changes/my-requests', null, router)
@@ -209,8 +228,8 @@ export default function SubscriptionStatus({ user }) {
       </div>
 
       {showManage && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-          <div className="bg-[#0B0F1A] border border-gray-700/50 rounded-xl max-w-2xl w-full flex flex-col" style={{ maxHeight: '90vh' }}>
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-[#0B0F1A] border border-gray-700/50 rounded-xl max-w-2xl w-full flex flex-col my-8" style={{ maxHeight: '90vh' }}>
             <div className="flex items-center justify-between p-6 border-b border-gray-700/50 flex-shrink-0">
               <h2 className="text-xl font-semibold text-white">Manage Subscription</h2>
               <button

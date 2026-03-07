@@ -376,47 +376,7 @@ export default function ProductDetails() {
         </div>
       </div>
 
-      {/* CSS for Stars Animation */}
-      <style jsx>{`
-        .stars-container {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-        }
-        
-        .star {
-          position: absolute;
-          width: 2px;
-          height: 2px;
-          background: white;
-          border-radius: 50%;
-          animation: twinkle linear infinite;
-          box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
-        }
-        
-        @keyframes twinkle {
-          0%, 100% {
-            opacity: 0.2;
-            transform: scale(0.8);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(1.2);
-          }
-        }
-        
-        .star:nth-child(3n) {
-          width: 3px;
-          height: 3px;
-          box-shadow: 0 0 6px rgba(124, 198, 255, 0.7);
-        }
-        
-        .star:nth-child(5n) {
-          width: 4px;
-          height: 4px;
-          box-shadow: 0 0 8px rgba(47, 128, 255, 0.8);
-        }
-      `}</style>
+   
 
       <div className="max-w-7xl mx-auto px-4 py-8 relative z-10">
         {/* Breadcrumb */}
@@ -520,9 +480,11 @@ export default function ProductDetails() {
                 </div>
                 <div className="w-[50%] bg-gray-700/30 rounded-full h-2">
                   <div
-                    className="h-2 rounded-full transition-all duration-300 bg-gradient-to-r from-blue-400 via-blue-500 to-cyan-400"
+                    className="h-2 rounded-full transition-all duration-300"
                     style={{
-                      width: `${(product.intensity / 10) * 100}%`
+                      width: `${(product.intensity / 10) * 100}%`,
+                      background: 'linear-gradient(90deg, #1D5BC7 0%, #86D1F8 82%, #97E2F8 94.12%, #CAF7FF 100%)',
+                      boxShadow: '0px 1px 17px 0px #86D1F8'
                     }}
                   ></div>
                 </div>
@@ -539,15 +501,36 @@ export default function ProductDetails() {
                     const match = label.match(/^[\p{Emoji}\p{Extended_Pictographic}]/u);
                     const emoji = match ? match[0] + ' ' : '';
                     const text = label.replace(/^[\p{Emoji}\p{Extended_Pictographic}]\s*/u, '');
+                    const labelWithoutEmoji = label.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
 
                     return (
-                      <span
-                        key={tag._id}
-                        className="px-3 py-1.5 text-sm rounded-full font-medium bg-white/5 backdrop-blur-sm border border-blue-400/40 hover:border-2 hover:border-blue-400 transition-all text-white flex items-center gap-1"
-                      >
-                        <span className="text-sm">{emoji}</span>
-                        {text}
-                      </span>
+                      <div key={tag._id} className="relative group">
+                        <span
+                          className="px-3 py-1.5 text-sm rounded-full font-medium bg-white/5 backdrop-blur-sm border border-blue-400/40 hover:border-2 hover:border-blue-400 transition-all text-white flex items-center gap-1 cursor-pointer"
+                        >
+                          <img src="/images/dots.png" alt="" className="w-4 h-4" />
+                          {text}
+                        </span>
+                        {/* Tooltip */}
+                        {tag.tooltip && (
+                          <div className="absolute right-0 top-full mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-[9999]">
+                            <div 
+                              className="relative rounded-xl shadow-2xl pt-9 px-5 pb-5" 
+                              style={{ 
+                                minWidth: '240px',
+                                maxWidth: '280px',
+                                minHeight: '120px',
+                                backgroundImage: 'url(/tooltip.png)',
+                                backgroundSize: '100% 100%',
+                                backgroundRepeat: 'no-repeat'
+                              }}
+                            >
+                              <h4 className="text-white font-bold text-base mb-2">{labelWithoutEmoji}</h4>
+                              <p className="text-white/90 text-sm leading-relaxed">{tag.tooltip}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     );
                   })}
                 </div>

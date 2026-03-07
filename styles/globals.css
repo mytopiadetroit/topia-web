@@ -27,10 +27,6 @@ body {
   background-repeat: no-repeat !important;
   background-attachment: fixed !important;
   min-height: 100vh !important;
-  -webkit-backface-visibility: hidden !important;
-  backface-visibility: hidden !important;
-  -webkit-perspective: 1000 !important;
-  perspective: 1000 !important;
 }
 
 /* Custom checkbox styling */
@@ -65,6 +61,12 @@ input[type="checkbox"]:checked::after {
 .tawk-button,
 iframe[title*="chat"] {
   bottom: 70px !important;
+}
+
+/* Prevent body scroll when modal is open */
+body.modal-open {
+  overflow: hidden !important;
+  padding-right: var(--scrollbar-width, 0px) !important;
 }
 
 /* Custom toast styles end */

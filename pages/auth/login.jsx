@@ -244,7 +244,7 @@ const Login = () => {
   const isFormFilled = phoneNumber.length >= 10 && !error && formData.phone;
 
   return (
-    <div className="h-screen flex overflow-hidden relative" style={{ background: 'transparent' }}>
+    <div className="min-h-screen flex items-center justify-center overflow-hidden relative px-4 py-20 md:py-28" style={{ background: 'transparent' }}>
       {/* Animated stars background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="stars-container">
@@ -263,71 +263,53 @@ const Login = () => {
         </div>
       </div>
 
-      {/* CSS for Stars Animation */}
-      <style jsx>{`
-        .stars-container {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-        }
-        
-        .star {
-          position: absolute;
-          width: 2px;
-          height: 2px;
-          background: white;
-          border-radius: 50%;
-          animation: twinkle linear infinite;
-          box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
-        }
-        
-        @keyframes twinkle {
-          0%, 100% {
-            opacity: 0.2;
-            transform: scale(0.8);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(1.2);
-          }
-        }
-        
-        .star:nth-child(3n) {
-          width: 3px;
-          height: 3px;
-          box-shadow: 0 0 6px rgba(124, 198, 255, 0.7);
-        }
-        
-        .star:nth-child(5n) {
-          width: 4px;
-          height: 4px;
-          box-shadow: 0 0 8px rgba(47, 128, 255, 0.8);
-        }
-      `}</style>
 
-      {/* Left Side - Mushroom Image */}
-      <div className="hidden lg:block lg:w-1/2 relative z-10">
-        <img
-          src={loginImage?.image || "/images/auth.png"}
-          alt="Mushroom in forest"
-          className="w-full h-full object-cover"
-        />
-      </div>
+      {/* Main Content Container */}
+      <div className="w-full max-w-2xl relative z-10">
+        
+        {/* Logo Image - Behind and Above Box */}
+        <div className="absolute -top-[180px] md:-top-[200px] lg:-top-[240px] left-1/2 transform -translate-x-1/2 z-0">
+          <img 
+            src="/agelogo.png" 
+            alt="Logo" 
+            className="w-96 h-96 md:w-[28rem] md:h-[28rem] lg:w-[32rem] lg:h-[32rem] object-contain"
+          />
+        </div>
 
-      {/* Right Side - Login Form */}
-      <div className="w-full lg:w-2/3 bg-white/5 backdrop-blur-[1px] flex items-center justify-center p-8 overflow-y-auto relative z-10">
-        <div className="w-full max-w-md">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-5xl font-bold text-white mb-2 break-words">Welcome to your <br /> Topia </h1>
+        {/* Login Card with Background Image */}
+        <div className="relative p-8 md:p-12 overflow-hidden min-h-[420px] md:min-h-[400px]">
+          {/* Background Image */}
+          <div 
+            className="absolute inset-0 z-0 bg-contain md:bg-contain bg-no-repeat"
+            style={{
+              backgroundImage: 'url(/bgage.png)',
+              backgroundSize: '100% 95%',
+              backgroundPosition: 'center top'
+            }}
+          >
+            <style jsx>{`
+              @media (min-width: 768px) {
+                div {
+                  background-size: contain !important;
+                  background-position: center !important;
+                }
+              }
+            `}</style>
           </div>
 
-          <div className="space-y-4">
-            {/* Phone Number Label */}
-            <div className="mb-4">
-              <div className="block text-gray-300 text-sm font-medium mb-3">Check-in with your registered phone number</div>
+          {/* Content Overlay */}
+          <div className="relative z-10 flex flex-col items-center justify-center">
+            {/* Header */}
+            <h1 className="text-xl md:text-2xl lg:text-3xl text-white font-bold text-center mb-3 md:mb-4 uppercase tracking-wide" style={{ textShadow: '2px 2px 8px rgba(0,0,0,0.5)' }}>
+              Welcome to Shroom Topia Detroit
+            </h1>
+            
+            <p className="text-base md:text-lg text-gray-300 text-center mb-6 md:mb-8" style={{ textShadow: '1px 1px 4px rgba(0,0,0,0.5)' }}>
+              Portal to Detroits Largest Mushroom Selection
+            </p>
 
-              {/* Phone Field with react-phone-input-2 */}
+            {/* Phone Input */}
+            <div className="w-full max-w-md mb-4">
               <PhoneInput
                 country={'us'}
                 value={phoneNumber}
@@ -336,7 +318,7 @@ const Login = () => {
                   name: 'phone',
                   required: true,
                   autoFocus: true,
-                  placeholder: 'Enter phone number',
+                  placeholder: '+1',
                   className: 'w-full px-4 py-3 border border-white/30 bg-white/10 rounded-full focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-white placeholder-gray-400 shadow-[0_0_15px_rgba(34,211,238,0.3)]'
                 }}
                 containerClass="w-full"
@@ -372,9 +354,13 @@ const Login = () => {
               />
             </div>
 
+            <p className="text-sm text-gray-300 text-center mb-6" style={{ textShadow: '1px 1px 3px rgba(0,0,0,0.5)' }}>
+              Check in with your registered phone number
+            </p>
+
             {/* Error Message */}
             {error && (
-              <div className="text-red-300 text-sm mb-4">
+              <div className="text-red-300 text-sm mb-4 text-center">
                 {error}
               </div>
             )}
@@ -384,21 +370,32 @@ const Login = () => {
               type="button"
               onClick={handleLogin}
               disabled={loading}
-              className="bg-transparent text-white border-2 border-white/50 hover:border-white font-medium py-3 px-6 rounded-full transition-all duration-200 focus:outline-none shadow-[0_8px_30px_rgba(77,163,255,0.8)] hover:shadow-[0_12px_40px_rgba(77,163,255,1)] transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full max-w-[280px] px-8 py-3 text-white text-base md:text-lg font-bold rounded-full transition-all duration-300 transform hover:scale-105 active:scale-95 uppercase tracking-wider mb-4"
+              style={{
+                background: 'transparent',
+                border: '1px solid #86D1F8',
+                boxShadow: '0 0 10px rgba(134, 209, 248, 0.3)'
+              }}
             >
-              {loading ? 'Checking...' : 'Check-In'}
+              {loading ? 'Checking...' : 'Check - In'}
             </button>
-
-            {/* Footer Text */}
-            <div className="text-center mt-16">
-              <p className="text-gray-300 text-sm">
-                Do not have an account ?
-                <Link href="/auth/register">
-                  <span className="bg-transparent text-white border-2 border-white/50 hover:border-white font-medium cursor-pointer ml-2 px-4 py-2 rounded-full transition-all duration-200 inline-block shadow-[0_8px_30px_rgba(77,163,255,0.8)] hover:shadow-[0_12px_40px_rgba(77,163,255,1)] transform hover:scale-105">Register</span>
-                </Link>
-              </p>
-            </div>
           </div>
+        </div>
+
+        {/* Register Link - Below Box */}
+        <div className="text-center mt-1">
+          <p className="text-white text-base md:text-lg">
+            Do not have an account ?{' '}
+            <Link href="/auth/register">
+              <span className="inline-block px-6 py-2 text-white font-bold rounded-full cursor-pointer transition-all duration-300 transform hover:scale-105" style={{
+                background: 'transparent',
+                border: '1px solid rgba(255, 255, 255, 0.5)',
+                boxShadow: 'none'
+              }}>
+                Register
+              </span>
+            </Link>
+          </p>
         </div>
       </div>
     </div>

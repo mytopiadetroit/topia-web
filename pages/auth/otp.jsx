@@ -101,7 +101,7 @@ const OtpVerification = () => {
   const isFormFilled = otp.length === 6;
 
   return (
-    <div className="h-screen flex overflow-hidden relative" style={{ background: 'transparent' }}>
+    <div className="min-h-screen flex items-center justify-center overflow-hidden relative px-4 py-20 md:py-28" style={{ background: 'transparent' }}>
       {/* Animated stars background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="stars-container">
@@ -120,124 +120,95 @@ const OtpVerification = () => {
         </div>
       </div>
 
-      {/* CSS for Stars Animation */}
-      <style jsx>{`
-        .stars-container {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-        }
+     
+      <div className="w-full max-w-2xl relative z-10">
         
-        .star {
-          position: absolute;
-          width: 2px;
-          height: 2px;
-          background: white;
-          border-radius: 50%;
-          animation: twinkle linear infinite;
-          box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
-        }
-        
-        @keyframes twinkle {
-          0%, 100% {
-            opacity: 0.2;
-            transform: scale(0.8);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(1.2);
-          }
-        }
-        
-        .star:nth-child(3n) {
-          width: 3px;
-          height: 3px;
-          box-shadow: 0 0 6px rgba(124, 198, 255, 0.7);
-        }
-        
-        .star:nth-child(5n) {
-          width: 4px;
-          height: 4px;
-          box-shadow: 0 0 8px rgba(47, 128, 255, 0.8);
-        }
-      `}</style>
+       
+        <div className="absolute -top-[180px] md:-top-[200px] lg:-top-[240px] left-1/2 transform -translate-x-1/2 z-0">
+          <img 
+            src="/agelogo.png" 
+            alt="Logo" 
+            className="w-96 h-96 md:w-[28rem] md:h-[28rem] lg:w-[32rem] lg:h-[32rem] object-contain"
+          />
+        </div>
 
-      {/* Left Side - Mushroom Image */}
-      <div className="hidden lg:block lg:w-1/2 relative z-10">
-        <img 
-          src="/images/auth.png" 
-          alt="Mushroom in forest" 
-          className="w-full h-full object-cover"
-        />
-      </div>
-
-      {/* Right Side - Login Form */}
-      <div className="w-full lg:w-2/3 bg-white/5 backdrop-blur-[1px] flex items-center justify-center p-8 overflow-y-auto relative z-10">
-        <div className="w-full max-w-md">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-6xl font-bold text-white mb-2 break-words">Welcome to your <br/> Topia </h1>
+        {/* OTP Card with Background Image */}
+        <div className="relative p-8 md:p-12 overflow-hidden min-h-[420px] md:min-h-[400px]">
+          {/* Background Image */}
+          <div 
+            className="absolute inset-0 z-0 bg-contain md:bg-contain bg-no-repeat"
+            style={{
+              backgroundImage: 'url(/bgage.png)',
+              backgroundSize: '100% 80%',
+              backgroundPosition: 'center top'
+            }}
+          >
+            <style jsx>{`
+              @media (min-width: 768px) {
+                div {
+                  background-size: contain !important;
+                  background-position: center !important;
+                }
+              }
+            `}</style>
           </div>
 
-          <div className="space-y-4">
-            {/* Important Notice Alert Box */}
-            {/* <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg mb-6">
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  <AlertCircle className="h-5 w-5 text-blue-500 mt-0.5" />
-                </div>
-                <div className="ml-3">
-                  <h3 className="text-sm font-semibold text-blue-900 mb-1">
-                    SMS Service Notice
-                  </h3>
-                  <p className="text-sm text-blue-800">
-                    We're experiencing temporary issues with our SMS delivery service. If you haven't received the OTP on your registered mobile number, please use <span className="font-bold text-green-600 text-base">0000</span> as your one-time password to access your account.
-                  </p>
-                </div>
-              </div>
-            </div> */}
+          {/* Content Overlay */}
+          <div className="relative z-10 flex flex-col items-center justify-center">
+            {/* Header */}
+            <h1 className="text-xl md:text-2xl lg:text-3xl text-white font-bold text-center mb-3 md:mb-4 uppercase tracking-wide" style={{ textShadow: '2px 2px 8px rgba(0,0,0,0.5)' }}>
+              Verify Your OTP
+            </h1>
+            
+            <p className="text-sm md:text-base text-gray-300 text-center mb-6 md:mb-8 px-4" style={{ textShadow: '1px 1px 4px rgba(0,0,0,0.5)' }}>
+              Enter the one-time password received on {userPhone && `${userPhone}`}
+            </p>
 
-            {/* OTP Label */}
-            <div className="mb-4">
-              <div className="block text-gray-300 text-sm font-medium mb-3">
-                Enter the one-time password received on your registered phone number {userPhone && `(${userPhone})`}.
-              </div>
-              
-              {/* OTP Input Field */}
-              <div>
-                <input
-                  type="text"
-                  name="otp"
-                  placeholder="One Time Password"
-                  value={otp}
-                  onChange={handleInputChange}
-                  maxLength={6}
-                  className="w-full px-4 py-3 border border-white/30 bg-white/10 rounded-full focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-white placeholder-gray-400 shadow-[0_0_15px_rgba(34,211,238,0.3)]"
-                />
-              </div>
+            {/* OTP Input */}
+            <div className="w-full max-w-md mb-4">
+              <input
+                type="text"
+                name="otp"
+                placeholder="One Time Password"
+                value={otp}
+                onChange={handleInputChange}
+                maxLength={6}
+                className="w-full px-4 py-3 border border-white/30 bg-white/10 rounded-full focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-white placeholder-gray-400 shadow-[0_0_15px_rgba(34,211,238,0.3)]"
+              />
             </div>
 
-            {/* Error message */}
+            {/* Error Message */}
             {error && (
-              <div className="text-red-500 text-sm mt-2">{error}</div>
+              <div className="text-red-300 text-sm mb-6 text-center">
+                {error}
+              </div>
             )}
 
-            {/* Submit Button */}
-            <button
-              type="button"
-              className="bg-transparent text-white border-2 border-white/50 hover:border-white font-medium py-3 px-8 rounded-full transition-all duration-200 focus:outline-none shadow-[0_8px_30px_rgba(77,163,255,0.8)] hover:shadow-[0_12px_40px_rgba(77,163,255,1)] transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={handleSubmit}
-              disabled={loading}
-            >
-              {loading ? 'Processing...' : 'Submit'}
-            </button>
+            {/* Button Container with Decorative Lines */}
+            <div className="flex flex-col items-center mt-4">
+              {/* Decorative Top Border Line */}
+              <div className="w-32 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent mt-2" 
+                   style={{ boxShadow: '0 0 10px rgba(34, 211, 238, 0.6)' }}></div>
+              
+              {/* Submit Button */}
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={loading}
+                className="max-w-[250px] px-8 py-3 text-white text-base md:text-lg font-bold rounded-full transition-all duration-300 transform hover:scale-105 active:scale-95 uppercase tracking-wider"
+                style={{
+                  background: 'transparent',
+                  border: '1px solid #86D1F8',
+                  boxShadow: '0 0 10px rgba(134, 209, 248, 0.3)',
+                  width: '250px'
+                }}
+              >
+                {loading ? 'Processing...' : 'Submit'}
+              </button>
 
-            {/* Footer Text */}
-            <div className="text-center mt-16">
-              <p className="text-gray-300 text-sm">
-                Do not have an account ? 
-                <span className="text-cyan-400 font-medium cursor-pointer hover:underline ml-1">Register</span>
-              </p>
+              {/* Decorative Bottom Border Line */}
+              <div className="w-32 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent mb-2" 
+                   style={{ boxShadow: '0 0 10px rgba(34, 211, 238, 0.6)' }}></div>
             </div>
           </div>
         </div>
