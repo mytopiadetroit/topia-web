@@ -224,6 +224,14 @@ export default function Navbar() {
                 >
                   REWARDS
                 </button>
+                {isLoggedIn && (
+                  <button 
+                    onClick={() => handleProtectedNavigation(user?.isTopiaCircleMember ? '/profile' : '/topia-circle')}
+                    className="nav-link text-white/70 hover:text-white/70 px-3 py-2 text-sm font-medium transition-all duration-300"
+                  >
+                    {user?.isTopiaCircleMember ? 'MANAGE SUBSCRIPTION' : 'TOPIA CIRCLE'}
+                  </button>
+                )}
               </div>
             </div>
 
@@ -473,6 +481,21 @@ export default function Navbar() {
                   <Award className="w-5 h-5 group-hover:text-blue-400" />
                   <span className="font-medium"> Rewards</span>
                 </button>
+                
+                {isLoggedIn && (
+                  <button 
+                    onClick={() => {
+                      handleProtectedNavigation(user?.isTopiaCircleMember ? '/profile' : '/topia-circle');
+                      handleNavItemClick();
+                    }}
+                    className="flex items-center space-x-3 px-2 py-3 text-white hover:text-blue-400 hover:bg-white/10 rounded-lg transition-all duration-200 group w-full text-left"
+                  >
+                    <Users className="w-5 h-5 group-hover:text-blue-400" />
+                    <span className="font-medium">
+                      {user?.isTopiaCircleMember ? 'Manage Subscription' : 'Topia Circle'}
+                    </span>
+                  </button>
+                )}
               </div>
 
               {/* Cart Section */}

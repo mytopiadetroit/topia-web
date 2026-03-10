@@ -29,6 +29,12 @@ body {
   min-height: 100vh !important;
 }
 
+@media (max-width: 768px) {
+  body {
+    background-image: url('/newere.png') !important;
+  }
+}
+
 /* Custom checkbox styling */
 input[type="checkbox"] {
   appearance: none;

@@ -236,8 +236,8 @@ export default function Home() {
         EXPERIENCES.
       </h1>
       <p className="text-base md:text-lg lg:text-xl text-gray-400 mb-10 font-light leading-relaxed">
-        Premium psychedelic wellness products<br />
-        designed for intentional journeys.
+        Portal to the largest mushroom selection in<br />
+        the Metro Detroit area..
       </p>
       
       {/* Buttons Container */}
@@ -482,7 +482,9 @@ export default function Home() {
               {/* Text Overlay on Topia New Image */}
               <div className="absolute inset-0 flex items-center justify-center rounded-lg px-4 md:px-6 pt-0 md:pt-0">
                 <p className="text-white leading-relaxed mx-auto text-center text-sm md:text-[22px] max-w-[280px] md:max-w-md">
-                  Step into a world of wellness, where exclusive rewards, personalized benefits, and a community of growth await.
+                 Build your own monthly selection $200 in products for $100 / month
+
+
                 </p>
               </div>
               {/* Button positioned separately - Mobile: 160px, Desktop: 370px */}
