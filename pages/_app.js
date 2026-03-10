@@ -14,7 +14,7 @@ function AppContent({ Component, pageProps }) {
   const router = useRouter();
   const { isLoggedIn, user, loading } = useUser();
   
-  // Skip age verification for logged-in users
+ 
   const shouldShowAgeVerification = !isLoggedIn;
 
   const checkUserStatus = useCallback(async () => {
@@ -41,7 +41,7 @@ function AppContent({ Component, pageProps }) {
   }, []);
 
   useEffect(() => {
-    // If not logged in or already on the login page, don't check status
+ 
     if (!isLoggedIn || router.pathname === '/auth/login') {
       return;
     }
@@ -78,7 +78,7 @@ function AppContent({ Component, pageProps }) {
     verifyUserStatus();
   }, [isLoggedIn, loading, router, user]);
 
-  // Conditionally wrap with AgeVerification only for non-logged-in users
+ 
   const content = (
     <Layout>
       <Component {...pageProps} />
@@ -110,35 +110,29 @@ function AppContent({ Component, pageProps }) {
 
 export default function App({ Component, pageProps }) {
   useEffect(() => {
-    // Debug: Check if background image is loading
-    console.log('🎨 Checking background image...');
+   
     const img = new Image();
-    img.onload = () => {
-      console.log('✅ Background image loaded successfully: /images/bgimage.png');
-    };
-    img.onerror = () => {
-      console.error('❌ Failed to load background image: /images/bgimage.png');
-    };
+   
     img.src = '/bgimage.png';
   }, []);
 
   useEffect(() => {
-    // Only run on client side
+   
     if (typeof window === 'undefined') return;
 
-    // Check if Tawk.to is already loaded
+   
     if (window.Tawk_API) {
       console.log('Tawk.to already loaded');
       return;
     }
 
-    // Check if script is already in the DOM
+ 
     if (document.getElementById('tawk-script')) {
       console.log('Tawk.to script already exists');
       return;
     }
 
-    // Create script element
+ 
     const script = document.createElement('script');
     script.id = 'tawk-script';
     script.async = true;
@@ -146,13 +140,13 @@ export default function App({ Component, pageProps }) {
     script.crossOrigin = 'anonymous';
     script.src = 'https://embed.tawk.to/68a6df3bc7b5501923c9a4e4/1j35tg0d7';
 
-    // Set up error handling
+   
     let scriptError = false;
     const errorHandler = (error) => {
       if (scriptError) return;
       scriptError = true;
       console.error('Tawk.to script error:', error);
-      // Fallback: Load Tawk.to using alternative method
+     
       if (!window.Tawk_API) {
         console.log('Trying alternative Tawk.to loading method...');
         const fallbackScript = document.createElement('script');
@@ -171,7 +165,7 @@ export default function App({ Component, pageProps }) {
       }
     };
 
-    // Set up event handlers
+ 
     script.onerror = errorHandler;
     script.onload = () => {
       if (scriptError) return;
@@ -188,7 +182,7 @@ export default function App({ Component, pageProps }) {
       }
     };
 
-    // Add script to document
+  
     document.head.appendChild(script);
 
     
@@ -199,7 +193,7 @@ export default function App({ Component, pageProps }) {
       }
     }, 5000);
 
-    // Cleanup function
+   
     return () => {
       clearTimeout(loadCheck);
       const script = document.getElementById('tawk-script');
