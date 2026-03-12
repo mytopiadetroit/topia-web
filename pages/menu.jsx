@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { debounce } from 'lodash';
 import { ChevronDown, ChevronUp, Filter, X, Menu as MenuIcon, Tag, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/router';
@@ -47,6 +47,7 @@ const Menu = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [showPendingMessage, setShowPendingMessage] = useState(false);
   const ITEMS_PER_PAGE = 15;
+  const [openTooltipId, setOpenTooltipId] = useState(null);
 
   
 
@@ -72,6 +73,18 @@ const Menu = () => {
 
     return () => clearInterval(intervalId);
   }, [isLoggedIn, refreshUserData]);
+
+  // Close tooltip when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (openTooltipId) {
+        setOpenTooltipId(null);
+      }
+    };
+    
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [openTooltipId]);
 
   // Handle user status and products
   useEffect(() => {
@@ -145,7 +158,7 @@ const Menu = () => {
     // Safety timeout - if loading takes too long, force data fetch
     const safetyTimeout = setTimeout(() => {
       if (loadingData && isLoggedIn) {
-        console.log('⚠️ Safety timeout triggered - forcing data fetch');
+        console.log('?? Safety timeout triggered - forcing data fetch');
         fetchCategories();
         fetchProducts();
         fetchReviewTags();
@@ -1004,7 +1017,7 @@ if (isLoggedIn && user?.status === 'suspend') {
       {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} available
       {totalPages > 1 && (
         <span className="text-gray-500">
-          {' '}• Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} - {Math.min(currentPage * ITEMS_PER_PAGE, filteredProducts.length)} of {filteredProducts.length}
+          {' '}� Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} - {Math.min(currentPage * ITEMS_PER_PAGE, filteredProducts.length)} of {filteredProducts.length}
         </span>
       )}
     </p>
@@ -1031,7 +1044,7 @@ if (isLoggedIn && user?.status === 'suspend') {
   }
 
   return (
-    <div className="min-h-screen lg:px-14 relative" style={{ background: 'transparent' }}>
+    <div className="min-h-screen lg:px-14 relative overflow-x-hidden" style={{ background: 'transparent' }}>
       {/* Global Stars Animation */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="stars-container">
@@ -1053,23 +1066,23 @@ if (isLoggedIn && user?.status === 'suspend') {
     
       
       {/* Navigation */}
-      <nav className=" mt-5 px-4 py-3 relative z-10">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4 text-sm text-gray-300">
+      <nav className="mt-5 px-4 py-3 relative z-10 max-w-full">
+        <div className="flex items-center justify-between max-w-full">
+          <div className="flex items-center space-x-4 text-sm text-gray-300 flex-shrink min-w-0">
             <span
-              className="hover:text-white cursor-pointer"
+              className="hover:text-white cursor-pointer whitespace-nowrap"
               onClick={handleHomeClick}
             >
               Home
             </span>
             <span className="text-gray-500">/</span>
-            <span className="text-white font-medium">Menu</span>
+            <span className="text-white font-medium whitespace-nowrap">Menu</span>
           </div>
 
           {/* Mobile filter button */}
           <button
             onClick={() => setIsDrawerOpen(true)}
-            className="lg:hidden flex items-center space-x-2 px-3 py-2 bg-[#536690] text-white rounded-lg hover:bg-[#536690]/90 transition-colors"
+            className="lg:hidden flex items-center space-x-2 px-3 py-2 bg-[#536690] text-white rounded-lg hover:bg-[#536690]/90 transition-colors flex-shrink-0"
           >
             <Filter size={16} />
             <span className="text-sm">Filters</span>
@@ -1082,10 +1095,10 @@ if (isLoggedIn && user?.status === 'suspend') {
         </div>
       </nav>
 
-      <div className="flex flex-col lg:flex-row relative">
+      <div className="flex flex-col lg:flex-row relative max-w-full overflow-x-hidden">
         {/* Desktop Sidebar - Hidden on mobile */}
         <div 
-          className="hidden lg:block w-72 m-4 rounded-2xl self-start"
+          className="hidden lg:block w-72 m-4 rounded-2xl self-start flex-shrink-0"
           style={{
             background: 'rgba(20, 20, 20, 0.4)',
             border: '1.2px solid rgba(134, 209, 248, 0.2)'
@@ -1115,7 +1128,7 @@ if (isLoggedIn && user?.status === 'suspend') {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 p-4 lg:p-6">
+        <div className="flex-1 p-4 lg:p-6 max-w-full overflow-x-hidden min-w-0">
           {/* Mobile Active Filters Display */}
           {activeFilterCount > 0 && (
             <div className="lg:hidden mb-4 p-3 bg-gray-50 rounded-lg">
@@ -1142,7 +1155,7 @@ if (isLoggedIn && user?.status === 'suspend') {
               {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} available
               {totalPages > 1 && (
                 <span className="text-gray-100">
-                  {' '}• Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} - {Math.min(currentPage * ITEMS_PER_PAGE, filteredProducts.length)} of {filteredProducts.length}
+                  {' '}� Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} - {Math.min(currentPage * ITEMS_PER_PAGE, filteredProducts.length)} of {filteredProducts.length}
                 </span>
               )}
             </p>
@@ -1305,9 +1318,17 @@ if (isLoggedIn && user?.status === 'suspend') {
                               {(product.reviewTags || []).slice(0, 4).map((tag, idx) => {
                                 // Remove emojis from label
                                 const labelWithoutEmoji = tag.label.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
+                                const tooltipId = `${product._id}-${tag._id}`;
+                                const isTooltipOpen = openTooltipId === tooltipId;
+                                // Flip tooltip for even index (0, 2) - left side tags
+                                const shouldFlip = true;
                                 return (
                                   <div key={tag._id} className="relative group">
                                     <span
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setOpenTooltipId(isTooltipOpen ? null : tooltipId);
+                                      }}
                                       className="px-3 py-1.5 text-sm rounded-full font-medium bg-white/5 backdrop-blur-sm border border-blue-400/40 hover:border-2 hover:border-blue-400 transition-all text-white flex items-center gap-2 cursor-pointer"
                                     >
                                       <img src="/images/dots.png" alt="" className="w-4 h-4" />
@@ -1315,7 +1336,7 @@ if (isLoggedIn && user?.status === 'suspend') {
                                     </span>
                                     {/* Tooltip */}
                                     {tag.tooltip && (
-                                      <div className="absolute right-0 top-full mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-[9999]">
+                                      <div className={`absolute left-0 top-full mt-2 transition-opacity duration-200 z-[9999] ${isTooltipOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 group-hover:opacity-100 pointer-events-none'}`}>
                                         <div 
                                           className="relative rounded-xl shadow-2xl pt-9 px-5 pb-5" 
                                           style={{ 
@@ -1324,11 +1345,14 @@ if (isLoggedIn && user?.status === 'suspend') {
                                             minHeight: '120px',
                                             backgroundImage: 'url(/tooltip.png)',
                                             backgroundSize: '100% 100%',
-                                            backgroundRepeat: 'no-repeat'
+                                            backgroundRepeat: 'no-repeat',
+                                            transform: shouldFlip ? 'scaleX(-1)' : 'none'
                                           }}
                                         >
-                                          <h4 className="text-white font-bold text-base mb-2">{labelWithoutEmoji}</h4>
-                                          <p className="text-white/90 text-sm leading-relaxed">{tag.tooltip}</p>
+                                          <div style={{ transform: shouldFlip ? 'scaleX(-1)' : 'none' }}>
+                                            <h4 className="text-white font-bold text-base mb-2">{labelWithoutEmoji}</h4>
+                                            <p className="text-white/90 text-sm leading-relaxed">{tag.tooltip}</p>
+                                          </div>
                                         </div>
                                       </div>
                                     )}
@@ -1590,9 +1614,17 @@ if (isLoggedIn && user?.status === 'suspend') {
                               {(product.reviewTags || []).slice(0, 4).map((tag, idx) => {
                                 // Remove emojis from label
                                 const labelWithoutEmoji = tag.label.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
+                                const tooltipId = `${product._id}-${tag._id}`;
+                                const isTooltipOpen = openTooltipId === tooltipId;
+                                // Flip tooltip for even index (0, 2) - left side tags
+                                const shouldFlip = true;
                                 return (
                                   <div key={tag._id} className="relative group">
                                     <span
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setOpenTooltipId(isTooltipOpen ? null : tooltipId);
+                                      }}
                                       className="px-3 py-1.5 text-sm rounded-full font-medium bg-white/5 backdrop-blur-sm border border-blue-400/40 hover:border-2 hover:border-blue-400 transition-all text-white flex items-center gap-2 cursor-pointer"
                                     >
                                       <img src="/images/dots.png" alt="" className="w-4 h-4" />
@@ -1600,7 +1632,7 @@ if (isLoggedIn && user?.status === 'suspend') {
                                     </span>
                                     {/* Tooltip */}
                                     {tag.tooltip && (
-                                      <div className="absolute left-0 top-full mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-[9999]">
+                                      <div className={`absolute left-0 top-full mt-2 transition-opacity duration-200 z-[9999] ${isTooltipOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 group-hover:opacity-100 pointer-events-none'}`}>
                                         <div 
                                           className="relative rounded-xl shadow-2xl pt-9 px-5 pb-5" 
                                           style={{ 
@@ -1609,11 +1641,14 @@ if (isLoggedIn && user?.status === 'suspend') {
                                             minHeight: '120px',
                                             backgroundImage: 'url(/tooltip.png)',
                                             backgroundSize: '100% 100%',
-                                            backgroundRepeat: 'no-repeat'
+                                            backgroundRepeat: 'no-repeat',
+                                            transform: shouldFlip ? 'scaleX(-1)' : 'none'
                                           }}
                                         >
-                                          <h4 className="text-white font-bold text-base mb-2">{labelWithoutEmoji}</h4>
-                                          <p className="text-white/90 text-sm leading-relaxed">{tag.tooltip}</p>
+                                          <div style={{ transform: shouldFlip ? 'scaleX(-1)' : 'none' }}>
+                                            <h4 className="text-white font-bold text-base mb-2">{labelWithoutEmoji}</h4>
+                                            <p className="text-white/90 text-sm leading-relaxed">{tag.tooltip}</p>
+                                          </div>
                                         </div>
                                       </div>
                                     )}
@@ -1622,10 +1657,11 @@ if (isLoggedIn && user?.status === 'suspend') {
                               })}
                             </div>
 
-                            {/* Flavors with pricing - INLINE STYLE */}
+                            {/* Variants with pricing - INLINE STYLE */}
                             <div className="mt-4">
                               <div className="flex flex-wrap items-center gap-3">
-                                {product.flavors.filter(f => f.isActive).map((flavor, idx) => {
+                                {product.variants.map((variant, idx) => {
+
                                   const cartItem = cart.find((i) => {
                                     const isSameProduct = (i.id || i._id) === product._id;
                                     const isSameFlavor = i.selectedFlavor?._id === flavor._id;
@@ -1910,9 +1946,17 @@ return (
             {(product.reviewTags || []).slice(0, 4).map((tag, idx) => {
               // Remove emojis from label
               const labelWithoutEmoji = tag.label.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
+              const tooltipId = `${product._id}-${tag._id}`;
+              const isTooltipOpen = openTooltipId === tooltipId;
+              // Flip tooltip for specific indexes: 0, 2, 3, 5, 6, 8
+              const shouldFlip = true;
               return (
                 <div key={tag._id} className="relative group">
                   <span
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpenTooltipId(isTooltipOpen ? null : tooltipId);
+                    }}
                     className="px-3 py-1.5 text-sm rounded-full font-medium bg-white/5 backdrop-blur-sm border border-blue-400/40 hover:border-2 hover:border-blue-400 transition-all text-white flex items-center gap-2 cursor-pointer"
                   >
                     <img src="/images/dots.png" alt="" className="w-4 h-4" />
@@ -1920,7 +1964,7 @@ return (
                   </span>
                   {/* Tooltip */}
                   {tag.tooltip && (
-                    <div className="absolute left-0 top-full mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-[9999]">
+                    <div className={`absolute left-0 top-full mt-2 transition-opacity duration-200 z-[9999] ${isTooltipOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 group-hover:opacity-100 pointer-events-none'}`}>
                       <div 
                         className="relative rounded-xl shadow-2xl pt-9 px-5 pb-5" 
                         style={{ 
@@ -1929,11 +1973,14 @@ return (
                           minHeight: '120px',
                           backgroundImage: 'url(/tooltip.png)',
                           backgroundSize: '100% 100%',
-                          backgroundRepeat: 'no-repeat'
+                          backgroundRepeat: 'no-repeat',
+                          transform: shouldFlip ? 'scaleX(-1)' : 'none'
                         }}
                       >
-                        <h4 className="text-white font-bold text-base mb-2">{labelWithoutEmoji}</h4>
-                        <p className="text-white/90 text-sm leading-relaxed">{tag.tooltip}</p>
+                        <div style={{ transform: shouldFlip ? 'scaleX(-1)' : 'none' }}>
+                          <h4 className="text-white font-bold text-base mb-2">{labelWithoutEmoji}</h4>
+                          <p className="text-white/90 text-sm leading-relaxed">{tag.tooltip}</p>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -2270,3 +2317,6 @@ return (
 };
 
 export default Menu;
+
+
+
