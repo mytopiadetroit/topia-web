@@ -25,7 +25,7 @@ export const fetchPublishedContent = async (params = {}) => {
   }
 };
 
-// Fetch single content by ID
+
 export const fetchContentById = async (id) => {
   try {
     const response = await fetch(`${API_BASE_URL}/content/public/${id}`);
