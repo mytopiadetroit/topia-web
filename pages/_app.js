@@ -14,7 +14,7 @@ function AppContent({ Component, pageProps }) {
   const router = useRouter();
   const { isLoggedIn, user, loading } = useUser();
   
-  // Skip age verification for logged-in users
+ 
   const shouldShowAgeVerification = !isLoggedIn;
 
   const checkUserStatus = useCallback(async () => {
@@ -41,12 +41,11 @@ function AppContent({ Component, pageProps }) {
   }, []);
 
   useEffect(() => {
-    // If not logged in or already on the login page, don't check status
+ 
     if (!isLoggedIn || router.pathname === '/auth/login') {
       return;
     }
 
-    // Skip if still loading
     if (loading) {
       console.log('App loading, skipping redirection check');
       return;
@@ -57,17 +56,16 @@ function AppContent({ Component, pageProps }) {
         const status = await checkUserStatus();
         console.log('User status from API:', status);
         
-        // Allow suspended users to access these pages
+    
         const allowedPagesForSuspended = ['/suspend', '/terms', '/privacypolicy', '/contact'];
         const isAllowedPage = allowedPagesForSuspended.includes(router.pathname);
         
-        // Only redirect to suspend page if user is logged in AND status is 'suspend'
-        // and not already on an allowed page
+        
         if (isLoggedIn && status === 'suspend' && !isAllowedPage) {
           console.log('User is suspended, redirecting to suspend page');
           router.push('/suspend');
         }
-        // If user is not suspended and somehow on suspend page, redirect them away
+      
         else if (isLoggedIn && status !== 'suspend' && router.pathname === '/suspend') {
           console.log('User is not suspended, redirecting to home');
           router.push('/');
@@ -80,7 +78,7 @@ function AppContent({ Component, pageProps }) {
     verifyUserStatus();
   }, [isLoggedIn, loading, router, user]);
 
-  // Conditionally wrap with AgeVerification only for non-logged-in users
+ 
   const content = (
     <Layout>
       <Component {...pageProps} />
@@ -112,22 +110,29 @@ function AppContent({ Component, pageProps }) {
 
 export default function App({ Component, pageProps }) {
   useEffect(() => {
-    // Only run on client side
+   
+    const img = new Image();
+   
+    img.src = '/bgimage.png';
+  }, []);
+
+  useEffect(() => {
+   
     if (typeof window === 'undefined') return;
 
-    // Check if Tawk.to is already loaded
+   
     if (window.Tawk_API) {
       console.log('Tawk.to already loaded');
       return;
     }
 
-    // Check if script is already in the DOM
+ 
     if (document.getElementById('tawk-script')) {
       console.log('Tawk.to script already exists');
       return;
     }
 
-    // Create script element
+ 
     const script = document.createElement('script');
     script.id = 'tawk-script';
     script.async = true;
@@ -135,13 +140,13 @@ export default function App({ Component, pageProps }) {
     script.crossOrigin = 'anonymous';
     script.src = 'https://embed.tawk.to/68a6df3bc7b5501923c9a4e4/1j35tg0d7';
 
-    // Set up error handling
+   
     let scriptError = false;
     const errorHandler = (error) => {
       if (scriptError) return;
       scriptError = true;
       console.error('Tawk.to script error:', error);
-      // Fallback: Load Tawk.to using alternative method
+     
       if (!window.Tawk_API) {
         console.log('Trying alternative Tawk.to loading method...');
         const fallbackScript = document.createElement('script');
@@ -160,7 +165,7 @@ export default function App({ Component, pageProps }) {
       }
     };
 
-    // Set up event handlers
+ 
     script.onerror = errorHandler;
     script.onload = () => {
       if (scriptError) return;
@@ -177,7 +182,7 @@ export default function App({ Component, pageProps }) {
       }
     };
 
-    // Add script to document
+  
     document.head.appendChild(script);
 
     
@@ -188,7 +193,7 @@ export default function App({ Component, pageProps }) {
       }
     }, 5000);
 
-    // Cleanup function
+   
     return () => {
       clearTimeout(loadCheck);
       const script = document.getElementById('tawk-script');

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { Heart } from 'lucide-react';
@@ -148,15 +148,15 @@ export default function WishlistPage() {
 
   if (userLoading || !isLoggedIn || loadingCategories) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'transparent' }}>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-400"></div>
       </div>
     );
   }
 
   if (categoryError) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'transparent' }}>
         <div className="text-center">
           <p className="text-red-500 mb-4">{categoryError}</p>
           <button 
@@ -201,24 +201,84 @@ export default function WishlistPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="min-h-screen relative" style={{ background: 'transparent' }}>
+      {/* Animated stars background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="stars-container">
+          {[...Array(60)].map((_, i) => (
+            <div
+              key={`star-${i}`}
+              className="star"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${2 + Math.random() * 3}s`
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* CSS for Stars Animation */}
+      <style jsx>{`
+        .stars-container {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+        }
+        
+        .star {
+          position: absolute;
+          width: 2px;
+          height: 2px;
+          background: white;
+          border-radius: 50%;
+          animation: twinkle linear infinite;
+          box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
+        }
+        
+        @keyframes twinkle {
+          0%, 100% {
+            opacity: 0.2;
+            transform: scale(0.8);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.2);
+          }
+        }
+        
+        .star:nth-child(3n) {
+          width: 3px;
+          height: 3px;
+          box-shadow: 0 0 6px rgba(124, 198, 255, 0.7);
+        }
+        
+        .star:nth-child(5n) {
+          width: 4px;
+          height: 4px;
+          box-shadow: 0 0 8px rgba(47, 128, 255, 0.8);
+        }
+      `}</style>
+
+      <div className="max-w-7xl mx-auto px-4 py-8 relative z-10">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <Heart className="w-7 h-7" style={{ color: '#80A6F7' }} fill="#80A6F7" />
+          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+            <Heart className="w-7 h-7 text-white fill-white" />
             Wishlist
           </h1>
-          <span className="text-gray-500">{count} items</span>
+          <span className="text-gray-300">{count} items</span>
         </div>
 
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#536690]"></div>
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-cyan-400"></div>
           </div>
         ) : count === 0 ? (
           <div className="text-center py-20">
-            <p className="text-gray-500 mb-4">Your wishlist is empty.</p>
-            <Link href="/menu" className="px-6 py-2 bg-[#536690] text-white rounded-full hover:bg-[#536690]">
+            <p className="text-gray-300 mb-4">Your wishlist is empty.</p>
+            <Link href="/menu" className="px-6 py-2 bg-cyan-500/20 text-cyan-300 border border-cyan-400/50 rounded-full hover:bg-cyan-500/30 inline-block transition-all shadow-lg shadow-cyan-500/20">
               Browse Products
             </Link>
           </div>
@@ -245,12 +305,16 @@ export default function WishlistPage() {
                 return (
                   <div key={product._id} className="w-full">
                     <div
-                      className="relative rounded-3xl border border-gray-200 hover:shadow-lg transition-shadow bg-white overflow-hidden w-full max-w-4xl mx-auto"
+                      className="relative rounded-3xl overflow-hidden w-full max-w-4xl mx-auto cursor-pointer"
+                      style={{
+                        background: 'rgba(20, 20, 20, 0.4)',
+                        border: '1.2px solid rgba(134, 209, 248, 0.2)'
+                      }}
                       onClick={() => router.push(`/productdetails?id=${product._id}`)}
                     >
                       <div className="flex flex-col lg:flex-row">
                         {/* Left side - Product Image */}
-                        <div className="w-full lg:w-2/5 h-64 lg:h-80 bg-gray-100 relative">
+                        <div className="w-full lg:w-2/5 h-64 lg:h-80 bg-gray-800 relative">
                           {product.images && product.images.length > 0 ? (
                             <img
                               src={product.images[0].startsWith('http') ? product.images[0] : `http://localhost:5000${product.images[0]}`}
@@ -278,31 +342,25 @@ export default function WishlistPage() {
                         </div>
                         
                         {/* Right side - Product Details */}
-                        <div className="w-full lg:w-3/5 p-6">
-                          <h3 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h3>
+                        <div className="w-full md:w-3/5 p-6">
+                          <h3 className="text-2xl font-bold text-gray-100 mb-2">{product.name}</h3>
                           
                           {/* Intensity Bar */}
                           {product.intensity && (
                             <div className="mb-4">
-                              <div className="flex items-center justify-between mb-1">
-                                <span className="text-sm text-gray-600">Intensity</span>
-                                <span className={`text-sm font-bold ${
-                                  product.intensity <= 3 ? 'text-green-600' : 
-                                  product.intensity <= 7 ? 'text-yellow-600' : 
-                                  'text-red-500'
-                                }`}>
-                                  {product.intensity <= 3 ? 'Mild' : product.intensity <= 7 ? 'Medium' : 'Strong'} ({product.intensity}/10)
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity</span>
+                                <span className="text-sm font-bold text-cyan-400">
+                                  {product.intensity}/10
                                 </span>
                               </div>
-                              <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div className="w-full bg-gray-700/30 rounded-full h-2">
                                 <div 
                                   className="h-2 rounded-full transition-all duration-300"
                                   style={{ 
                                     width: `${(product.intensity / 10) * 100}%`,
-                                    backgroundColor: 
-                                      product.intensity <= 3 ? '#10B981' : 
-                                      product.intensity <= 7 ? '#F59E0B' : 
-                                      '#EF4444'
+                                    background: 'linear-gradient(90deg, #1D5BC7 0%, #86D1F8 82%, #97E2F8 94.12%, #CAF7FF 100%)',
+                                    boxShadow: '0px 1px 17px 0px #86D1F8'
                                   }}
                                 ></div>
                               </div>
@@ -314,14 +372,15 @@ export default function WishlistPage() {
                             {(product.reviewTags || []).slice(0, 4).map((tagId, idx) => {
                               const tagName = getTagName(tagId);
                               if (!tagName) return null;
-                              const color = colors[idx % colors.length];
+                              // Remove emojis from tag name
+                              const labelWithoutEmoji = tagName.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
                               return (
                                 <span 
-                                  key={tagId} 
-                                  className="px-3 py-1.5 text-sm rounded-full font-medium"
-                                  style={{ backgroundColor: color.bg, color: color.color }}
+                                  key={tagId}
+                                  className="px-3 py-1.5 text-sm rounded-full font-medium bg-white/5 backdrop-blur-sm border border-blue-400/40 hover:border-2 hover:border-blue-400 transition-all text-white flex items-center gap-2"
                                 >
-                                  {tagName}
+                                  <img src="/images/dots.png" alt="" className="w-4 h-4" />
+                                  {labelWithoutEmoji}
                                 </span>
                               );
                             })}
@@ -344,22 +403,27 @@ export default function WishlistPage() {
                                 return (
                                   <div 
                                     key={variant._id} 
-                                    className="relative border-2 border-gray-900 rounded-2xl px-4 py-3 bg-white min-w-[120px]"
+                                    className="relative px-4 py-3 min-w-[110px]"
+                                    style={{
+                                      background: 'transparent',
+                                      border: '1.26px solid rgba(134, 209, 248, 0.6)',
+                                      borderRadius: '14.7px'
+                                    }}
                                     onClick={(e) => e.stopPropagation()}
                                   >
                                     {/* Add to Cart Button - Top Right */}
                                     <div className="absolute -top-2 -right-2">
                                       {isInCart ? (
-                                        <div className="flex items-center border-2 border-gray-900 rounded-full bg-white">
+                                        <div className="flex items-center border-2 border-gray-700/50 rounded-full bg-white">
                                           <button 
                                             onClick={(e) => handleQuantityChange(product, cartItem.quantity - 1, variant, null, e)}
-                                            className="p-1 hover:bg-gray-50 rounded-l-full transition-colors"
+                                            className="p-1 hover:bg-gray-100 rounded-l-full transition-colors"
                                           >
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3">
                                               <path d="M5 12h14"/>
                                             </svg>
                                           </button>
-                                          <span className="px-2 text-xs font-bold">
+                                          <span className="px-2 text-xs font-bold text-black">
                                             {cartItem.quantity}
                                           </span>
                                           <button 
@@ -371,9 +435,9 @@ export default function WishlistPage() {
                                               }
                                             }}
                                             disabled={cartItem.quantity >= variantStock}
-                                            className="p-1 hover:bg-gray-50 rounded-r-full transition-colors disabled:opacity-50"
+                                            className="p-1 hover:bg-gray-100 rounded-r-full transition-colors disabled:opacity-50"
                                           >
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3">
                                               <path d="M12 5v14M5 12h14"/>
                                             </svg>
                                           </button>
@@ -391,10 +455,10 @@ export default function WishlistPage() {
                                           className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-md ${
                                             isOutOfStock 
                                               ? 'bg-gray-300 cursor-not-allowed' 
-                                              : 'bg-gray-900 hover:bg-gray-800'
+                                              : 'bg-white hover:bg-gray-100'
                                           }`}
                                         >
-                                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3">
                                             <path d="M12 5v14M5 12h14"/>
                                           </svg>
                                         </button>
@@ -403,10 +467,10 @@ export default function WishlistPage() {
                                     
                                     {/* Size and Price */}
                                     <div className="flex flex-col">
-                                      <span className="text-sm font-bold text-gray-900">
+                                      <span className="text-sm font-bold text-white">
                                         {variant.size.value}{variant.size.unit === 'grams' ? 'G' : variant.size.unit}
                                       </span>
-                                      <span className="text-base font-bold text-gray-900">
+                                      <span className="text-base font-bold text-white">
                                         ${variant.price}
                                       </span>
                                     </div>
@@ -423,8 +487,8 @@ export default function WishlistPage() {
                                   toast.success('Removed from wishlist');
                                 }}
                               >
-                                <span className="text-sm font-medium">Remove</span>
-                                <Heart className="w-5 h-5" fill="currentColor" />
+                                <span className="text-sm text-white font-medium">Remove</span>
+                                <Heart className="w-5 h-5 text-white" fill="currentColor" />
                               </div>
                             </div>
                           </div>
@@ -440,12 +504,16 @@ export default function WishlistPage() {
                 return (
                   <div key={product._id} className="w-full">
                     <div
-                      className="relative rounded-3xl border border-gray-200 hover:shadow-lg transition-shadow bg-white overflow-hidden w-full max-w-4xl mx-auto"
+                      className="relative rounded-3xl overflow-hidden w-full max-w-4xl mx-auto cursor-pointer"
+                      style={{
+                        background: 'rgba(20, 20, 20, 0.4)',
+                        border: '1.2px solid rgba(134, 209, 248, 0.2)'
+                      }}
                       onClick={() => router.push(`/productdetails?id=${product._id}`)}
                     >
                       <div className="flex flex-col lg:flex-row">
                         {/* Left side - Product Image */}
-                        <div className="w-full lg:w-2/5 h-64 lg:h-80 bg-gray-100 relative">
+                        <div className="w-full lg:w-2/5 h-64 lg:h-80 bg-gray-800 relative">
                           {product.images && product.images.length > 0 ? (
                             <img
                               src={product.images[0].startsWith('http') ? product.images[0] : `http://localhost:5000${product.images[0]}`}
@@ -474,31 +542,25 @@ export default function WishlistPage() {
                         </div>
                         
                         {/* Right side - Product Details */}
-                        <div className="w-full lg:w-3/5 p-6">
-                          <h3 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h3>
+                        <div className="w-full md:w-3/5 p-6">
+                          <h3 className="text-2xl font-bold text-gray-100 mb-2">{product.name}</h3>
                           
                           {/* Intensity Bar */}
                           {product.intensity && (
                             <div className="mb-4">
-                              <div className="flex items-center justify-between mb-1">
-                                <span className="text-sm text-gray-600">Intensity</span>
-                                <span className={`text-sm font-bold ${
-                                  product.intensity <= 3 ? 'text-green-600' : 
-                                  product.intensity <= 7 ? 'text-yellow-600' : 
-                                  'text-red-500'
-                                }`}>
-                                  {product.intensity <= 3 ? 'Mild' : product.intensity <= 7 ? 'Medium' : 'Strong'} ({product.intensity}/10)
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity</span>
+                                <span className="text-sm font-bold text-cyan-400">
+                                  {product.intensity}/10
                                 </span>
                               </div>
-                              <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div className="w-full bg-gray-700/30 rounded-full h-2">
                                 <div 
                                   className="h-2 rounded-full transition-all duration-300"
                                   style={{ 
                                     width: `${(product.intensity / 10) * 100}%`,
-                                    backgroundColor: 
-                                      product.intensity <= 3 ? '#10B981' : 
-                                      product.intensity <= 7 ? '#F59E0B' : 
-                                      '#EF4444'
+                                    background: 'linear-gradient(90deg, #1D5BC7 0%, #86D1F8 82%, #97E2F8 94.12%, #CAF7FF 100%)',
+                                    boxShadow: '0px 1px 17px 0px #86D1F8'
                                   }}
                                 ></div>
                               </div>
@@ -510,14 +572,15 @@ export default function WishlistPage() {
                             {(product.reviewTags || []).slice(0, 4).map((tagId, idx) => {
                               const tagName = getTagName(tagId);
                               if (!tagName) return null;
-                              const color = colors[idx % colors.length];
+                              // Remove emojis from tag name
+                              const labelWithoutEmoji = tagName.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
                               return (
                                 <span 
-                                  key={tagId} 
-                                  className="px-3 py-1.5 text-sm rounded-full font-medium"
-                                  style={{ backgroundColor: color.bg, color: color.color }}
+                                  key={tagId}
+                                  className="px-3 py-1.5 text-sm rounded-full font-medium bg-white/5 backdrop-blur-sm border border-blue-400/40 hover:border-2 hover:border-blue-400 transition-all text-white flex items-center gap-2"
                                 >
-                                  {tagName}
+                                  <img src="/images/dots.png" alt="" className="w-4 h-4" />
+                                  {labelWithoutEmoji}
                                 </span>
                               );
                             })}
@@ -540,22 +603,27 @@ export default function WishlistPage() {
                                 return (
                                   <div 
                                     key={flavor._id} 
-                                    className="relative border-2 border-gray-900 rounded-2xl px-4 py-3 bg-white min-w-[120px]"
+                                    className="relative px-4 py-3 min-w-[110px]"
+                                    style={{
+                                      background: 'transparent',
+                                      border: '1.26px solid rgba(134, 209, 248, 0.6)',
+                                      borderRadius: '14.7px'
+                                    }}
                                     onClick={(e) => e.stopPropagation()}
                                   >
                                     {/* Add to Cart Button - Top Right */}
                                     <div className="absolute -top-2 -right-2">
                                       {isInCart ? (
-                                        <div className="flex items-center border-2 border-gray-900 rounded-full bg-white">
+                                        <div className="flex items-center border-2 border-gray-700/50 rounded-full bg-white">
                                           <button 
                                             onClick={(e) => handleQuantityChange(product, cartItem.quantity - 1, null, flavor, e)}
-                                            className="p-1 hover:bg-gray-50 rounded-l-full transition-colors"
+                                            className="p-1 hover:bg-gray-100 rounded-l-full transition-colors"
                                           >
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3">
                                               <path d="M5 12h14"/>
                                             </svg>
                                           </button>
-                                          <span className="px-2 text-xs font-bold">
+                                          <span className="px-2 text-xs font-bold text-black">
                                             {cartItem.quantity}
                                           </span>
                                           <button 
@@ -567,9 +635,9 @@ export default function WishlistPage() {
                                               }
                                             }}
                                             disabled={cartItem.quantity >= flavorStock}
-                                            className="p-1 hover:bg-gray-50 rounded-r-full transition-colors disabled:opacity-50"
+                                            className="p-1 hover:bg-gray-100 rounded-r-full transition-colors disabled:opacity-50"
                                           >
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3">
                                               <path d="M12 5v14M5 12h14"/>
                                             </svg>
                                           </button>
@@ -587,10 +655,10 @@ export default function WishlistPage() {
                                           className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-md ${
                                             isOutOfStock 
                                               ? 'bg-gray-300 cursor-not-allowed' 
-                                              : 'bg-gray-900 hover:bg-gray-800'
+                                              : 'bg-white hover:bg-gray-100'
                                           }`}
                                         >
-                                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3">
                                             <path d="M12 5v14M5 12h14"/>
                                           </svg>
                                         </button>
@@ -599,10 +667,10 @@ export default function WishlistPage() {
                                     
                                     {/* Flavor Name and Price */}
                                     <div className="flex flex-col">
-                                      <span className="text-sm font-bold text-gray-900">
+                                      <span className="text-sm font-bold text-white">
                                         {flavor.name}
                                       </span>
-                                      <span className="text-base font-bold text-gray-900">
+                                      <span className="text-base font-bold text-white">
                                         ${flavor.price}
                                       </span>
                                     </div>
@@ -619,8 +687,8 @@ export default function WishlistPage() {
                                   toast.success('Removed from wishlist');
                                 }}
                               >
-                                <span className="text-sm font-medium">Remove</span>
-                                <Heart className="w-5 h-5" fill="currentColor" />
+                                <span className="text-sm text-white font-medium">Remove</span>
+                                <Heart className="w-5 h-5 text-white" fill="currentColor" />
                               </div>
                             </div>
                           </div>
@@ -639,64 +707,70 @@ export default function WishlistPage() {
               return (
                 <div
                   key={product._id || product.id}
-                  className="relative rounded-2xl border border-gray-200 hover:shadow-md transition-shadow bg-white overflow-hidden cursor-pointer max-w-sm"
+                  className="relative rounded-3xl overflow-hidden w-full max-w-4xl mx-auto cursor-pointer"
+                  style={{
+                    background: 'rgba(20, 20, 20, 0.4)',
+                    border: '1.2px solid rgba(134, 209, 248, 0.2)'
+                  }}
                   onClick={() => router.push(`/productdetails?id=${product._id || product.id}`)}
                 >
-                  {/* Image + Stock overlay */}
-                  <div className="bg-gray-50 aspect-[4/3] overflow-hidden relative">
-                    {product.images && product.images.length > 0 ? (
-                      <img
-                        src={product.images[0].startsWith('http') ? product.images[0] : `http://localhost:5000${product.images[0]}`}
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gray-200"></div>
-                    )}
-                    {isOutOfStock ? (
-                      <div className="absolute inset-0 flex items-center justify-center z-10">
-                        <div className="text-2xl font-bold text-red-500 rotate-12 select-none text-center bg-white/90 px-4 py-2 rounded-lg">
-                          Out of<br />Stock
+                  <div className="flex flex-col md:flex-row">
+                    {/* Image Section */}
+                    <div className="md:w-1/3 bg-gray-800/20 overflow-hidden relative">
+                      {product.images && product.images.length > 0 ? (
+                        <img
+                          src={product.images[0].startsWith('http') ? product.images[0] : `http://localhost:5000${product.images[0]}`}
+                          alt={product.name}
+                          className="w-full h-full object-cover aspect-square"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-800/20 aspect-square"></div>
+                      )}
+                      {isOutOfStock ? (
+                        <div className="absolute inset-0 flex items-center justify-center z-10">
+                          <div className="text-2xl font-bold text-red-500 rotate-12 select-none text-center bg-white/90 px-4 py-2 rounded-lg">
+                            Out of<br />Stock
+                          </div>
                         </div>
-                      </div>
-                    ) : stock > 0 && stock < 5 ? (
-                      <div className="absolute top-2 right-2 z-10">
-                        <div className="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                          Only {stock} left
+                      ) : stock > 0 && stock < 5 ? (
+                        <div className="absolute top-2 right-2 z-10">
+                          <div className="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                            Only {stock} left
+                          </div>
                         </div>
-                      </div>
-                    ) : null}
-                  </div>
-
-                  <div className="p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900">{product.name}</h3>
-                        <p className="text-[#536690] font-bold">$ {product.price}</p>
-                      </div>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); remove(product._id || product.id); toast.success('Removed from wishlist'); }}
-                        className="p-2 rounded-full border hover:bg-gray-50"
-                        title="Remove from wishlist"
-                      >
-                        <Heart className="w-5 h-5" style={{ color: '#80A6F7' }} fill="#80A6F7" />
-                      </button>
+                      ) : null}
                     </div>
 
-                    {/* Cart controls */}
-                    <div className="flex justify-center mt-4">
+                    {/* Content Section */}
+                    <div className="md:w-2/3 p-6">
+                      <div className="flex items-start justify-between gap-3 mb-4">
+                        <div>
+                          <h3 className="text-xl font-semibold text-white mb-2">{product.name}</h3>
+                          <p className="text-cyan-400 font-bold text-lg">$ {product.price}</p>
+                        </div>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); remove(product._id || product.id); toast.success('Removed from wishlist'); }}
+                          className="p-2 rounded-full border border-gray-700/50 hover:bg-white/10"
+                          title="Remove from wishlist"
+                        >
+                          <Heart className="w-5 h-5" style={{ color: '#80A6F7' }} fill="#80A6F7" />
+                        </button>
+                      </div>
+
+                      {/* Cart controls */}
+                      <div className="flex justify-center mt-4">
                       {cartItem ? (
                         <div className="flex items-center space-x-3" onClick={(e) => e.stopPropagation()}>
-                          <div className="flex items-center border border-gray-300 rounded-full bg-white">
+                          <div className="flex items-center border border-gray-700/50 rounded-full bg-white/10 backdrop-blur-sm">
                             <button 
                               onClick={(e) => handleQuantityChange(product, (cartItem.quantity || 0) - 1, null, null, e)}
-                              className="p-2 hover:bg-gray-50 rounded-l-full transition-colors"
+                              className="p-2 hover:bg-white/20 rounded-l-full transition-colors"
                             >
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="w-4 h-4 text-gray-600 hover:text-black" stroke="currentColor" strokeWidth="2">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="w-4 h-4 text-gray-300 hover:text-white" stroke="currentColor" strokeWidth="2">
                                 <path d="M5 12h14"/>
                               </svg>
                             </button>
-                            <span className="px-3 py-1 text-sm text-gray-800 font-medium min-w-[2rem] text-center">
+                            <span className="px-3 py-1 text-sm text-white font-medium min-w-[2rem] text-center">
                               {cartItem.quantity}
                             </span>
                             <button 
@@ -705,13 +779,13 @@ export default function WishlistPage() {
                               className={`p-2 rounded-r-full transition-colors ${
                                 isOutOfStock || (stock > 0 && (cartItem.quantity || 0) >= stock)
                                   ? 'opacity-50 cursor-not-allowed' 
-                                  : 'hover:bg-gray-50'
+                                  : 'hover:bg-white/20'
                               }`}
                             >
                               <svg width="16" height="16" viewBox="0 0 24 24" className={`w-4 h-4 ${
                                 isOutOfStock || (stock > 0 && (cartItem.quantity || 0) >= stock)
-                                  ? 'text-gray-400' 
-                                  : 'text-gray-600 hover:text-black'
+                                  ? 'text-gray-500' 
+                                  : 'text-gray-300 hover:text-white'
                               }`} fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M12 5v14M5 12h14"/>
                               </svg>
@@ -728,7 +802,7 @@ export default function WishlistPage() {
                         </button>
                       ) : (
                         <button
-                          className="w-[40%] py-2 px-4 rounded-4xl text-sm font-medium transition-colors bg-[#536690] text-white hover:bg-[#536690]"
+                          className="w-[40%] py-2 px-4 rounded-4xl text-sm font-medium transition-all bg-transparent text-white border border-white/50 hover:border-white shadow-[0_0_10px_rgba(77,163,255,0.3)] hover:shadow-[0_0_15px_rgba(77,163,255,0.5)] transform hover:scale-105"
                           onClick={(e) => handleAddToCart(product, e)}
                         >
                           Add to Cart
@@ -737,6 +811,7 @@ export default function WishlistPage() {
                     </div>
                   </div>
                 </div>
+              </div>
               );
             })}
           </div>

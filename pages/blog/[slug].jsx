@@ -148,8 +148,8 @@ const BlogDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-green-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-cyan-400"></div>
       </div>
     );
   }
@@ -176,42 +176,70 @@ const BlogDetail = () => {
         <meta name="twitter:title" content={content.title} />
         <meta name="twitter:description" content={content.description || content.title} />
         {content.featuredImage && <meta name="twitter:image" content={content.featuredImage} />}
+        
+        <style>{`
+          article * {
+            color: white !important;
+          }
+          article p {
+            color: #d1d5db !important;
+          }
+          article a {
+            color: #22d3ee !important;
+          }
+          article a:hover {
+            color: #67e8f9 !important;
+          }
+          article strong, article b {
+            color: white !important;
+          }
+          article [style*="background"] {
+            background: transparent !important;
+          }
+        `}</style>
       </Head>
 
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 relative overflow-hidden">
+        {/* Animated stars background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="stars"></div>
+          <div className="stars2"></div>
+          <div className="stars3"></div>
+        </div>
+
         {/* Header */}
-        <div className="bg-white border-b sticky top-0 z-10">
+        <div className="bg-black/30 backdrop-blur-md border-b border-white/10 sticky top-0 z-10">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <Link href="/resourcecenter" className="text-green-600 hover:text-green-700 flex items-center gap-2">
+            <Link href="/resourcecenter" className="text-cyan-400 hover:text-cyan-300 flex items-center gap-2 transition-colors">
               ← Back to Resource Center
             </Link>
           </div>
         </div>
 
         {/* Content */}
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <article className="bg-white rounded-lg shadow-sm p-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+          <article className="bg-black/40 backdrop-blur-md rounded-lg border border-white/10 p-8 shadow-lg shadow-cyan-500/10">
             {/* Type Badge */}
             <div className="mb-4">
               <span className={`px-3 py-1 text-sm font-medium rounded-full ${
                 content.type === 'video'
-                  ? 'bg-red-100 text-red-800'
-                  : 'bg-blue-100 text-blue-800'
+                  ? 'bg-red-500/20 text-red-300 border border-red-500/30'
+                  : 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
               }`}>
                 {content.type === 'video' ? 'Video' : 'Blog Post'}
               </span>
-              <span className="ml-3 text-sm text-green-600 font-medium">
+              <span className="ml-3 text-sm text-cyan-400 font-medium">
                 {content.category}
               </span>
             </div>
 
             {/* Title */}
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            <h1 className="text-4xl font-bold text-white mb-4">
               {content.title}
             </h1>
 
             {/* Meta Info */}
-            <div className="flex items-center space-x-6 text-sm text-gray-500 mb-6 pb-6 border-b">
+            <div className="flex items-center space-x-6 text-sm text-gray-400 mb-6 pb-6 border-b border-white/10">
               <span>By {content.author?.name}</span>
               <span>{formatDate(content.publishedAt || content.createdAt)}</span>
               <span>👁 {viewsCount} views</span>
@@ -226,8 +254,8 @@ const BlogDetail = () => {
               <div className="mb-8">
                 <iframe
                   src={getVideoEmbedUrl(content.videoUrl)}
-                  className="w-full h-64 md:h-96 rounded-lg"
-                  frameBorder="0"
+                  className="w-full h-64 md:h-96 rounded-lg border border-white/10"
+                  style={{ border: 0 }}
                   allowFullScreen
                 ></iframe>
               </div>
@@ -236,7 +264,7 @@ const BlogDetail = () => {
                 <img
                   src={content.featuredImage}
                   alt={content.title}
-                  className="w-full h-auto rounded-lg"
+                  className="w-full h-auto rounded-lg border border-white/10"
                 />
               </div>
             ) : null}
@@ -244,27 +272,27 @@ const BlogDetail = () => {
             {/* Description */}
             {content.description && (
               <div className="mb-8">
-                <p className="text-xl text-gray-700 leading-relaxed">
+                <p className="text-xl text-gray-300 leading-relaxed">
                   {content.description}
                 </p>
               </div>
             )}
 
             {/* Content */}
-            <div className="prose prose-lg max-w-none mb-8">
+            <div className="prose prose-lg prose-invert max-w-none mb-8">
               <div
-                className="text-gray-800 leading-relaxed whitespace-pre-wrap"
+                className="text-white leading-relaxed whitespace-pre-wrap [&_*]:text-white [&_h1]:text-white [&_h2]:text-white [&_h3]:text-white [&_h4]:text-white [&_h5]:text-white [&_h6]:text-white [&_p]:text-gray-200 [&_li]:text-gray-200 [&_span]:text-gray-200 [&_div]:text-gray-200 [&_a]:text-cyan-400 [&_a:hover]:text-cyan-300 [&_strong]:text-white [&_b]:text-white [&_em]:text-gray-300"
                 dangerouslySetInnerHTML={{ __html: content.content.replace(/\n/g, '<br>') }}
               />
             </div>
 
             {/* Tags */}
             {content.tags && content.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-8 pb-8 border-b">
+              <div className="flex flex-wrap gap-2 mb-8 pb-8 border-b border-white/10">
                 {content.tags.map((tag, index) => (
                   <span
                     key={index}
-                    className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full"
+                    className="px-3 py-1 bg-blue-500/20 text-blue-300 text-sm rounded-full border border-blue-500/30 hover:border-blue-400/50 transition-colors"
                   >
                     #{tag}
                   </span>
@@ -276,17 +304,17 @@ const BlogDetail = () => {
             <div className="flex justify-center space-x-4">
               <button 
                 onClick={handleToggleLike} 
-                className={`px-6 py-3 rounded-lg transition-colors ${
+                className={`px-6 py-3 rounded-lg transition-all ${
                   liked 
-                    ? 'bg-[#80A6F7] text-white hover:bg-[#6f93df]' 
-                    : 'bg-green-600 text-white hover:bg-green-700'
+                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/50 hover:border-cyan-400 shadow-lg shadow-cyan-500/20' 
+                    : 'bg-white/10 text-white border border-white/20 hover:border-cyan-400/50 hover:shadow-lg hover:shadow-cyan-500/20'
                 }`}
               >
                 {liked ? '💙 Liked' : '❤️ Like'} ({likesCount})
               </button>
               <button 
                 onClick={handleShare} 
-                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-6 py-3 bg-white/10 border border-white/20 text-white rounded-lg hover:border-cyan-400/50 hover:shadow-lg hover:shadow-cyan-500/20 transition-all"
               >
                 📤 Share
               </button>

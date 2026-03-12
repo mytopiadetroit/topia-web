@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -99,10 +99,10 @@ const ResourceCenter = () => {
     console.log('Clicked image:', image.title);
 
     setIsPaused(true);
-    setShowFullscreen(false); // Add this
-    setFullscreenImage(null);  // Add this - reset first
+    setShowFullscreen(false); 
+    setFullscreenImage(null);  
 
-    // Use setTimeout to ensure state updates
+  
     setTimeout(() => {
       setCurrentImageIndex(index);
       setFullscreenImage(image);
@@ -174,10 +174,10 @@ const ResourceCenter = () => {
   };
 
   const openContentModal = async (contentItem) => {
-    // Use slug from backend (SEO-friendly!)
-    const slug = contentItem.slug || contentItem._id; // Fallback to ID if slug doesn't exist yet
+   
+    const slug = contentItem.slug || contentItem._id; 
     
-    // Navigate to clean slug URL (no ID parameter!)
+   
     router.push(`/blog/${slug}`);
   };
 
@@ -241,7 +241,7 @@ const ResourceCenter = () => {
   const getVideoEmbedUrl = (url) => {
     if (!url) return '';
 
-    // YouTube
+    
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
       const videoId = url.includes('youtu.be')
         ? url.split('youtu.be/')[1]?.split('?')[0]
@@ -249,7 +249,7 @@ const ResourceCenter = () => {
       return `https://www.youtube.com/embed/${videoId}`;
     }
 
-    // Vimeo
+   
     if (url.includes('vimeo.com')) {
       const videoId = url.split('vimeo.com/')[1]?.split('?')[0];
       return `https://player.vimeo.com/video/${videoId}`;
@@ -266,59 +266,127 @@ const ResourceCenter = () => {
         <meta name="keywords" content="mushrooms, wellness, health, blogs, videos, resources" />
       </Head>
 
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen relative" style={{ background: 'transparent' }}>
+        {/* Global Stars Animation */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+          <div className="stars-container">
+            {[...Array(60)].map((_, i) => (
+              <div
+                key={`global-star-${i}`}
+                className="star"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                  animationDelay: `${Math.random() * 3}s`,
+                  animationDuration: `${2 + Math.random() * 3}s`
+                }}
+              />
+            ))}
+          </div>
+        </div>
+
+    
+
         {/* Hero Section */}
-        <div className="bg-gradient-to-r from-[#80A6F7] to-[#80A6F7] text-white">
+        <div className="relative z-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
             <div className="text-center">
-              <h1 className="text-4xl md:text-6xl font-bold mb-6">
+              <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white">
                 Resource Center
               </h1>
-              <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
-                Discover the world of functional mushrooms through our curated collection of blogs, videos, and educational content
+              <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto text-gray-300">
+                Discover mushroom education, guides, and insights from Shroom Topia Detroit.
               </p>
 
-              {/* Search Bar */}
-              {/* <div className="max-w-2xl border-white border-1 rounded-4xl mx-auto">
+              <div className="max-w-2xl mx-auto mb-12">
                 <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
                   <input
                     type="text"
-                    placeholder="Search for content..."
+                    placeholder="Search guide, strains, or topics"
                     value={filters.search}
                     onChange={(e) => handleFilterChange('search', e.target.value)}
-                    className="w-full px-6 py-4 text-gray-900 rounded-full text-lg focus:outline-none focus:ring-4 focus:ring-white/30"
+                    className="w-full pl-10 pr-4 py-4 bg-transparent border border-[#86D1F8] rounded-full text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#86D1F8]/50 focus:border-[#86D1F8]"
+                    style={{ borderWidth: '0.25px' }}
                   />
-                  <button className="absolute right-2 top-2 bg-white text-[#80A6F7] px-6 py-2 rounded-full  transition-colors">
-                    Search
+                </div>
+              </div>
+
+              <div className="mb-12">
+                <div className="relative flex items-center justify-center mb-6">
+                  <div className="w-20 lg:w-28 h-px bg-gradient-to-r from-transparent via-[#86D1F8] to-transparent opacity-60 mr-3"></div>
+                  <h2 className="text-2xl font-bold text-white">Explore Topics</h2>
+                  <div className="w-20 lg:w-28 h-px bg-gradient-to-r from-transparent via-[#86D1F8] to-transparent opacity-60 ml-3"></div>
+                </div>
+                <div className="flex flex-wrap justify-center gap-3">
+                  <button 
+                    onClick={() => handleFilterChange('category', 'Getting Started')}
+                    className="px-6 py-3 bg-transparent border border-[#86D1F8] rounded-full text-white hover:bg-[#86D1F8]/10 transition-all"
+                    style={{ borderWidth: '0.25px' }}
+                  >
+                    Getting Started
+                  </button>
+                  <button 
+                    onClick={() => handleFilterChange('category', 'Microdosing')}
+                    className="px-6 py-3 bg-transparent border border-[#86D1F8] rounded-full text-white hover:bg-[#86D1F8]/10 transition-all"
+                    style={{ borderWidth: '0.25px' }}
+                  >
+                    Microdosing
+                  </button>
+                  <button 
+                    onClick={() => handleFilterChange('category', 'Experience')}
+                    className="px-6 py-3 bg-transparent border border-[#86D1F8] rounded-full text-white hover:bg-[#86D1F8]/10 transition-all"
+                    style={{ borderWidth: '0.25px' }}
+                  >
+                    Experience
+                  </button>
+                  <button 
+                    onClick={() => handleFilterChange('category', 'Safety')}
+                    className="px-6 py-3 bg-transparent border border-[#86D1F8] rounded-full text-white hover:bg-[#86D1F8]/10 transition-all"
+                    style={{ borderWidth: '0.25px' }}
+                  >
+                    Safety
+                  </button>
+                  <button 
+                    onClick={() => handleFilterChange('category', 'Formats')}
+                    className="px-6 py-3 bg-transparent border border-[#86D1F8] rounded-full text-white hover:bg-[#86D1F8]/10 transition-all"
+                    style={{ borderWidth: '0.25px' }}
+                  >
+                    Formats <span className="text-xs opacity-70">(Capsules / Edibles / Dried)</span>
                   </button>
                 </div>
-              </div> */}
+              </div>
             </div>
 
-            {/* Gallery Visual Guides Section */}
             {galleryImages.length > 0 && (
               <div className="mt-12">
-                <h2 className="text-2xl md:text-3xl font-bold tracking-[0.5em] uppercase mb-6 text-center">
-                  Visual Guides
-                </h2>
+                <div className="relative flex items-center justify-center mb-6 max-w-4xl mx-auto">
+                  <div className="absolute left-4 lg:left-16 w-32 lg:w-48 h-px bg-gradient-to-r from-transparent via-[#86D1F8] to-transparent opacity-60"></div>
+                  <h2 className="text-2xl md:text-3xl font-bold tracking-[0.5em] uppercase text-center text-white px-12 lg:px-20" style={{ textShadow: '0 0 20px rgba(255, 255, 255, 0.6)' }}>
+                    Visual Guides
+                  </h2>
+                  <div className="absolute right-4 lg:right-16 w-32 lg:w-48 h-px bg-gradient-to-r from-transparent via-[#86D1F8] to-transparent opacity-60"></div>
+                </div>
                 <div
                   className="relative max-w-4xl mx-auto"
                   onMouseEnter={() => setIsPaused(true)}
                   onMouseLeave={() => setIsPaused(false)}
                 >
-                  {/* Main Image Display */}
                   <div
-                    className="relative overflow-hidden rounded-2xl shadow-2xl bg-white/10 cursor-pointer h-[500px] md:h-[1100px]"
+                    className="relative overflow-hidden rounded-2xl shadow-2xl bg-transparent border border-gray-800/40 cursor-pointer h-[500px] md:h-[1100px]"
                     onMouseEnter={() => setIsPaused(true)}
                     onMouseLeave={() => setIsPaused(false)}
-                    onClick={() => handleImageClick(galleryImages[currentImageIndex], currentImageIndex)} // Move onClick here
+                    onClick={() => handleImageClick(galleryImages[currentImageIndex], currentImageIndex)}
                   >
                     {galleryImages.map((image, index) => (
                       <div
                         key={image._id}
                         className={`absolute inset-0 transition-opacity duration-1000 ${index === currentImageIndex ? 'opacity-100' : 'opacity-0'
                           }`}
-                      // Remove onClick from here
                       >
                         <img
                           src={image.imageUrl.startsWith('http') ? image.imageUrl : `http://localhost:5000${image.imageUrl}`}
@@ -335,7 +403,6 @@ const ResourceCenter = () => {
                     ))}
                   </div>
 
-                  {/* Image Thumbnails */}
                   <div className="flex justify-center gap-3 mt-6 flex-wrap px-4">
                     {galleryImages.map((image, index) => (
                       <button
@@ -356,7 +423,6 @@ const ResourceCenter = () => {
                     ))}
                   </div>
 
-                  {/* Navigation Arrows */}
                   {galleryImages.length > 1 && (
                     <>
                       <button
@@ -378,44 +444,67 @@ const ResourceCenter = () => {
                     </>
                   )}
                 </div>
+
+                <div className="text-center mt-6">
+                  <button 
+                    onClick={() => handleImageClick(galleryImages[currentImageIndex], currentImageIndex)}
+                    className="inline-flex items-center text-white hover:text-cyan-400 transition-colors"
+                  >
+                    View Full Guide
+                    <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             )}
           </div>
         </div>
 
-        {/* Filters */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-            <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-              <div className="flex flex-col sm:flex-row gap-4 flex-1">
-                <select
-                  value={filters.type}
-                  onChange={(e) => handleFilterChange('type', e.target.value)}
-                  className="px-4 py-2 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                >
-                  <option value="">All Content Types</option>
-                  <option value="blog">Blog Posts</option>
-                  <option value="video">Videos</option>
-                </select>
+          <div className="relative flex items-center justify-center mb-8">
+            <div className="w-20 lg:w-28 h-px bg-gradient-to-r from-transparent via-[#86D1F8] to-transparent opacity-60 mr-3"></div>
+            <h2 className="text-2xl md:text-3xl font-bold text-white text-center">Articles</h2>
+            <div className="w-20 lg:w-28 h-px bg-gradient-to-r from-transparent via-[#86D1F8] to-transparent opacity-60 ml-3"></div>
+          </div>
+          
+          <div className="flex flex-row gap-4 mb-8">
+            <select
+              value={filters.type}
+              onChange={(e) => handleFilterChange('type', e.target.value)}
+              className="flex-1 px-6 py-3 border border-[#86D1F8] bg-transparent text-white rounded-full focus:ring-2 focus:ring-[#86D1F8]/30 focus:border-[#86D1F8]"
+              style={{ 
+                borderWidth: '0.25px',
+                textAlign: 'left',
+                paddingLeft: '24px'
+              }}
+            >
+              <option value="" className="bg-gray-900 text-white">Filter by Topic</option>
+              <option value="blog" className="bg-gray-900 text-white">Blog Posts</option>
+              <option value="video" className="bg-gray-900 text-white">Videos</option>
+            </select>
 
-                <select
-                  value={filters.category}
-                  onChange={(e) => handleFilterChange('category', e.target.value)}
-                  className="px-4 py-2 border text-gray-700  border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                >
-                  <option value="">All Categories</option>
-                  {categories.map((category, index) => (
-                    <option key={index} value={category}>
-                      {category}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <select
+              value={filters.category}
+              onChange={(e) => handleFilterChange('category', e.target.value)}
+              className="flex-1 px-6 py-3 border border-[#86D1F8] bg-transparent text-white rounded-full focus:ring-2 focus:ring-[#86D1F8]/30 focus:border-[#86D1F8]"
+              style={{ 
+                borderWidth: '0.25px',
+                textAlign: 'left',
+                paddingLeft: '24px'
+              }}
+            >
+              <option value="" className="bg-gray-900 text-white">Content Type</option>
+              {categories.map((category, index) => (
+                <option key={index} value={category} className="bg-gray-900 text-white">
+                  {category}
+                </option>
+              ))}
+            </select>
+          </div>
 
-              <div className="text-sm text-gray-600">
-                {pagination.totalItems || 0} results found
-              </div>
-            </div>
+          <div className="text-sm text-[#86D1F8] font-medium mb-8">
+            {pagination.totalItems || 0} results found
           </div>
 
           {/* Content Grid */}
@@ -426,18 +515,17 @@ const ResourceCenter = () => {
           ) : content.length === 0 ? (
             <div className="text-center py-16">
               <div className="text-gray-400 text-6xl mb-4">📚</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No content found</h3>
-              <p className="text-gray-600">Try adjusting your search or filter criteria</p>
+              <h3 className="text-xl font-semibold text-white mb-2">No content found</h3>
+              <p className="text-gray-300">Try adjusting your search or filter criteria</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
               {content.map((item) => (
                 <div
                   key={item._id}
-                  className="bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden cursor-pointer group"
+                  className="bg-white/5 backdrop-blur-sm rounded-lg border border-gray-800/40 hover:border-gray-700/60 transition-all duration-300 overflow-hidden cursor-pointer group"
                   onClick={() => openContentModal(item)}
                 >
-                  {/* Image */}
                   <div className="relative h-48 bg-gray-200">
                     {item.featuredImage ? (
                       <img
@@ -451,17 +539,12 @@ const ResourceCenter = () => {
                       </div>
                     )}
 
-                    {/* Type Badge */}
                     <div className="absolute top-3 left-3">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${item.type === 'video'
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-blue-100 text-blue-800'
-                        }`}>
-                        {item.type === 'video' ? 'Video' : 'Blog'}
+                      <span className="px-3 py-1 text-sm font-medium rounded-full bg-[#86D1F8] text-black">
+                        {item.type === 'video' ? 'Video' : 'Article'}
                       </span>
                     </div>
 
-                    {/* Read Time */}
                     {item.readTime > 0 && (
                       <div className="absolute top-3 right-3">
                         <span className="bg-black/50 text-white px-2 py-1 text-xs rounded">
@@ -471,7 +554,6 @@ const ResourceCenter = () => {
                     )}
                   </div>
 
-                  {/* Content */}
                   <div className="p-6">
                     <div className="mb-2">
                       <span className="text-sm text-green-600 font-medium">
@@ -479,15 +561,15 @@ const ResourceCenter = () => {
                       </span>
                     </div>
 
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-green-600 transition-colors">
+                    <h3 className="text-lg font-semibold text-white mb-2 line-clamp-2 group-hover:text-cyan-400 transition-colors">
                       {item.title}
                     </h3>
 
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                    <p className="text-gray-300 text-sm mb-4 line-clamp-3">
                       {item.description}
                     </p>
 
-                    <div className="flex items-center justify-between text-sm text-gray-500">
+                    <div className="flex items-center justify-between text-sm text-gray-400 mb-4">
                       <div className="flex items-center space-x-4">
                         <span>👁 {item.views}</span>
                         <span>❤️ {item.likes}</span>
@@ -495,13 +577,24 @@ const ResourceCenter = () => {
                       <span>{formatDate(item.publishedAt || item.createdAt)}</span>
                     </div>
 
-                    {/* Tags */}
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openContentModal(item);
+                      }}
+                      className="w-full bg-transparent border border-[#86D1F8] text-[#86D1F8] py-2 px-4 rounded-lg hover:bg-[#86D1F8]/10 transition-all text-sm font-medium"
+                      style={{ borderWidth: '0.25px' }}
+                    >
+                      Read Guide
+                    </button>
+
                     {item.tags && item.tags.length > 0 && (
                       <div className="mt-3 flex flex-wrap gap-1">
                         {item.tags.slice(0, 3).map((tag, index) => (
                           <span
                             key={index}
-                            className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded"
+                            className="px-2 py-1 bg-transparent border border-[#86D1F8] text-[#86D1F8] text-xs rounded"
+                            style={{ borderWidth: '0.25px' }}
                           >
                             #{tag}
                           </span>
@@ -564,9 +657,9 @@ const ResourceCenter = () => {
         {/* Content Modal */}
         {showModal && selectedContent && (
           <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg w-[95vw] h-[95vh] overflow-y-auto shadow-2xl">
+            <div className="bg-gray-900/95 backdrop-blur-sm rounded-lg w-[95vw] h-[95vh] overflow-y-auto shadow-2xl border border-gray-800/40">
               {/* Modal Header */}
-              <div className="sticky top-0 bg-white border-b p-6 flex items-center justify-between z-10">
+              <div className="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-gray-800/40 p-6 flex items-center justify-between z-10">
                 <div>
                   <span className={`px-3 py-1 text-sm font-medium rounded-full ${selectedContent.type === 'video'
                       ? 'bg-red-100 text-red-800'
@@ -643,7 +736,7 @@ const ResourceCenter = () => {
                     {selectedContent.tags.map((tag, index) => (
                       <span
                         key={index}
-                        className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full"
+                        className="px-3 py-1 bg-transparent border border-cyan-400/40 text-cyan-400 text-sm rounded-full"
                       >
                         #{tag}
                       </span>

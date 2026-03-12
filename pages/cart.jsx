@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import { useUser } from '../context/UserContext';
@@ -118,17 +118,76 @@ const Cart = () => {
 
   if (cart.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-20 p-4">
-        <div className="max-w-6xl mx-auto">
+      <div className="min-h-screen relative pt-20 p-4" style={{ background: 'transparent' }}>
+        {/* Animated stars background */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+          <div className="stars-container">
+            {[...Array(60)].map((_, i) => (
+              <div
+                key={`star-${i}`}
+                className="star"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                  animationDelay: `${Math.random() * 3}s`,
+                  animationDuration: `${2 + Math.random() * 3}s`
+                }}
+              />
+            ))}
+          </div>
+        </div>
+
+        <style jsx>{`
+          .stars-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+          }
+          
+          .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle linear infinite;
+            box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
+          }
+          
+          @keyframes twinkle {
+            0%, 100% {
+              opacity: 0.2;
+              transform: scale(0.8);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(1.2);
+            }
+          }
+          
+          .star:nth-child(3n) {
+            width: 3px;
+            height: 3px;
+            box-shadow: 0 0 6px rgba(124, 198, 255, 0.7);
+          }
+          
+          .star:nth-child(5n) {
+            width: 4px;
+            height: 4px;
+            box-shadow: 0 0 8px rgba(47, 128, 255, 0.8);
+          }
+        `}</style>
+
+        <div className="max-w-6xl mx-auto relative z-10">
           <div className="text-center py-16">
             <div className="mb-6">
               <img src="/images/cart.png" alt="Empty Cart" className="w-32 h-32 mx-auto opacity-50" />
             </div>
-            <h1 className="text-2xl font-semibold text-gray-900 mb-4">Your cart is empty</h1>
-            <p className="text-gray-600 mb-8">Looks like you haven't added any products to your cart yet.</p>
+            <h1 className="text-2xl font-semibold text-white mb-4">Your cart is empty</h1>
+            <p className="text-gray-300 mb-8">Looks like you haven't added any products to your cart yet.</p>
             <button 
               onClick={() => router.push('/menu')}
-              className="bg-[#536690] hover:bg-[#536690] text-white font-semibold py-3 px-8 rounded-full transition-colors"
+              className="bg-transparent text-white border-2 border-white/50 hover:border-white font-semibold py-3 px-8 rounded-full transition-all shadow-[0_8px_30px_rgba(77,163,255,0.8)] hover:shadow-[0_12px_40px_rgba(77,163,255,1)]"
             >
               Start Shopping
             </button>
@@ -139,8 +198,67 @@ const Cart = () => {
   }
   
   return (
-    <div className="min-h-screen bg-gray-50 pt-20 p-4">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen relative pt-20 p-4" style={{ background: 'transparent' }}>
+      {/* Animated stars background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="stars-container">
+          {[...Array(60)].map((_, i) => (
+            <div
+              key={`star-${i}`}
+              className="star"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${2 + Math.random() * 3}s`
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      <style jsx>{`
+        .stars-container {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+        }
+        
+        .star {
+          position: absolute;
+          width: 2px;
+          height: 2px;
+          background: white;
+          border-radius: 50%;
+          animation: twinkle linear infinite;
+          box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
+        }
+        
+        @keyframes twinkle {
+          0%, 100% {
+            opacity: 0.2;
+            transform: scale(0.8);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.2);
+          }
+        }
+        
+        .star:nth-child(3n) {
+          width: 3px;
+          height: 3px;
+          box-shadow: 0 0 6px rgba(124, 198, 255, 0.7);
+        }
+        
+        .star:nth-child(5n) {
+          width: 4px;
+          height: 4px;
+          box-shadow: 0 0 8px rgba(47, 128, 255, 0.8);
+        }
+      `}</style>
+
+      <div className="max-w-6xl mx-auto relative z-10">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Left Side - Cart Items */}
           <div className="flex-1">
@@ -152,18 +270,18 @@ const Cart = () => {
                     <path d="M19 12H5M12 19l-7-7 7-7"/>
                   </svg>
                 </button> */}
-                <h1 className="text-xl font-semibold text-gray-900">My Cart ({cartCount} items)</h1>
+                <h1 className="text-xl font-semibold text-white">My Cart ({cartCount} items)</h1>
               </div>
               <div className="flex items-center gap-3">
                 <button 
                   onClick={handleClearCart}
-                  className="px-4 py-2 text-sm text-red-600 hover:text-red-700 border border-red-300 rounded-full hover:bg-red-50 transition-colors"
+                  className="px-4 py-2 text-sm bg-transparent text-white border-2 border-white/50 hover:border-white rounded-full font-semibold transition-all shadow-[0_8px_30px_rgba(77,163,255,0.8)] hover:shadow-[0_12px_40px_rgba(77,163,255,1)] transform hover:scale-105"
                 >
                   Clear Cart
                 </button>
                 <button 
                   onClick={() => router.push('/menu')} 
-                  className="flex items-center gap-2 px-4 py-2 border border-gray-500 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-transparent text-white border-2 border-white/50 hover:border-white rounded-full text-sm font-semibold transition-all shadow-[0_8px_30px_rgba(77,163,255,0.8)] hover:shadow-[0_12px_40px_rgba(77,163,255,1)] transform hover:scale-105"
                 >
                   Continue Shopping
                 </button>
@@ -180,7 +298,7 @@ const Cart = () => {
                 const isAtMaxStock = stock > 0 && item.quantity >= stock;
                 
                 return (
-                  <div key={item._id || item.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 w-full">
+                  <div key={item._id || item.id} className="bg-white/5 backdrop-blur-[1px] rounded-2xl border border-gray-800/40 w-full">
                     <div className="flex items-center gap-4">
                     <div 
   className="w-32 rounded-2xl h-30 overflow-hidden flex-shrink-0 cursor-pointer"
@@ -197,7 +315,7 @@ const Cart = () => {
 </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <h3 className="font-semibold text-gray-900 text-sm">
+                          <h3 className="font-semibold text-white text-sm">
                             {item.displayName || item.name}
                           </h3>
                           {item.isDealProduct && item.dealDiscount > 0 && (
@@ -207,12 +325,12 @@ const Cart = () => {
                           )}
                         </div>
                         {item.selectedVariant && (
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-gray-300">
                             Size: {item.selectedVariant.size.value}{item.selectedVariant.size.unit}
                           </p>
                         )}
                         {item.selectedFlavor && (
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-gray-300">
                             Flavor: {item.selectedFlavor.name}
                             {/* {item.selectedFlavor.price > 0 && (
                               <span className="text-green-600 ml-1">
@@ -221,7 +339,7 @@ const Cart = () => {
                             )} */}
                           </p>
                         )}
-                        <p className="text-gray-500 text-sm mt-1">Quantity: {item.quantity}</p>
+                        <p className="text-gray-200 text-sm mt-1">Quantity: {item.quantity}</p>
                         {isOutOfStock && (
                           <p className="text-red-500 text-sm mt-1">Out of stock</p>
                         )}
@@ -240,29 +358,29 @@ const Cart = () => {
                       {/* Quantity Controls and Delete */}
                       <div className="flex items-end mt-14 gap-3 mr-4">
                         {/* Quantity Controls */}
-                        <div className="flex items-center border bg-[#BABABA80] border-gray-300 rounded-full">
+                        <div className="flex items-center border bg-white/10 border-white/30 rounded-full">
                           <button 
                             onClick={() => handleQuantityChange(item._id || item.id, item.quantity - 1, item.selectedVariant || null, item.selectedFlavor || null)}
-                            className="p-2 hover:bg-gray-50 rounded-l-full"
+                            className="p-2 hover:bg-white/10 rounded-l-full transition-colors"
                           >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="w-4 h-4 text-gray-800 hover:text-black" stroke="currentColor" strokeWidth="2">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="w-4 h-4 text-white hover:text-cyan-400" stroke="currentColor" strokeWidth="2">
                               <path d="M5 12h14"/>
                             </svg>
                           </button>
-                          <span className="px-3 py-1 text-sm text-gray-800 font-medium">{item.quantity}</span>
+                          <span className="px-3 py-1 text-sm text-white font-medium">{item.quantity}</span>
                           <button 
                             onClick={() => handleQuantityChange(item._id || item.id, item.quantity + 1, item.selectedVariant || null, item.selectedFlavor || null)}
                             disabled={isOutOfStock || isAtMaxStock}
                             className={`p-2 rounded-r-full ${
                               isOutOfStock || isAtMaxStock 
                                 ? 'opacity-50 cursor-not-allowed' 
-                                : 'hover:bg-gray-50'
+                                : 'hover:bg-white/10'
                             }`}
                           >
                             <svg width="16" height="16" viewBox="0 0 24 24" className={`w-4 h-4 ${
                               isOutOfStock || isAtMaxStock 
                                 ? 'text-gray-400' 
-                                : 'text-gray-800 hover:text-black'
+                                : 'text-white hover:text-cyan-400'
                             }`} fill="none" stroke="currentColor" strokeWidth="2">
                               <path d="M12 5v14M5 12h14"/>
                             </svg>
@@ -271,7 +389,7 @@ const Cart = () => {
                         {/* Delete Button */}
                         <button 
                           onClick={() => handleRemoveItem(item._id || item.id, item.selectedVariant || null, item.selectedFlavor || null)}
-                          className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                          className="p-2 text-white hover:text-cyan-400 transition-colors"
                         >
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c0 1 1 2 2 2v2"/>
@@ -290,28 +408,28 @@ const Cart = () => {
 
           {/* Right Side - Bill Summary */}
           <div className="w-full lg:w-80 flex flex-col items-center lg:ml-44">
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 w-full">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">Bill Summary</h2>
+            <div className="bg-white/5 backdrop-blur-[1px] rounded-2xl p-6 border border-gray-800/40 w-full">
+              <h2 className="text-xl font-semibold text-white mb-6">Bill Summary</h2>
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Subtotal</span>
-                  <span className="font-semibold text-gray-900">$ {subtotal.toFixed(2)}</span>
+                  <span className="text-gray-300">Subtotal</span>
+                  <span className="font-semibold text-white">$ {subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Tax ({taxPercentage}%)</span>
-                  <span className="font-semibold text-gray-900">$ {tax.toFixed(2)}</span>
+                  <span className="text-gray-300">Tax ({taxPercentage}%)</span>
+                  <span className="font-semibold text-white">$ {tax.toFixed(2)}</span>
                 </div>
               </div>
               <div className="border-t border-gray-200 pt-4 mb-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-xl font-semibold text-gray-900">Grand Total</span>
-                  <span className="text-xl font-semibold text-gray-900">$ {grandTotal.toFixed(2)}</span>
+                  <span className="text-xl font-semibold text-white">Grand Total</span>
+                  <span className="text-xl font-semibold text-white">$ {grandTotal.toFixed(2)}</span>
                 </div>
               </div>
             </div>
             <button 
               onClick={handleSubmitCart}
-              className="w-full mt-6 bg-[#536690] hover:bg-slate-700 text-white font-semibold py-4 px-6 rounded-4xl transition-colors"
+              className="w-full mt-6 bg-transparent text-white border-2 border-white/50 hover:border-white font-semibold py-4 px-6 rounded-full transition-all shadow-[0_8px_30px_rgba(77,163,255,0.8)] hover:shadow-[0_12px_40px_rgba(77,163,255,1)] transform hover:scale-105"
             >
               Submit Cart
             </button>

@@ -144,9 +144,9 @@ export default function Home() {
     };
     
     loadInitialData();
-  }, [isLoggedIn]); // Re-run when login status changes
+  }, [isLoggedIn]); 
 
-  // Removed duplicate polling - settings are loaded once on mount
+  
 
   const formatTime = (time) => {
     if (!time) return '';
@@ -195,7 +195,8 @@ export default function Home() {
   }, [sections]);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen relative overflow-x-hidden" style={{ background: 'transparent' }}>
+      {/* Global Background Image - Applied via body in globals.css */}
     
      {/* Debug Info - Remove in production */}
      {/* <div style={{ position: 'fixed', top: 10, right: 10, background: 'black', color: 'white', padding: '10px', zIndex: 9999, fontSize: '12px', borderRadius: '5px' }}>
@@ -211,78 +212,75 @@ export default function Home() {
      </div> */}
       
  {/* Hero Section */}
-<section className="relative h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-900 via-black to-gray-800">
-  {/* Background Image - Blue Mushrooms */}
-  <div className="absolute inset-0 z-0">
-    <Image 
-      src={homepageImages.hero}
-      alt="Glowing blue mushrooms"
-      className="w-full h-full object-cover opacity-60"
-      fill
-      priority={true}
-      sizes="100vw"
-    />
-    {/* Dark gradient overlay */}
-    <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent"></div>
-  </div>
+<section 
+  className="relative min-h-[600px] flex items-center justify-center overflow-hidden py-20"
+  style={{
+    background: 'transparent'
+  }}
+>
+  {/* Cosmic Glow Effect - Right Side */}
+  <div 
+    className="absolute right-0 top-1/4 w-1/2 h-1/2 opacity-20 blur-3xl pointer-events-none"
+    style={{
+      background: 'radial-gradient(circle, rgba(47,128,255,0.3) 0%, transparent 70%)'
+    }}
+  />
   
   {/* Hero Content - Left Aligned */}
   <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 lg:px-16">
-    <div className={`max-w-xl transform transition-all duration-1000 ${
+    <div className={`max-w-2xl transform transition-all duration-1000 ${
       isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
     }`}>
-      <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-6 leading-tight tracking-tight">
-        ELEVATE YOUR<br />
-        WELLNESS<br />
-        NATURALLY
+      <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-6 leading-tight tracking-tight">
+        ELEVATED<br />
+        EXPERIENCES.
       </h1>
-      <p className="text-base md:text-lg lg:text-xl text-gray-300 mb-10 font-light leading-relaxed">
-        Discover the power of therapeutic<br />
-        mushrooms today!
+      <p className="text-base md:text-lg lg:text-xl text-gray-400 mb-10 font-light leading-relaxed">
+       Your Portal to the Largest Mushroom Selection in the Metro Detroit Area
       </p>
-      <button 
-        onClick={() => {
-          if (isLoggedIn) {
-            router.push('/menu');
-          } else {
-            router.push('/auth/login');
-          }
-        }}
-        className="bg-white hover:bg-gray-100 text-black px-10 py-4 rounded-full text-base md:text-lg font-semibold transition-all duration-300 transform hover:scale-105 inline-block uppercase tracking-wider"
-      >
-        MENU
-      </button>
+      
+      {/* Buttons Container */}
+      <div className="flex flex-wrap gap-4">
+        {/* Primary Button */}
+        <button 
+          onClick={() => {
+            if (isLoggedIn) {
+              router.push('/menu');
+            } else {
+              router.push('/auth/login');
+            }
+          }}
+          className="bg-white hover:bg-gray-50 text-black px-8 py-4 rounded-full text-sm md:text-base font-semibold transition-all duration-300 transform hover:scale-105 uppercase tracking-wider hover:shadow-[0_8px_30px_rgba(77,163,255,0.8)]"
+        >
+          EXPLORE THE MENU
+        </button>
+        
+        {/* Secondary Button */}
+        <button 
+          onClick={() => router.push('/resourcecenter')}
+          className="bg-transparent text-white border-2 border-white/30 hover:border-white/50 px-8 py-4 rounded-full text-sm md:text-base font-semibold transition-all duration-300 transform hover:scale-105 uppercase tracking-wider hover:shadow-[0_8px_30px_rgba(77,163,255,0.8)]"
+        >
+          LEARN YOUR DOSAGE
+        </button>
+      </div>
     </div>
   </div>
-
-  {/* Decorative mushroom image on right - visible on larger screens */}
-  {/* <div className="absolute right-0 top-0 bottom-0 w-1/2 hidden lg:block pointer-events-none">
-    <div className="relative w-full h-full">
-      <Image 
-        src="/images/mush.webp"
-        alt="Blue mushrooms decoration"
-        className="object-contain object-right opacity-80"
-        fill
-        priority={true}
-        sizes="50vw"
-      />
-    </div>
-  </div> */}
 </section>
 
-     {/* Content Section */}
-<section className="py-16 px-4 bg-white">
+     {/* Content Section - DISCOVER SHROOMTOPIA - COMMENTED OUT */}
+     {/*
+<section className="py-16 px-4" style={{ background: 'transparent' }}>
   <div className="max-w-5xl mx-auto">
-    {/* Discover Shroomtopia Header */}
+    {/* Discover Shroomtopia Header *-/}
     <div className="text-center mb-16">
-      <h2 className="text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-500 tracking-[0.1em] uppercase">
+      <h2 className="text-3xl lg:text-4xl xl:text-5xl font-bold text-white tracking-[0.1em] uppercase">
         DISCOVER SHROOMTOPIA
       </h2>
     </div>
 
-    {/* Mission Card with Background Image */}
+    {/* Mission Card with Background Image *-/}
     <div className="relative rounded-3xl overflow-hidden shadow-2xl">
-      {/* Background Image */}
+      {/* Background Image *-/}
       <div className="absolute inset-0 z-0">
         <Image 
           src={homepageImages.mission}
@@ -291,11 +289,11 @@ export default function Home() {
           fill
           sizes="(max-width: 768px) 100vw, 1200px"
         />
-        {/* Light overlay for better text visibility */}
+        {/* Light overlay for better text visibility *-/}
         <div className="absolute inset-0 bg-black/50"></div>
       </div>
 
-      {/* Mission Content */}
+      {/* Mission Content *-/}
       <div className="relative z-10 py-20 md:py-24 lg:py-28 px-8 md:px-16 lg:px-24 text-center">
         <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-8 tracking-wide uppercase">
           OUR MISSION
@@ -303,15 +301,16 @@ export default function Home() {
         <p className="text-white text-base md:text-lg lg:text-xl leading-relaxed max-w-4xl mx-auto">
           At SHROOMTOPIA, we are dedicated to enhancing your wellness journey through the power of therapeutic mushrooms. We believe in blending nature&apos;s gifts with modern lifestyles to promote creativity, relaxation, and enjoyment.
         </p>
-         <button  onClick={() => router.push('/resourcecenter')} className="bg-gray-900 mt-8 border-white border mx-auto hover:bg-gray-800 text-white px-6 py-3 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center space-x-2">
+         <button  onClick={() => router.push('/resourcecenter')} className="bg-white hover:bg-gray-50 text-black px-6 py-3 rounded-full text-sm font-semibold transition-all duration-300 transform hover:scale-105 uppercase tracking-wider hover:shadow-[0_8px_30px_rgba(77,163,255,0.8)] mx-auto flex items-center space-x-2 mt-8">
         <span>Access The Resource Center</span>
-        <ChevronRight className="w-5 h-5" />
+        <ChevronRight className="w-4 h-4" />
       </button>
       </div>
       
     </div>
   </div>
 </section>
+     */}
 
     
       
@@ -361,17 +360,11 @@ export default function Home() {
   </div> */}
 </div>
 
-
-          {/* Second Row */}
+          {/* Second Row - The Topia Circle Section - COMMENTED OUT */}
+          {/*
           <div className="grid relative lg:grid-cols-2 gap-12 items-center ">
-              {/* <div className="absolute inset-0 z-0 flex justify-center items-center pointer-events-none">
-    <div className="w-full h-full bg-[url('/images/over.png')] bg-no-repeat bg-center bg-contain"></div>
-  </div> */}
-            {/* Left Image - Rounded Rectangle */}
             <div className="order-2  lg:order-1">
-              
               <div className="relative">
-                
                 <Image 
                   src={homepageImages.circle}
                   alt="Wellness products and tools"
@@ -380,40 +373,20 @@ export default function Home() {
                   height={400}
                 />
               </div>
-                     
             </div>
-   
-
-            {/* Right Content */}
             <div className="order-1  lg:order-2">
-                          
-              <div
-                className=" rounded-4xl p-8 lg:p-10 relative"
-                style={{
-                 
-                }}
-              >
-                
-                {/* Badge */}
-                {/* <div className="absolute -top-10 -right-1">
-                <Image src='/images/offer.png' alt="Special offer badge" width={150} height={150} />
-                </div> */}
-                
+              <div className=" rounded-4xl p-8 lg:p-10 relative">
                 <div className="mb-4">
-                  {/* <span className="text-sm text-gray-600 font-medium">Elevate Your Membership</span> */}
                 </div>
-                
-                <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
+                <h3 className="text-3xl lg:text-4xl font-bold text-white mb-6">
                  The Topia 
 <br />
                 Circle  
                 </h3>
-                
-                <p className="text-gray-600 text-lg mb-8 leading-relaxed">
+                <p className="text-gray-300 text-lg mb-8 leading-relaxed">
                  Step into a world of wellness, where exclusive rewards,  <br />
-                 personalized benefits, and a community of growth await.
+                 personalized benefits, and a community of growth await.
                 </p>
-                
                 {profileLoading ? (
                   <div className="flex items-center space-x-2">
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600"></div>
@@ -429,7 +402,7 @@ export default function Home() {
                     </div>
                     <button 
                       onClick={() => router.push('/profile')} 
-                      className="bg-[#80A6F7] hover:bg-sky-500 text-white px-8 py-4 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105"
+                      className="bg-white hover:bg-gray-50 text-black px-8 py-4 rounded-full text-sm md:text-base font-semibold transition-all duration-300 transform hover:scale-105 uppercase tracking-wider hover:shadow-[0_8px_30px_rgba(77,163,255,0.8)]"
                     >
                       Manage Subscription
                     </button>
@@ -437,11 +410,107 @@ export default function Home() {
                 ) : (
                   <button   
                     onClick={() => router.push('/topia-circle')} 
-                    className="bg-[#2E2E2E] hover:bg-[#2E2E2E] text-white px-8 py-4 rounded-4xl font-semibold transition-all duration-300 transform hover:scale-105"
+                    className="bg-white hover:bg-gray-50 text-black px-8 py-4 rounded-full text-sm md:text-base font-semibold transition-all duration-300 transform hover:scale-105 uppercase tracking-wider shadow-[0_4px_15px_rgba(77,163,255,0.4)] hover:shadow-[0_8px_30px_rgba(77,163,255,0.8)]"
                   >
                     Join Now 
                   </button>
                 )}
+              </div>
+            </div>
+          </div>
+          */}
+
+          {/* New Images Section - Replacing Topia Circle */}
+          <div className="grid lg:grid-cols-2 gap-8 items-center my-12">
+            <div className="relative min-h-[400px] overflow-hidden rounded-lg">
+              <Image 
+                src="/images/mission.png"
+                alt="Mission Image"
+                className="w-full object-cover rounded-lg"
+                width={600}
+                height={400}
+              />
+              {/* Bottom Border Line - Mission */}
+              <div className="hidden md:block absolute -bottom-6 md:-bottom-11 left-1/2 transform -translate-x-1/2 w-48 md:w-80 h-12 md:h-24">
+                <Image 
+                  src="/linessss.png"
+                  alt="Decorative line"
+                  width={1224}
+                  height={200}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              {/* Text Overlay on Mission Image */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center rounded-lg px-4 md:px-6 pt-8 md:pt-28">
+                <p className="text-white leading-relaxed max-w-md mx-auto text-center mb-6 md:mb-12 text-sm md:text-[22px]">
+                  At SHROOMTOPIA, we are dedicated to enhancing your wellness journey through the power of therapeutic mushrooms. We believe in blending nature&apos;s gifts with modern lifestyles to promote creativity, relaxation, and enjoyment.
+                </p>
+                <button 
+                  onClick={() => router.push('/resourcecenter')} 
+                  className="px-4 md:px-10 py-2 md:py-3 rounded-full text-[10px] md:text-base font-semibold uppercase tracking-wider transition-all duration-300 transform hover:scale-105 whitespace-nowrap"
+                  style={{
+                    background: 'linear-gradient(90deg, #86D1F8 0%, #CFEFFF 50%, #86D1F8 100%)',
+                    color: '#000',
+                    boxShadow: '0 4px 15px rgba(134, 209, 248, 0.5)'
+                  }}
+                >
+                  <span className="hidden md:inline">ACCESS THE RESOURCE CENTER</span>
+                  <span className="md:hidden">RESOURCE CENTER</span>
+                  <ChevronRight className="inline-block w-3 h-3 md:w-5 md:h-5 ml-1 md:ml-2" />
+                </button>
+              </div>
+            </div>
+            <div className="relative min-h-[400px] overflow-hidden rounded-lg">
+              <Image 
+                src="/images/topianew.png"
+                alt="Topia New"
+                className="w-full object-cover rounded-lg"
+                width={600}
+                height={400}
+              />
+              {/* Bottom Border Line - Topia */}
+              <div className="hidden md:block absolute -bottom-2 md:-bottom-3 left-1/2 transform -translate-x-1/2 w-40 md:w-56 h-8 md:h-8">
+                <Image 
+                  src="/linessss.png"
+                  alt="Decorative line"
+                  width={224}
+                  height={32}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              {/* Text Overlay on Topia New Image */}
+              <div className="absolute inset-0 flex items-center justify-center rounded-lg px-4 md:px-6 pt-0 md:pt-0">
+                <p className="text-white leading-relaxed mx-auto text-center text-sm md:text-[22px] max-w-[280px] md:max-w-md">
+              Build Your Own Monthly Selection
+Get $200 in Products for Just $100 / Month
+
+
+                </p>
+              </div>
+              {/* Button positioned separately - Mobile: 160px, Desktop: 370px */}
+              <div className="absolute inset-0 flex items-center justify-center rounded-lg pt-[160px] md:pt-[370px]">
+                <button 
+                  onClick={() => {
+                    if (userProfile?.subscriptionStatus === 'paused') {
+                      router.push('/profile');
+                    } else {
+                      router.push('/topia-circle');
+                    }
+                  }}
+                  className="px-6 md:px-10 py-2 md:py-3 rounded-full text-xs md:text-base font-semibold uppercase tracking-wider transition-all duration-300 transform hover:scale-105"
+                  style={{
+                    background: 'linear-gradient(90deg, #86D1F8 0%, #CFEFFF 50%, #86D1F8 100%)',
+                    color: '#000',
+                    boxShadow: '0 4px 15px rgba(134, 209, 248, 0.5)'
+                  }}
+                >
+                  {userProfile?.subscriptionStatus === 'paused' 
+                    ? 'SUBSCRIPTION PAUSED' 
+                    : userProfile?.isTopiaCircleMember && userProfile?.subscriptionStatus === 'active' 
+                      ? 'MANAGE SUBSCRIPTION' 
+                      : 'JOIN NOW'}
+                  <ChevronRight className="inline-block w-3 h-3 md:w-5 md:h-5 ml-1 md:ml-2" />
+                </button>
               </div>
             </div>
           </div>
@@ -458,12 +527,12 @@ export default function Home() {
                 <span className="text-sm text-gray-600 font-medium">Earn $15 For Each Stamp and Save up to $135 </span>
               </div>
               
-              <h3 className="text-3xl lg:text-4xl relative font-extrabold text-gray-900 mb-6">
+              <h3 className="text-3xl lg:text-4xl relative font-extrabold text-white mb-6">
                 Earn And Track Rewards<br />
                 As You Grow
               </h3>
               
-              <p className="text-gray-600 relative text-lg mb-8 leading-relaxed">
+              <p className="text-gray-300 relative text-lg mb-8 leading-relaxed">
                 Collect points through engagement, participation,<br />
                 sharing content, or contributing to our community.<br />
                 Track your rewards and redeem points.
@@ -540,31 +609,31 @@ export default function Home() {
           </div> */}
 
  {/* Contact Us Section - Break out of parent container */}
-<section className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen py-20 bg-gray-50">
+<section className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen py-20" style={{ background: 'transparent' }}>
   <div className="grid lg:grid-cols-2 gap-0">
     {/* Left Content */}
     <div className="px-4 md:px-8 lg:px-16 xl:px-24 flex items-center justify-end">
       <div className="max-w-xl w-full">
-        <h2 className="text-5xl lg:text-6xl font-bold text-gray-800 tracking-wider mb-12 uppercase">
+        <h2 className="text-5xl lg:text-6xl font-bold text-white tracking-wider mb-12 uppercase">
           CONTACT US
         </h2>
         
         <div className="space-y-10">
           <div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
+            <h3 className="text-2xl font-bold text-white mb-4">
               Better yet, see us in person!
             </h3>
-            <p className="text-gray-600 text-lg leading-relaxed">
+            <p className="text-gray-300 text-lg leading-relaxed">
               We love our customers, so feel free to visit during normal business hours.
             </p>
           </div>
 
           <div>
-            <h4 className="text-2xl font-bold text-gray-900 mb-6">
+            <h4 className="text-2xl font-bold text-white mb-6">
               SHROOMTOPIA
             </h4>
             
-            <div className="space-y-4 text-gray-700">
+            <div className="space-y-4 text-gray-300">
               <p className="text-lg">
                 8201 8 Mile Road, Detroit, MI, USA
               </p>
@@ -578,11 +647,11 @@ export default function Home() {
           </div>
 
           <div>
-            <h4 className="text-2xl font-bold text-gray-900 mb-4">
+            <h4 className="text-2xl font-bold text-white mb-4">
               Hours
             </h4>
             {todayTiming ? (
-              <div className="flex items-center space-x-2 text-gray-700">
+              <div className="flex items-center space-x-2 text-gray-300">
                 <span className="text-lg">
                   {todayTiming.isOpen ? 'Open today' : 'Closed today'}
                 </span>
@@ -600,7 +669,7 @@ export default function Home() {
                 </svg>
               </div>
             ) : (
-              <div className="flex items-center space-x-2 text-gray-700">
+              <div className="flex items-center space-x-2 text-gray-300">
                 <span className="text-lg">Loading hours...</span>
               </div>
             )}
@@ -617,7 +686,7 @@ export default function Home() {
                         const t = byDay[d];
                         const label = d.charAt(0).toUpperCase() + d.slice(1);
                         return (
-                          <div key={d} className="flex items-center justify-between text-gray-700">
+                          <div key={d} className="flex items-center justify-between text-gray-300">
                             <span className="text-sm">{label}</span>
                             {t ? (
                               t.isOpen ? (
@@ -656,7 +725,7 @@ export default function Home() {
         <span>GET DIRECTIONS</span>
       </button>
 
-      {/* Zoom Controls with Google Maps links */}
+      
       <div className="absolute top-4 right-6 z-20 flex flex-col space-y-2">
         <button
           onClick={() => window.open('https://www.google.com/maps/@42.4455298,-83.1537416,18z', '_blank')}
@@ -677,16 +746,16 @@ export default function Home() {
       {/* Interactive Map */}
       <iframe
   id="map-iframe"
-  src="https://www.google.com/maps?q=42.4455298,-83.1537416&output=embed"
+  src="https://www.google.com/maps?q=42.4455298,-83.1537416&output=embed&style=feature:all|element:geometry|color:0x242f3e&style=feature:all|element:labels.text.stroke|color:0x242f3e&style=feature:all|element:labels.text.fill|color:0x746855&style=feature:water|element:geometry|color:0x17263c"
   className="w-full h-full"
-  style={{ border: 0, display: 'block', margin: 0, padding: 0, borderRadius: '12px' }}
+  style={{ border: 0, display: 'block', margin: 0, padding: 0, borderRadius: '12px', filter: 'invert(90%) hue-rotate(180deg)' }}
   allowFullScreen
   loading="lazy"
   title="ShroomTopia Location Map"
 />
       
       {/* Map Info Footer */}
-      <p className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 text-sm text-gray-600 bg-white/90 px-4 py-2 rounded-full shadow-lg backdrop-blur-sm">
+      <p className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 text-sm text-gray-300 bg-black/70 px-4 py-2 rounded-full shadow-lg backdrop-blur-sm">
         Use mouse wheel or pinch to zoom • Drag to pan
       </p>
     </div>

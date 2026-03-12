@@ -139,6 +139,39 @@ export default function Navbar() {
 
   return (
     <>
+      {/* CSS for navbar hover effect */}
+      <style jsx>{`
+        .navbar-with-glow {
+          position: relative;
+          overflow: visible;
+        }
+        
+        .nav-link {
+          position: relative;
+          padding-bottom: 8px;
+        }
+        
+        .nav-link::before {
+          content: '';
+          position: absolute;
+          bottom: -40px;
+          left: 50%;
+          transform: translateX(-50%) scaleX(0);
+          width: 250px;
+          height: 40px;
+          background-image: url('/images/hover.png');
+          background-size: contain;
+          background-repeat: no-repeat;
+          background-position: center;
+          transition: transform 0.3s ease;
+          pointer-events: none;
+        }
+        
+        .nav-link:hover::before {
+          transform: translateX(-50%) scaleX(1);
+        }
+      `}</style>
+      
       {/* Overlay for mobile drawer */}
       {isMenuOpen && (
         <div 
@@ -148,39 +181,37 @@ export default function Navbar() {
       )}
       
       {/* Main navbar */}
-     <nav className="bg-white shadow-sm relative z-50">
+     <nav className="bg-[#030408] shadow-sm relative z-50 border-b border-white/10 navbar-with-glow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             {/* Logo */}
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 -ml-4 md:ml-0">
               <div className="flex items-center space-x-2">
                 <a href="/" className="flex items-center">
-                  <img src="/newlogo.jpg" alt="Logo" className="h-20 w-auto" />
+                  <span className="text-xl md:text-2xl font-medium text-white uppercase ml-4 md:ml-0">Shroomtopia</span>
                 </a>
               </div>
             </div>
 
             {/* Desktop Navigation */}
-           <div className={`hidden md:block rounded-4xl bg-[url('/images/navbar.png')] bg-cover bg-center transition-all duration-300 ${hasActiveDeals && isLoggedIn ? 'w-[780px]' : 'w-[680px]'}`}>
-              <div className="ml-20 flex items-baseline space-x-8">
-                <a href="/" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
+           {/* <div className={`hidden md:block rounded-4xl bg-[url('/images/navbar.png')] bg-cover bg-center transition-all duration-300 ${hasActiveDeals && isLoggedIn ? 'w-[780px]' : 'w-[680px]'}`}> */}
+           <div className="hidden md:block">
+              <div className="ml-10 flex items-baseline space-x-8">
+                <a href="/" className="nav-link text-white/70 hover:text-white/70 px-3 py-2 text-sm font-medium transition-all duration-300">
                   HOME
                 </a>
                 <button 
                   onClick={() => handleProtectedNavigation('/menu')}
-                  className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200"
+                  className="nav-link text-white/70 hover:text-white/70 px-3 py-2 text-sm font-medium transition-all duration-300"
                 >
                   MENU
                 </button>
                 {hasActiveDeals && isLoggedIn && (
-                  <a href="/crazy-deals" className="relative text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
-                    DEALS OF THE WEEK
-                    <span className="absolute -top-2 -right-3 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
-                      🔥
-                    </span>
+                  <a href="/crazy-deals" className="nav-link relative text-white/70 hover:text-white/70 px-3 py-2 text-sm font-medium transition-all duration-300">
+                    DEALS
                   </a>
                 )}
-                <a href="/resourcecenter" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
+                <a href="/resourcecenter" className="nav-link text-white/70 hover:text-white/70 px-3 py-2 text-sm font-medium transition-all duration-300">
                RESOURCE CENTER
 
                 </a>
@@ -189,10 +220,18 @@ export default function Navbar() {
                   </a> */}
                 <button 
                   onClick={() => handleProtectedNavigation('/rewards')}
-                  className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200"
+                  className="nav-link text-white/70 hover:text-white/70 px-3 py-2 text-sm font-medium transition-all duration-300"
                 >
                   REWARDS
                 </button>
+                {isLoggedIn && (
+                  <button 
+                    onClick={() => handleProtectedNavigation(user?.isTopiaCircleMember ? '/profile' : '/topia-circle')}
+                    className="nav-link text-white/70 hover:text-white/70 px-3 py-2 text-sm font-medium transition-all duration-300"
+                  >
+                    {user?.isTopiaCircleMember ? 'MANAGE SUBSCRIPTION' : 'TOPIA CIRCLE'}
+                  </button>
+                )}
               </div>
             </div>
 
@@ -203,8 +242,8 @@ export default function Navbar() {
                 onClick={() => handleProtectedNavigation('/wishlist')}
                 className="relative"
               >
-                <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-400 transition-colors duration-200">
-                  <Heart className="w-5 h-5 text-gray-600" />
+                <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center cursor-pointer hover:bg-white/20 transition-colors duration-200">
+                  <Heart className="w-5 h-5 text-white" />
                 </div>
                 {wishlistCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
@@ -217,8 +256,8 @@ export default function Navbar() {
                 onClick={() => handleProtectedNavigation('/cart')}
                 className="relative"
               >
-                <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-400 transition-colors duration-200">
-                  <ShoppingCart className="w-5 h-5 text-gray-600" />
+                <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center cursor-pointer hover:bg-white/20 transition-colors duration-200">
+                  <ShoppingCart className="w-5 h-5 text-white" />
                 </div>
                 {cartCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
@@ -233,47 +272,47 @@ export default function Navbar() {
                   className="flex items-center space-x-1 cursor-pointer"
                   onClick={() => isLoggedIn ? setIsProfileOpen(!isProfileOpen) : router.push('/welcome')}
                 >
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden bg-white/10">
                     {isLoggedIn ? (
                       <img src={user?.avatar || "/images/pic1.png"} alt="Profile" className="w-full h-full object-cover" />
                     ) : (
-                      <User className="w-5 h-5 text-gray-600" />
+                      <User className="w-5 h-5 text-white" />
                     )}
                   </div>
-                  {isLoggedIn && <ChevronDown className="w-3 h-3 text-gray-600" />}
+                  {isLoggedIn && <ChevronDown className="w-3 h-3 text-white" />}
                 </div>
                 
                 {/* Profile Dropdown */}
               
 {isLoggedIn && isProfileOpen && (
-  <div className="absolute right-0 mt-2 w-[220px] bg-white rounded-md shadow-2xl py-0 z-40 border border-gray-100">
+  <div className="absolute right-0 mt-2 w-[220px] bg-[#0B0F1A] backdrop-blur-sm rounded-md shadow-2xl py-0 z-40 border border-gray-700/50 shadow-[0_0_20px_rgba(77,163,255,0.3)]">
     {/* Arrow indicator */}
-    <div className="absolute -top-1 right-4 w-3 h-3 bg-white transform rotate-45 border-l border-t border-gray-100"></div>
+    <div className="absolute -top-1 right-4 w-3 h-3 bg-[#0B0F1A] transform rotate-45 border-l border-t border-gray-700/50"></div>
     
-    <div className="bg-[#80A6F7]/80 shadow-inner rounded-t-md">
+    <div className="bg-white/5 backdrop-blur-sm shadow-inner rounded-t-md">
       <ul>
-        <li className="px-3 py-2 shadow-inner border-b-2 border-white">
+        <li className="px-3 py-2 shadow-inner border-b border-white/10 hover:bg-white/10 transition-colors">
           <a href="/profile" className="flex items-center gap-3 text-white font-semibold text-sm">
             <User className="text-lg" />
             Profile Settings
           </a>
         </li>
         
-        <li className="px-3 py-2 shadow-inner border-b-2 border-white">
+        <li className="px-3 py-2 shadow-inner border-b border-white/10 hover:bg-white/10 transition-colors">
           <a href="/myorders" className="flex items-center gap-3 text-white font-semibold text-sm">
             <ShoppingCart className="text-lg" />
             My Orders
           </a>
         </li>
         
-        <li className="px-3 py-2 shadow-inner border-b-2 border-white">
+        <li className="px-3 py-2 shadow-inner border-b border-white/10 hover:bg-white/10 transition-colors">
           <a href="/myhistory" className="flex items-center gap-3 text-white font-semibold text-sm">
             <BookOpen className="text-lg" />
             My History
           </a>
         </li>
         
-        <li className="px-3 py-2 shadow-inner">
+        <li className="px-3 py-2 shadow-inner hover:bg-white/10 transition-colors rounded-b-md">
           <button 
             onClick={() => {
               logout();
@@ -317,16 +356,21 @@ export default function Navbar() {
       {/* Mobile Side Drawer - Now opens from LEFT */}
       <div 
         ref={sideDrawerRef}
-        className={`fixed top-0 left-0 h-full w-80 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-50 md:hidden ${
+        className={`fixed top-0 left-0 h-full w-80 shadow-2xl transform transition-transform duration-300 ease-in-out z-50 md:hidden ${
           isMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
+        style={{
+          background: 'rgba(20, 20, 20, 0.4)',
+          border: '1.2px solid rgba(134, 209, 248, 0.2)',
+          backdropFilter: 'blur(10px)'
+        }}
       >
         <div className="flex flex-col h-full">
           {/* User Profile Section */}
-          <div className="px-4 py-4 border-b border-gray-100 bg-gray-50">
+          <div className="px-4 py-4 border-b border-white/10">
             {isLoggedIn ? (
               <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-blue-200">
+                <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-blue-400/50">
                   <img 
                     src={user?.avatar || "/images/pic1.png"} 
                     alt="Profile" 
@@ -334,10 +378,10 @@ export default function Navbar() {
                   />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-900">
+                  <p className="text-sm font-medium text-white">
                     {user?.name || 'User'}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-white/70">
                     {user?.email || 'Welcome back!'}
                   </p>
                 </div>
@@ -364,9 +408,9 @@ export default function Navbar() {
                 <a 
                   href="/" 
                   onClick={handleNavItemClick}
-                  className="flex items-center space-x-3 px-2 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 group"
+                  className="flex items-center space-x-3 px-2 py-3 text-white hover:text-blue-400 hover:bg-white/10 rounded-lg transition-all duration-200 group"
                 >
-                  <Home className="w-5 h-5 group-hover:text-blue-600" />
+                  <Home className="w-5 h-5 group-hover:text-blue-400" />
                   <span className="font-medium">Home</span>
                 </a>
                 
@@ -375,9 +419,9 @@ export default function Navbar() {
                     handleProtectedNavigation('/menu');
                     handleNavItemClick();
                   }}
-                  className="flex items-center space-x-3 px-2 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 group w-full text-left"
+                  className="flex items-center space-x-3 px-2 py-3 text-white hover:text-blue-400 hover:bg-white/10 rounded-lg transition-all duration-200 group w-full text-left"
                 >
-                  <svg className="w-5 h-5 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 group-hover:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                   </svg>
                   <span className="font-medium">Menu</span>
@@ -387,9 +431,9 @@ export default function Navbar() {
                   <a 
                     href="/crazy-deals" 
                     onClick={handleNavItemClick}
-                    className="flex items-center space-x-3 px-2 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 group relative"
+                    className="flex items-center space-x-3 px-2 py-3 text-white hover:text-blue-400 hover:bg-white/10 rounded-lg transition-all duration-200 group relative"
                   >
-                    <svg className="w-5 h-5 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 group-hover:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <span className="font-medium">Deals of the Week</span>
@@ -403,9 +447,9 @@ export default function Navbar() {
                 <a 
                   href="/resourcecenter" 
                   onClick={handleNavItemClick}
-                  className="flex items-center space-x-3 px-2 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 group"
+                  className="flex items-center space-x-3 px-2 py-3 text-white hover:text-blue-400 hover:bg-white/10 rounded-lg transition-all duration-200 group"
                 >
-                  <BookOpen className="w-5 h-5 group-hover:text-blue-600" />
+                  <BookOpen className="w-5 h-5 group-hover:text-blue-400" />
                   <span className="font-medium">Resource Center</span>
                 </a>
                 
@@ -432,24 +476,39 @@ export default function Navbar() {
                     handleProtectedNavigation('/rewards');
                     handleNavItemClick();
                   }}
-                  className="flex items-center space-x-3 px-2 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 group w-full text-left"
+                  className="flex items-center space-x-3 px-2 py-3 text-white hover:text-blue-400 hover:bg-white/10 rounded-lg transition-all duration-200 group w-full text-left"
                 >
-                  <Award className="w-5 h-5 group-hover:text-blue-600" />
+                  <Award className="w-5 h-5 group-hover:text-blue-400" />
                   <span className="font-medium"> Rewards</span>
                 </button>
+                
+                {isLoggedIn && (
+                  <button 
+                    onClick={() => {
+                      handleProtectedNavigation(user?.isTopiaCircleMember ? '/profile' : '/topia-circle');
+                      handleNavItemClick();
+                    }}
+                    className="flex items-center space-x-3 px-2 py-3 text-white hover:text-blue-400 hover:bg-white/10 rounded-lg transition-all duration-200 group w-full text-left"
+                  >
+                    <Users className="w-5 h-5 group-hover:text-blue-400" />
+                    <span className="font-medium">
+                      {user?.isTopiaCircleMember ? 'Manage Subscription' : 'Topia Circle'}
+                    </span>
+                  </button>
+                )}
               </div>
 
               {/* Cart Section */}
-              <div className="pt-4 border-t border-gray-200">
+              <div className="pt-4 border-t border-white/10">
                 <button 
                   onClick={() => {
                     handleProtectedNavigation('/cart');
                     handleNavItemClick();
                   }}
-                  className="flex items-center justify-between px-2 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 group w-full text-left"
+                  className="flex items-center justify-between px-2 py-3 text-white hover:text-blue-400 hover:bg-white/10 rounded-lg transition-all duration-200 group w-full text-left"
                 >
                   <div className="flex items-center space-x-3">
-                    <ShoppingCart className="w-5 h-5 group-hover:text-blue-600" />
+                    <ShoppingCart className="w-5 h-5 group-hover:text-blue-400" />
                     <span className="font-medium">Shopping Cart</span>
                   </div>
                   {cartCount > 0 && (
@@ -462,15 +521,15 @@ export default function Navbar() {
 
               {/* My Profile Section with Dropdown */}
               {isLoggedIn && (
-                <div className="pt-4 border-t border-gray-200">
+                <div className="pt-4 border-t border-white/10">
                   <div className="space-y-1">
                     {/* My Profile Main Button with Dropdown */}
                     <button 
                       onClick={() => setIsMobileProfileOpen(!isMobileProfileOpen)}
-                      className="flex items-center justify-between w-full px-2 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 group"
+                      className="flex items-center justify-between w-full px-2 py-3 text-white hover:text-blue-400 hover:bg-white/10 rounded-lg transition-all duration-200 group"
                     >
                       <div className="flex items-center space-x-3">
-                        <User className="w-5 h-5 group-hover:text-blue-600" />
+                        <User className="w-5 h-5 group-hover:text-blue-400" />
                         <span className="font-medium">Profile</span>
                       </div>
                       <ChevronRight 
@@ -486,27 +545,27 @@ export default function Navbar() {
                         <a 
                           href="/profile" 
                           onClick={handleNavItemClick}
-                          className="flex items-center space-x-3 px-2 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 group"
+                          className="flex items-center space-x-3 px-2 py-2 text-white/80 hover:text-blue-400 hover:bg-white/10 rounded-lg transition-all duration-200 group"
                         >
-                          <User className="w-4 h-4 group-hover:text-blue-600" />
+                          <User className="w-4 h-4 group-hover:text-blue-400" />
                           <span className="text-sm font-medium">Profile Settings</span>
                         </a>
                         
                         <a 
                           href="/myorders" 
                           onClick={handleNavItemClick}
-                          className="flex items-center space-x-3 px-2 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 group"
+                          className="flex items-center space-x-3 px-2 py-2 text-white/80 hover:text-blue-400 hover:bg-white/10 rounded-lg transition-all duration-200 group"
                         >
-                          <ShoppingCart className="w-4 h-4 group-hover:text-blue-600" />
+                          <ShoppingCart className="w-4 h-4 group-hover:text-blue-400" />
                           <span className="text-sm font-medium">Orders</span>
                         </a>
                         
                         <a 
                           href="/myhistory" 
                           onClick={handleNavItemClick}
-                          className="flex items-center space-x-3 px-2 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 group"
+                          className="flex items-center space-x-3 px-2 py-2 text-white/80 hover:text-blue-400 hover:bg-white/10 rounded-lg transition-all duration-200 group"
                         >
-                          <BookOpen className="w-4 h-4 group-hover:text-blue-600" />
+                          <BookOpen className="w-4 h-4 group-hover:text-blue-400" />
                           <span className="text-sm font-medium"> History</span>
                         </a>
                       </div>
@@ -518,10 +577,10 @@ export default function Navbar() {
 
             {/* Logout Section */}
             {isLoggedIn && (
-              <div className="px-2 py-4 border-t border-gray-200 mt-auto">
+              <div className="px-2 py-4 border-t border-white/10 mt-auto">
                 <button 
                   onClick={handleLogout}
-                  className="flex items-center space-x-3 w-full px-2 py-3 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200 group"
+                  className="flex items-center space-x-3 w-full px-2 py-3 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-all duration-200 group"
                 >
                   <LogOut className="w-5 h-5" />
                   <span className="font-medium">Logout</span>

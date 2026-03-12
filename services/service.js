@@ -1,15 +1,14 @@
 // import axios from "axios";
 // import { toast } from 'react-toastify';
 
-      //  const ConstantsUrl = "http://localhost:5000/api/";
-  const ConstantsUrl = "https://api.mypsyguide.io/api/";
+        // const ConstantsUrl = "http://localhost:5000/api/";
+   const ConstantsUrl = "https://api.mypsyguide.io/api/";
 
 // let isRedirecting = false;
  
 
 
 
-// // Add request interceptor to include token in headers
 // axios.interceptors.request.use(
 //   (config) => {
 //     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
