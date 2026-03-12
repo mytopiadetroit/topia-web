@@ -131,7 +131,20 @@ export default function ProductDetails() {
   const [displayPrice, setDisplayPrice] = useState('0.00');
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [isDescriptionLong, setIsDescriptionLong] = useState(false);
+  const [openTooltipId, setOpenTooltipId] = useState(null);
   const descriptionRef = useRef(null);
+
+  // Close tooltip when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (openTooltipId) {
+        setOpenTooltipId(null);
+      }
+    };
+    
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [openTooltipId]);
 
   // Update price whenever relevant state changes
   useEffect(() => {
@@ -502,10 +515,16 @@ export default function ProductDetails() {
                     const emoji = match ? match[0] + ' ' : '';
                     const text = label.replace(/^[\p{Emoji}\p{Extended_Pictographic}]\s*/u, '');
                     const labelWithoutEmoji = label.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
+                    const tooltipId = `${product._id}-${tag._id}`;
+                    const isTooltipOpen = openTooltipId === tooltipId;
 
                     return (
                       <div key={tag._id} className="relative group">
                         <span
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenTooltipId(isTooltipOpen ? null : tooltipId);
+                          }}
                           className="px-3 py-1.5 text-sm rounded-full font-medium bg-white/5 backdrop-blur-sm border border-blue-400/40 hover:border-2 hover:border-blue-400 transition-all text-white flex items-center gap-1 cursor-pointer"
                         >
                           <img src="/images/dots.png" alt="" className="w-4 h-4" />
@@ -513,7 +532,7 @@ export default function ProductDetails() {
                         </span>
                         {/* Tooltip */}
                         {tag.tooltip && (
-                          <div className="absolute right-0 top-full mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-[9999]">
+                          <div className={`absolute right-0 top-full mt-2 transition-opacity duration-200 z-[9999] ${isTooltipOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 group-hover:opacity-100 pointer-events-none'}`}>
                             <div 
                               className="relative rounded-xl shadow-2xl pt-9 px-5 pb-5" 
                               style={{ 
