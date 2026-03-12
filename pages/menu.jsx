@@ -1017,7 +1017,7 @@ if (isLoggedIn && user?.status === 'suspend') {
       {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} available
       {totalPages > 1 && (
         <span className="text-gray-500">
-          {' '}• Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} - {Math.min(currentPage * ITEMS_PER_PAGE, filteredProducts.length)} of {filteredProducts.length}
+          {' '} Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} - {Math.min(currentPage * ITEMS_PER_PAGE, filteredProducts.length)} of {filteredProducts.length}
         </span>
       )}
     </p>
@@ -1155,7 +1155,7 @@ if (isLoggedIn && user?.status === 'suspend') {
               {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} available
               {totalPages > 1 && (
                 <span className="text-gray-100">
-                  {' '}• Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} - {Math.min(currentPage * ITEMS_PER_PAGE, filteredProducts.length)} of {filteredProducts.length}
+                  {' '} Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} - {Math.min(currentPage * ITEMS_PER_PAGE, filteredProducts.length)} of {filteredProducts.length}
                 </span>
               )}
             </p>
