@@ -236,8 +236,7 @@ export default function Home() {
         EXPERIENCES.
       </h1>
       <p className="text-base md:text-lg lg:text-xl text-gray-400 mb-10 font-light leading-relaxed">
-        Portal to the largest mushroom selection in<br />
-        the Metro Detroit area..
+       Your Portal to the Largest Mushroom Selection in the Metro Detroit Area
       </p>
       
       {/* Buttons Container */}
@@ -482,7 +481,8 @@ export default function Home() {
               {/* Text Overlay on Topia New Image */}
               <div className="absolute inset-0 flex items-center justify-center rounded-lg px-4 md:px-6 pt-0 md:pt-0">
                 <p className="text-white leading-relaxed mx-auto text-center text-sm md:text-[22px] max-w-[280px] md:max-w-md">
-                 Build your own monthly selection $200 in products for $100 / month
+              Build Your Own Monthly Selection
+Get $200 in Products for Just $100 / Month
 
 
                 </p>

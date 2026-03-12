@@ -42,7 +42,7 @@ export default function Welcome() {
 
           {/* Subtitle */}
           <p className="text-lg md:text-xl text-gray-300 mb-12 max-w-2xl mx-auto leading-relaxed">
-           welcome to ShroomTopia to Explore therapeutic mushrooms and begin your journey to elevated experiences
+        Explore the largest selection of mushrooms and begin your journey to elevated experiences.
           </p>
 
           {/* Action buttons */}
