@@ -15,9 +15,9 @@ export default function Welcome() {
 
   return (
     <div className="min-h-screen relative flex items-center justify-center px-4" style={{ background: 'transparent' }}>
-      {/* Global Background Image - Applied via body in globals.css */}
+  
 
-      {/* Main content */}
+    
       <div className="relative z-10 w-full max-w-4xl mx-auto">
         <div className={`text-center transform transition-all duration-1000 ${
           isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
@@ -42,8 +42,7 @@ export default function Welcome() {
 
           {/* Subtitle */}
           <p className="text-lg md:text-xl text-gray-300 mb-12 max-w-2xl mx-auto leading-relaxed">
-            Your wellness journey starts here. Discover the power of therapeutic mushrooms 
-            and elevate your natural wellness experience.
+           welcome to ShroomTopia to Explore therapeutic mushrooms and begin your journey to elevated experiences
           </p>
 
           {/* Action buttons */}
