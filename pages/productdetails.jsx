@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Heart, Package } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -532,14 +532,14 @@ export default function ProductDetails() {
                         </span>
                         {/* Tooltip */}
                         {tag.tooltip && (
-                          <div className={`absolute right-0 top-full mt-2 transition-opacity duration-200 z-[9999] ${isTooltipOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 group-hover:opacity-100 pointer-events-none'}`}>
+                          <div className={`absolute ${idx === 0 ? '-right-40' : '-right-40'} top-full mt-2 transition-opacity duration-200 z-[9999] ${isTooltipOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 group-hover:opacity-100 pointer-events-none'}`}>
                             <div 
                               className="relative rounded-xl shadow-2xl pt-9 px-5 pb-5" 
                               style={{ 
                                 minWidth: '240px',
                                 maxWidth: '280px',
                                 minHeight: '120px',
-                                backgroundImage: 'url(/tooltip.png)',
+                                backgroundImage: 'url(/rightone.png)',
                                 backgroundSize: '100% 100%',
                                 backgroundRepeat: 'no-repeat'
                               }}

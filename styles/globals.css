@@ -81,3 +81,22 @@ body.modal-open {
 }
 
 /* Custom toast styles end */
+/* Tooltip background classes */
+.tooltip-bg-normal {
+  background-image: url('/tooltip.png');
+}
+
+.tooltip-bg-special {
+  background-image: url('/tooltip.png');
+}
+
+@media (max-width: 1023px) {
+  .tooltip-bg-special {
+    background-image: url('/rightone.png');
+  }
+  
+  /* Move tooltip container to left on mobile for special tooltips */
+  .tooltip-container-special {
+    left: -110% !important;
+  }
+}

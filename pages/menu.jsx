@@ -1161,7 +1161,6 @@ if (isLoggedIn && user?.status === 'suspend') {
             </p>
           </div>
 
-
           {/* All Products */}
           {/* All Products */}
           <div className="mb-6">
@@ -1315,7 +1314,7 @@ if (isLoggedIn && user?.status === 'suspend') {
 
                             {/* Review Tags */}
                             <div className="flex flex-wrap gap-2 mb-4">
-                              {(product.reviewTags || []).slice(0, 4).map((tag, idx) => {
+                              {(product.reviewTags || []).slice(0, 4).map((tag, idx) => { 
                                 // Remove emojis from label
                                 const labelWithoutEmoji = tag.label.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
                                 const tooltipId = `${product._id}-${tag._id}`;
@@ -1336,14 +1335,14 @@ if (isLoggedIn && user?.status === 'suspend') {
                                     </span>
                                     {/* Tooltip */}
                                     {tag.tooltip && (
-                                      <div className={`absolute left-0 top-full mt-2 transition-opacity duration-200 z-[9999] ${isTooltipOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 group-hover:opacity-100 pointer-events-none'}`}>
+                                      <div className={`absolute left-0 top-full mt-2 transition-opacity duration-200 z-[9999] ${(idx === 2 || idx === 5 || idx === 8) ? "tooltip-container-special" : ""} ${isTooltipOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 group-hover:opacity-100 pointer-events-none'}`}>
                                         <div 
-                                          className="relative rounded-xl shadow-2xl pt-9 px-5 pb-5" 
+                                          className={`relative rounded-xl shadow-2xl pt-9 px-5 pb-5 tooltip-bg-${(idx === 2 || idx === 5 || idx === 8) ? "special" : "normal"}`} 
                                           style={{ 
                                             minWidth: '240px',
                                             maxWidth: '280px',
                                             minHeight: '120px',
-                                            backgroundImage: 'url(/tooltip.png)',
+                                            
                                             backgroundSize: '100% 100%',
                                             backgroundRepeat: 'no-repeat',
                                             transform: shouldFlip ? 'scaleX(-1)' : 'none'
@@ -1611,7 +1610,7 @@ if (isLoggedIn && user?.status === 'suspend') {
 
                             {/* Review Tags */}
                             <div className="flex flex-wrap gap-2 mb-4">
-                              {(product.reviewTags || []).slice(0, 4).map((tag, idx) => {
+                              {(product.reviewTags || []).slice(0, 4).map((tag, idx) => { 
                                 // Remove emojis from label
                                 const labelWithoutEmoji = tag.label.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
                                 const tooltipId = `${product._id}-${tag._id}`;
@@ -1632,14 +1631,14 @@ if (isLoggedIn && user?.status === 'suspend') {
                                     </span>
                                     {/* Tooltip */}
                                     {tag.tooltip && (
-                                      <div className={`absolute left-0 top-full mt-2 transition-opacity duration-200 z-[9999] ${isTooltipOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 group-hover:opacity-100 pointer-events-none'}`}>
+                                      <div className={`absolute left-0 top-full mt-2 transition-opacity duration-200 z-[9999] ${(idx === 2 || idx === 5 || idx === 8) ? "tooltip-container-special" : ""} ${isTooltipOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 group-hover:opacity-100 pointer-events-none'}`}>
                                         <div 
-                                          className="relative rounded-xl shadow-2xl pt-9 px-5 pb-5" 
+                                          className={`relative rounded-xl shadow-2xl pt-9 px-5 pb-5 tooltip-bg-${(idx === 2 || idx === 5 || idx === 8) ? "special" : "normal"}`} 
                                           style={{ 
                                             minWidth: '240px',
                                             maxWidth: '280px',
                                             minHeight: '120px',
-                                            backgroundImage: 'url(/tooltip.png)',
+                                            
                                             backgroundSize: '100% 100%',
                                             backgroundRepeat: 'no-repeat',
                                             transform: shouldFlip ? 'scaleX(-1)' : 'none'
@@ -1943,7 +1942,7 @@ return (
 
           {/* Review Tags */}
           <div className="flex flex-wrap gap-2 mb-4">
-            {(product.reviewTags || []).slice(0, 4).map((tag, idx) => {
+            {(product.reviewTags || []).slice(0, 4).map((tag, idx) => { 
               // Remove emojis from label
               const labelWithoutEmoji = tag.label.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
               const tooltipId = `${product._id}-${tag._id}`;
@@ -1964,14 +1963,14 @@ return (
                   </span>
                   {/* Tooltip */}
                   {tag.tooltip && (
-                    <div className={`absolute left-0 top-full mt-2 transition-opacity duration-200 z-[9999] ${isTooltipOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 group-hover:opacity-100 pointer-events-none'}`}>
+                    <div className={`absolute left-0 top-full mt-2 transition-opacity duration-200 z-[9999] ${(idx === 2 || idx === 5 || idx === 8) ? "tooltip-container-special" : ""} ${isTooltipOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 group-hover:opacity-100 pointer-events-none'}`}>
                       <div 
-                        className="relative rounded-xl shadow-2xl pt-9 px-5 pb-5" 
+                        className={`relative rounded-xl shadow-2xl pt-9 px-5 pb-5 tooltip-bg-${(idx === 2 || idx === 5 || idx === 8) ? "special" : "normal"}`} 
                         style={{ 
                           minWidth: '240px',
                           maxWidth: '280px',
                           minHeight: '120px',
-                          backgroundImage: 'url(/tooltip.png)',
+                          
                           backgroundSize: '100% 100%',
                           backgroundRepeat: 'no-repeat',
                           transform: shouldFlip ? 'scaleX(-1)' : 'none'
