@@ -30,6 +30,13 @@ body {
   overflow-x: hidden !important;
 }
 
+/* iOS Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+  body {
+    background-attachment: scroll !important;
+  }
+}
+
 html {
   overflow-x: hidden !important;
 }
@@ -37,6 +44,38 @@ html {
 @media (max-width: 768px) {
   body {
     background-image: url('/newere.png') !important;
+    background-attachment: scroll !important; /* iOS Safari fix */
+    background-size: contain !important; /* Shows full image */
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+    min-height: 100vh !important;
+    min-height: -webkit-fill-available !important; /* iOS viewport fix */
+  }
+}
+
+/* iPhone specific fix */
+@media only screen and (max-device-width: 480px) {
+  body {
+    background-image: url('/newere.png') !important;
+    background-attachment: scroll !important;
+    background-size: cover !important;
+    -webkit-background-size: cover !important;
+    background-position: center center !important;
+    min-height: 100vh !important;
+    min-height: -webkit-fill-available !important;
+  }
+}
+
+/* Additional mobile viewport fix */
+@media screen and (max-width: 768px) {
+  html {
+    height: 100% !important;
+    height: -webkit-fill-available !important;
+  }
+  
+  body {
+    height: 100% !important;
+    height: -webkit-fill-available !important;
   }
 }
 

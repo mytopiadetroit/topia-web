@@ -113,7 +113,7 @@ export default function App({ Component, pageProps }) {
    
     const img = new Image();
    
-    img.src = '/bgimage.png';
+    img.src = '/newbg.png';
   }, []);
 
   useEffect(() => {

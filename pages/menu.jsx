@@ -1045,23 +1045,7 @@ if (isLoggedIn && user?.status === 'suspend') {
 
   return (
     <div className="min-h-screen lg:px-14 relative overflow-x-hidden" style={{ background: 'transparent' }}>
-      {/* Global Stars Animation */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="stars-container">
-          {[...Array(60)].map((_, i) => (
-            <div
-              key={`global-star-${i}`}
-              className="star"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 3}s`,
-                animationDuration: `${2 + Math.random() * 3}s`
-              }}
-            />
-          ))}
-        </div>
-      </div>
+    
 
     
       
