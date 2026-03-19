@@ -48,6 +48,7 @@ const Menu = () => {
   const [showPendingMessage, setShowPendingMessage] = useState(false);
   const ITEMS_PER_PAGE = 15;
   const [openTooltipId, setOpenTooltipId] = useState(null);
+  const [selectedOptions, setSelectedOptions] = useState({}); // {productId: {selectedItem, quantity}}
 
   
 
@@ -545,6 +546,102 @@ const Menu = () => {
     } else {
       toast.error('Product is out of stock');
     }
+  };
+
+  // Helper functions for dropdown selection
+  const initializeProductSelection = (product) => {
+    if (selectedOptions[product._id]) return;
+    
+    let defaultSelection = null;
+    if (product.hasVariants && product.variants?.length > 0) {
+      const inStockVariant = product.variants.find(v => Number(v.stock || 0) > 0);
+      defaultSelection = inStockVariant || product.variants[0];
+    } else if (product.flavors?.length > 0) {
+      const inStockFlavor = product.flavors.find(f => f.isActive && Number(f.stock || 0) > 0);
+      defaultSelection = inStockFlavor || product.flavors.find(f => f.isActive);
+    }
+    
+    if (defaultSelection) {
+      setSelectedOptions(prev => ({
+        ...prev,
+        [product._id]: { selectedItem: defaultSelection, quantity: 1 }
+      }));
+    }
+  };
+
+  const handleOptionChange = (productId, item) => {
+    setSelectedOptions(prev => ({
+      ...prev,
+      [productId]: { selectedItem: item, quantity: prev[productId]?.quantity || 1 }
+    }));
+  };
+
+  const handleQuantityChangeNew = (productId, delta) => {
+    setSelectedOptions(prev => {
+      const current = prev[productId];
+      if (!current) return prev;
+      
+      const newQuantity = Math.max(1, (current.quantity || 1) + delta);
+      const maxStock = Number(current.selectedItem.stock || 0);
+      
+      if (newQuantity > maxStock) {
+        toast.error(`Only ${maxStock} available in stock`);
+        return prev;
+      }
+      
+      return {
+        ...prev,
+        [productId]: { ...current, quantity: newQuantity }
+      };
+    });
+  };
+
+  const handleAddToCartNew = (product, e) => {
+    e?.stopPropagation();
+    const selection = selectedOptions[product._id];
+    if (!selection) return;
+    
+    const { selectedItem, quantity } = selection;
+    const stock = Number(selectedItem.stock || 0);
+    
+    if (stock <= 0) {
+      toast.error('Selected option is out of stock');
+      return;
+    }
+    
+    // Check how much is already in cart
+    const cartItem = cart.find((i) => {
+      const isSameProduct = (i.id || i._id) === product._id;
+      if (product.hasVariants) {
+        return isSameProduct && i.selectedVariant?._id === selectedItem._id;
+      } else if (product.flavors) {
+        return isSameProduct && i.selectedFlavor?._id === selectedItem._id;
+      }
+      return false;
+    });
+    
+    const currentCartQuantity = cartItem ? cartItem.quantity : 0;
+    const totalQuantity = currentCartQuantity + quantity;
+    
+    // Check if total would exceed stock
+    if (totalQuantity > stock) {
+      toast.error(`Only ${stock - currentCartQuantity} more can be added (${currentCartQuantity} already in cart)`);
+      return;
+    }
+    
+    if (product.hasVariants) {
+      addToCart({ ...product, selectedVariant: selectedItem }, quantity);
+      toast.success(`${product.name} (${selectedItem.size.value}${selectedItem.size.unit}) added!`);
+    } else if (product.flavors) {
+      addToCart({ ...product, selectedFlavor: selectedItem }, quantity);
+      toast.success(`${product.name} (${selectedItem.name}) added!`);
+    }
+    
+    // Reset quantity to 1 after adding
+    setSelectedOptions(prev => ({
+      ...prev,
+      [product._id]: { ...prev[product._id], quantity: 1 }
+    }));
   };
 
   const isDriedFilterActive = () => {
@@ -1150,6 +1247,11 @@ if (isLoggedIn && user?.status === 'suspend') {
           <div className="mb-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 relative">
               {sortedProducts.map((product) => {
+                // Initialize selection for products with variants/flavors
+                if ((product.hasVariants && product.variants?.length > 0) || (product.flavors?.length > 0)) {
+                  initializeProductSelection(product);
+                }
+                
                 const isDried = isDriedProduct(product);
                 const isEdibles = isEdiblesProduct(product);
                 const driedCat = categories.find(cat => cat.category.toUpperCase() === 'DRIED');
@@ -1278,9 +1380,7 @@ if (isLoggedIn && user?.status === 'suspend') {
                             {product.intensity && (
                               <div className="mb-4">
                                 <div className="flex items-center justify-between mb-2">
-                                  <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity</span>
-                                  <span className="text-sm font-bold text-cyan-400">
-                                    {product.intensity}/10
+                                  <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity - {product.intensity}/10</span><span className="text-sm font-bold text-white">10/10
                                   </span>
                                 </div>
                                 <div className="w-full bg-gray-700/30 rounded-full h-2">
@@ -1293,6 +1393,27 @@ if (isLoggedIn && user?.status === 'suspend') {
                                     }}
                                   ></div>
                                 </div>
+                              </div>
+                            )}
+
+                            {/* Total Weight, Pieces, Per Piece - Transparent Boxes */}
+                            {(product.showTotalWeight || product.showTotalPieces || product.showPerPiece) && (
+                              <div className="flex flex-nowrap gap-2 mb-4">
+                                {product.showTotalWeight && product.totalWeight && (
+                                  <div className="flex-1 min-w-[90px] border border-white/20 rounded-lg px-4 py-1.5  text-center">
+                                    <div className="text-[10px] text-gray-300 uppercase tracking-wide mb-0.5">Total Weight</div><div className="text-sm font-bold text-white">{product.totalWeight}</div>
+                                  </div>
+                                )}
+                                {product.showTotalPieces && product.totalPieces && (
+                                  <div className="flex-1 min-w-[120px] border border-white/20 rounded-lg px-4 py-3  text-center">
+                                    <div className="text-[10px] text-gray-300 uppercase tracking-wide mb-0.5">Pieces</div><div className="text-sm font-bold text-white">{product.totalPieces}</div>
+                                  </div>
+                                )}
+                                {product.showPerPiece && product.perPiece && (
+                                  <div className="flex-1 min-w-[120px] border border-white/20 rounded-lg px-4 py-3  text-center">
+                                    <div className="text-[10px] text-gray-300 uppercase tracking-wide mb-0.5">Per Piece</div><div className="text-sm font-bold text-white">{product.perPiece}</div>
+                                  </div>
+                                )}
                               </div>
                             )}
 
@@ -1344,150 +1465,124 @@ if (isLoggedIn && user?.status === 'suspend') {
                               })}
                             </div>
 
-                            {/* Variants with pricing - INLINE STYLE */}
+                            {/* NEW: Dropdown + Quantity + Add to Cart */}
                             <div className="mt-4">
-                              <div className="flex flex-wrap items-center gap-3">
-                                {product.variants.map((variant, idx) => {
-
-                                  const cartItem = cart.find((i) => {
-                                    const isSameProduct = (i.id || i._id) === product._id;
-                                    const isSameVariant = i.selectedVariant?._id === variant._id;
-                                    return isSameProduct && isSameVariant;
-                                  });
-
-                                  const isInCart = cartItem && cartItem.quantity > 0;
-                                  const variantStock = Number(variant.stock || 0);
-                                  const isOutOfStock = variantStock <= 0;
-                                  // const cartItem = cart.find((i) => (i.id || i._id) === product._id && i.selectedVariant?._id === variant._id);
-
-
-                                  return (
-                                    <div
-                                      key={variant._id}
-                                      className="relative px-4 py-3 min-w-[110px]"
-                                      style={{
-                                        background: 'transparent',
-                                        border: '1.26px solid rgba(134, 209, 248, 0.6)',
-                                        borderRadius: '14.7px'
-                                      }}
-                                      onClick={(e) => e.stopPropagation()}
-                                    >
-                                      {/* Add to Cart Button - Top Right */}
-                                      <div className="absolute -top-2 -right-2">
-                                        {isInCart ? (
-                                          <div className="flex items-center border-2 border-gray-900 rounded-full bg-white">
-                                            <button
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                updateCartItemQuantity(product._id, cartItem.quantity - 1, variant);
-                                              }}
-                                              className="p-1 hover:bg-gray-50 rounded-l-full transition-colors"
-                                            >
-                                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                                                <path d="M5 12h14" />
-                                              </svg>
-                                            </button>
-                                            <span className="px-2 text-xs font-bold">
-                                              {cartItem.quantity}
-                                            </span>
-                                            <button
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                if (cartItem.quantity < variantStock) {
-                                                  updateCartItemQuantity(product._id, cartItem.quantity + 1, variant);
-                                                } else {
-                                                  toast.error(`Only ${variantStock} available`);
-                                                }
-                                              }}
-                                              disabled={cartItem.quantity >= variantStock}
-                                              className="p-1 hover:bg-gray-50 rounded-r-full transition-colors disabled:opacity-50"
-                                            >
-                                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                                                <path d="M12 5v14M5 12h14" />
-                                              </svg>
-                                            </button>
-                                          </div>
-                                        ) : (
-                                          <button
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              if (!isOutOfStock) {
-                                                addToCart({ ...product, selectedVariant: variant }, 1);
-                                                toast.success(`${product.name} (${variant.size.value}${variant.size.unit}) added!`);
-                                                setAddedSet(prev => ({ ...prev, [`${product._id}-${variant._id}`]: true }));
-                                              }
-                                            }}
-                                            disabled={isOutOfStock}
-                                            className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-md ${isOutOfStock
-                                              ? 'bg-gray-600/50 cursor-not-allowed'
-                                              : 'bg-white hover:bg-gray-100'
-                                              }`}
-                                          >
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3">
-                                              <path d="M12 5v14M5 12h14" />
-                                            </svg>
-                                          </button>
-                                        )}
+                              {(() => {
+                                const selection = selectedOptions[product._id];
+                                const selectedItem = selection?.selectedItem;
+                                const quantity = selection?.quantity || 1;
+                                const currentPrice = selectedItem?.price || product.price;
+                                const currentStock = Number(selectedItem?.stock || 0);
+                                
+                                // Check if quantity equals or exceeds stock
+                                const isOutOfStock = currentStock <= 0 || quantity >= currentStock;
+                                
+                                // Get all options (variants or flavors)
+                                const options = product.hasVariants ? product.variants : (product.flavors || []);
+                                
+                                return (
+                                  <div className="flex flex-col gap-3">
+                                    {/* Dropdown + Quantity + Price */}
+                                    <div className="flex items-center gap-3">
+                                      {/* Dropdown */}
+                                      <select
+                                        value={selectedItem?._id || ''}
+                                        onChange={(e) => {
+                                          const item = options.find(opt => opt._id === e.target.value);
+                                          if (item) handleOptionChange(product._id, item);
+                                        }}
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="flex-1 bg-transparent border border-white/30 rounded-md px-3 py-2 text-white text-sm focus:outline-none focus:border-cyan-400"
+                                        style={{ minWidth: '120px' }}
+                                      >
+                                        {options.map((item) => {
+                                          const stock = Number(item.stock || 0);
+                                          const label = product.hasVariants 
+                                            ? `${item.size.value}${item.size.unit} - $${item.price}${stock <= 0 ? ' (Out of Stock)' : ''}`
+                                            : `${item.name} - $${item.price}${stock <= 0 ? ' (Out of Stock)' : ''}`;
+                                          return (
+                                            <option key={item._id} value={item._id} disabled={stock <= 0} style={{ backgroundColor: 'rgba(20, 30, 50, 0.95)', color: 'white' }}>
+                                              {label}
+                                            </option>
+                                          );
+                                        })}
+                                      </select>
+                                      
+                                      {/* Quantity Controls */}
+                                      <div className="flex items-center border border-white/30 rounded-md overflow-hidden">
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleQuantityChangeNew(product._id, -1);
+                                          }}
+                                          className="px-3 py-2 text-white hover:bg-white/10 transition-colors"
+                                        >
+                                          −
+                                        </button>
+                                        <span className="px-4 py-2 text-white font-medium min-w-[40px] text-center">
+                                          {quantity}
+                                        </span>
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleQuantityChangeNew(product._id, 1);
+                                          }}
+                                          disabled={quantity >= currentStock}
+                                          className="px-3 py-2 text-white hover:bg-white/10 transition-colors disabled:opacity-50"
+                                        >
+                                          +
+                                        </button>
                                       </div>
-
-                                      {/* Size and Price */}
-                                      <div className="flex flex-col">
-                                        <span className="text-sm font-bold text-white">
-                                          {variant.size.value}{variant.size.unit === 'grams' ? 'G' : variant.size.unit === 'pieces' ? ' pcs' : variant.size.unit.toUpperCase()}
-                                        </span>
-                                        <span className="text-base font-bold text-white">
-                                          ${variant.price}
-                                        </span>
+                                      
+                                      {/* Price Display */}
+                                      <div className="text-2xl font-bold text-white">
+                                        ${currentPrice}
                                       </div>
                                     </div>
-                                  );
-                                })}
-
-                                {/* Wishlist Button */}
-                                <div
-                                  className="flex text-white items-center space-x-2 cursor-pointer hover:text-red-500 transition-colors"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (!isLoggedIn) {
-                                      toast.error('Please login to manage your wishlist', {
-                                        position: "bottom-left",
-                                        autoClose: 3000,
-                                        hideProgressBar: false,
-                                        closeOnClick: true,
-                                        pauseOnHover: true,
-                                        draggable: true,
-                                        progress: undefined,
-                                      });
-                                      return;
-                                    }
-                                    const wasInWishlist = isInWishlist(product._id);
-                                    toggle(product);
-                                    toast.success(
-                                      wasInWishlist ? 'Removed from wishlist' : 'Added to wishlist!',
-                                      {
-                                        position: "bottom-left",
-                                        autoClose: 2000,
-                                        hideProgressBar: false,
-                                        closeOnClick: true,
-                                        pauseOnHover: true,
-                                        draggable: true,
-                                      }
-                                    );
-                                  }}
-                                >
-                                  <span className="text-sm text-gray-100 font-medium">Wishlist</span>
-                                  <svg
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill={isInWishlist(product._id) ? 'currentColor' : 'none'}
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                  >
-                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                                  </svg>
-                                </div>
-                              </div>
+                                    
+                                    {/* Add to Cart + Wishlist Buttons */}
+                                    <div className="flex items-center gap-3 mt-1">{/* Add to Cart Button with Gradient */}
+                                      <button
+                                        onClick={(e) => handleAddToCartNew(product, e)}
+                                        disabled={isOutOfStock}
+                                        className="px-6 py-3 rounded-md font-medium text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed" style={{ width: '70%', background: isOutOfStock 
+                                            ? 'rgba(100, 100, 100, 0.5)'
+                                            : 'linear-gradient(90deg, rgba(70, 113, 209, 0.4) 0%, rgba(62, 102, 190, 0.4) 50%, rgba(34, 55, 102, 0.4) 100%)',
+                                          
+                                          border: '1px solid #88AAE4',
+                                        }}
+                                      >
+                                        {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+                                      </button>
+                                      
+                                      {/* Wishlist Button */}
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          if (!isLoggedIn) {
+                                            toast.error('Please login to manage your wishlist');
+                                            return;
+                                          }
+                                          const wasInWishlist = isInWishlist(product._id);
+                                          toggle(product);
+                                          toast.success(wasInWishlist ? 'Removed from wishlist' : 'Added to wishlist!');
+                                        }}
+                                        className="px-4 py-3 text-white hover:text-red-500 transition-colors"
+                                      >
+                                        <svg
+                                          width="24"
+                                          height="24"
+                                          viewBox="0 0 24 24"
+                                          fill={isInWishlist(product._id) ? 'currentColor' : 'none'}
+                                          stroke="currentColor"
+                                          strokeWidth="2"
+                                        >
+                                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                                        </svg><span className="text-xs"></span></button>
+                                    </div>
+                                  </div>
+                                );
+                              })()}
                             </div>
                           </div>
                         </div>
@@ -1569,14 +1664,11 @@ if (isLoggedIn && user?.status === 'suspend') {
                           {/* Right side - Product Details */}
                           <div className="w-full lg:w-3/5 p-6">
                             <h3 className="text-2xl font-bold text-gray-100 mb-2">{product.name}</h3>
-                            {product?.short_description && <p className="text-gray-300 -mt-1  mb-2">{product.short_description}</p>}
                             {/* Intensity Bar */}
                             {product.intensity && (
                               <div className="mb-4">
                                 <div className="flex items-center justify-between mb-2">
-                                  <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity</span>
-                                  <span className="text-sm font-bold text-cyan-400">
-                                    {product.intensity}/10
+                                  <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity - {product.intensity}/10</span><span className="text-sm font-bold text-white">10/10
                                   </span>
                                 </div>
                                 <div className="w-full bg-gray-700/30 rounded-full h-2">
@@ -1589,6 +1681,27 @@ if (isLoggedIn && user?.status === 'suspend') {
                                     }}
                                   ></div>
                                 </div>
+                              </div>
+                            )}
+
+                            {/* Total Weight, Pieces, Per Piece - Transparent Boxes */}
+                            {(product.showTotalWeight || product.showTotalPieces || product.showPerPiece) && (
+                              <div className="flex flex-nowrap gap-2 mb-4">
+                                {product.showTotalWeight && product.totalWeight && (
+                                  <div className="flex-1 min-w-[80px] border border-white/30 rounded-md px-2 py-1.5 bg-transparent text-center">
+                                    <div className="text-[10px] text-gray-300 uppercase tracking-wide mb-0.5">Total Weight</div><div className="text-sm font-bold text-white">{product.totalWeight}</div>
+                                  </div>
+                                )}
+                                {product.showTotalPieces && product.totalPieces && (
+                                  <div className="flex-1 min-w-[80px] border border-white/30 rounded-md px-2 py-1.5 bg-transparent text-center">
+                                    <div className="text-[10px] text-gray-300 uppercase tracking-wide mb-0.5">Pieces</div><div className="text-sm font-bold text-white">{product.totalPieces}</div>
+                                  </div>
+                                )}
+                                {product.showPerPiece && product.perPiece && (
+                                  <div className="flex-1 min-w-[80px] border border-white/30 rounded-md px-2 py-1.5 bg-transparent text-center">
+                                    <div className="text-[10px] text-gray-300 uppercase tracking-wide mb-0.5">Per Piece</div><div className="text-sm font-bold text-white">{product.perPiece}</div>
+                                  </div>
+                                )}
                               </div>
                             )}
 
@@ -1640,149 +1753,122 @@ if (isLoggedIn && user?.status === 'suspend') {
                               })}
                             </div>
 
-                            {/* Variants with pricing - INLINE STYLE */}
+                            {/* NEW: Dropdown + Quantity + Add to Cart for Flavors */}
                             <div className="mt-4">
-                              <div className="flex flex-wrap items-center gap-3">
-                                {product.variants.map((variant, idx) => {
-
-                                  const cartItem = cart.find((i) => {
-                                    const isSameProduct = (i.id || i._id) === product._id;
-                                    const isSameFlavor = i.selectedFlavor?._id === flavor._id;
-                                    return isSameProduct && isSameFlavor;
-                                  });
-
-                                  const isInCart = cartItem && cartItem.quantity > 0;
-                                  const flavorStock = Number(flavor.stock || 0);
-                                  // Flavor is out of stock if: product hasStock is false OR individual flavor stock is 0
-                                  const isOutOfStock = !product.hasStock || flavorStock <= 0;
-
-                                  return (
-                                    <div
-                                      key={flavor._id}
-                                      className="relative px-4 py-3 min-w-[110px]"
-                                      style={{
-                                        background: 'transparent',
-                                        border: '1.26px solid rgba(134, 209, 248, 0.6)',
-                                        borderRadius: '14.7px'
-                                      }}
-                                      onClick={(e) => e.stopPropagation()}
-                                    >
-                                      {/* Add to Cart Button - Top Right */}
-                                      <div className="absolute -top-2 -right-2">
-                                        {isInCart ? (
-                                          <div className="flex items-center border-2 border-gray-900 rounded-full bg-white">
-                                            <button
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                updateCartItemQuantity(product._id, cartItem.quantity - 1, null, flavor);
-                                              }}
-                                              className="p-1 hover:bg-gray-50 rounded-l-full transition-colors"
-                                            >
-                                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                                                <path d="M5 12h14" />
-                                              </svg>
-                                            </button>
-                                            <span className="px-2 text-xs font-bold">
-                                              {cartItem.quantity}
-                                            </span>
-                                            <button
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                if (cartItem.quantity < flavorStock) {
-                                                  updateCartItemQuantity(product._id, cartItem.quantity + 1, null, flavor);
-                                                } else {
-                                                  toast.error(`Only ${flavorStock} available`);
-                                                }
-                                              }}
-                                              disabled={cartItem.quantity >= flavorStock}
-                                              className="p-1 hover:bg-gray-50 rounded-r-full transition-colors disabled:opacity-50"
-                                            >
-                                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                                                <path d="M12 5v14M5 12h14" />
-                                              </svg>
-                                            </button>
-                                          </div>
-                                        ) : (
-                                          <button
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              if (!isOutOfStock) {
-                                                addToCart({ ...product, selectedFlavor: flavor }, 1);
-                                                toast.success(`${product.name} (${flavor.name}) added!`);
-                                                setAddedSet(prev => ({ ...prev, [`${product._id}-${flavor._id}`]: true }));
-                                              }
-                                            }}
-                                            disabled={isOutOfStock}
-                                            className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-md ${isOutOfStock
-                                              ? 'bg-gray-600/50 cursor-not-allowed'
-                                              : 'bg-white hover:bg-gray-100'
-                                              }`}
-                                          >
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3">
-                                              <path d="M12 5v14M5 12h14" />
-                                            </svg>
-                                          </button>
-                                        )}
+                              {(() => {
+                                const selection = selectedOptions[product._id];
+                                const selectedItem = selection?.selectedItem;
+                                const quantity = selection?.quantity || 1;
+                                const currentPrice = selectedItem?.price || product.price;
+                                const currentStock = Number(selectedItem?.stock || 0);
+                                
+                                // Check if quantity equals or exceeds stock
+                                const isOutOfStock = currentStock <= 0 || quantity >= currentStock;
+                                
+                                // Get all flavors
+                                const options = product.flavors || [];
+                                
+                                return (
+                                  <div className="flex flex-col gap-3">
+                                    {/* Dropdown + Quantity + Price */}
+                                    <div className="flex items-center gap-3">
+                                      {/* Dropdown */}
+                                      <select
+                                        value={selectedItem?._id || ''}
+                                        onChange={(e) => {
+                                          const item = options.find(opt => opt._id === e.target.value);
+                                          if (item) handleOptionChange(product._id, item);
+                                        }}
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="flex-1 bg-transparent border border-white/30 rounded-md px-3 py-2 text-white text-sm focus:outline-none focus:border-cyan-400"
+                                        style={{ minWidth: '120px' }}
+                                      >
+                                        {options.filter(f => f.isActive).map((item) => {
+                                          const stock = Number(item.stock || 0);
+                                          const label = `${item.name} - $${item.price}${stock <= 0 ? ' (Out of Stock)' : ''}`;
+                                          return (
+                                            <option key={item._id} value={item._id} disabled={stock <= 0} style={{ backgroundColor: 'rgba(20, 30, 50, 0.95)', color: 'white' }}>
+                                              {label}
+                                            </option>
+                                          );
+                                        })}
+                                      </select>
+                                      
+                                      {/* Quantity Controls */}
+                                      <div className="flex items-center border border-white/30 rounded-md overflow-hidden">
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleQuantityChangeNew(product._id, -1);
+                                          }}
+                                          className="px-3 py-2 text-white hover:bg-white/10 transition-colors"
+                                        >
+                                          −
+                                        </button>
+                                        <span className="px-4 py-2 text-white font-medium min-w-[40px] text-center">
+                                          {quantity}
+                                        </span>
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleQuantityChangeNew(product._id, 1);
+                                          }}
+                                          disabled={quantity >= currentStock}
+                                          className="px-3 py-2 text-white hover:bg-white/10 transition-colors disabled:opacity-50"
+                                        >
+                                          +
+                                        </button>
                                       </div>
-
-                                      {/* Flavor Name and Price */}
-                                      <div className="flex flex-col">
-                                        <span className="text-sm font-bold text-white">
-                                          {flavor.name}
-                                        </span>
-                                        <span className="text-base font-bold text-white">
-                                          ${flavor.price}
-                                        </span>
+                                      
+                                      {/* Price Display */}
+                                      <div className="text-2xl font-bold text-white">
+                                        ${currentPrice}
                                       </div>
                                     </div>
-                                  );
-                                })}
-
-                                {/* Wishlist Button */}
-                                <div
-                                  className="flex items-center space-x-2 cursor-pointer hover:text-red-500 transition-colors"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (!isLoggedIn) {
-                                      toast.error('Please login to manage your wishlist', {
-                                        position: "bottom-left",
-                                        autoClose: 3000,
-                                        hideProgressBar: false,
-                                        closeOnClick: true,
-                                        pauseOnHover: true,
-                                        draggable: true,
-                                        progress: undefined,
-                                      });
-                                      return;
-                                    }
-                                    const wasInWishlist = isInWishlist(product._id);
-                                    toggle(product);
-                                    toast.success(
-                                      wasInWishlist ? 'Removed from wishlist' : 'Added to wishlist!',
-                                      {
-                                        position: "bottom-left",
-                                        autoClose: 2000,
-                                        hideProgressBar: false,
-                                        closeOnClick: true,
-                                        pauseOnHover: true,
-                                        draggable: true,
-                                      }
-                                    );
-                                  }}
-                                >
-                                  <span className="text-sm text-gray-100 font-medium">Wishlist</span>
-                                  <svg
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill={isInWishlist(product._id) ? 'currentColor' : 'none'}
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                  >
-                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                                  </svg>
-                                </div>
-                              </div>
+                                    
+                                    {/* Add to Cart + Wishlist Buttons */}
+                                    <div className="flex items-center gap-3 mt-1">{/* Add to Cart Button with Gradient */}
+                                      <button
+                                        onClick={(e) => handleAddToCartNew(product, e)}
+                                        disabled={isOutOfStock}
+                                        className="px-6 py-3 rounded-md font-medium text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed" style={{ width: '70%', background: isOutOfStock 
+                                            ? 'rgba(100, 100, 100, 0.5)'
+                                            : 'linear-gradient(90deg, rgba(70, 113, 209, 0.4) 0%, rgba(62, 102, 190, 0.4) 50%, rgba(34, 55, 102, 0.4) 100%)',
+                                          
+                                          border: '1px solid #88AAE4',
+                                        }}
+                                      >
+                                        {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+                                      </button>
+                                      
+                                      {/* Wishlist Button */}
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          if (!isLoggedIn) {
+                                            toast.error('Please login to manage your wishlist');
+                                            return;
+                                          }
+                                          const wasInWishlist = isInWishlist(product._id);
+                                          toggle(product);
+                                          toast.success(wasInWishlist ? 'Removed from wishlist' : 'Added to wishlist!');
+                                        }}
+                                        className="px-4 py-3 text-white hover:text-red-500 transition-colors"
+                                      >
+                                        <svg
+                                          width="24"
+                                          height="24"
+                                          viewBox="0 0 24 24"
+                                          fill={isInWishlist(product._id) ? 'currentColor' : 'none'}
+                                          stroke="currentColor"
+                                          strokeWidth="2"
+                                        >
+                                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                                        </svg><span className="text-xs"></span></button>
+                                    </div>
+                                  </div>
+                                );
+                              })()}
                             </div>
                           </div>
                         </div>
@@ -1900,15 +1986,12 @@ return (
         {/* Right side - Product Details */}
         <div className="w-full lg:w-3/5 p-6">
           <h3 className="text-2xl font-bold text-gray-100 mb-2">{product.name}</h3>
-          {product?.short_description && <p className="text-gray-300 -mt-1 mb-2">{product.short_description}</p>}
           
           {/* Intensity Bar */}
           {product.intensity && (
             <div className="mb-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity</span>
-                <span className="text-sm font-bold text-cyan-400">
-                  {product.intensity}/10
+                <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity - {product.intensity}/10</span><span className="text-sm font-bold text-white">10/10
                 </span>
               </div>
               <div className="w-full bg-gray-700/30 rounded-full h-2">
@@ -1921,6 +2004,27 @@ return (
                   }}
                 ></div>
               </div>
+            </div>
+          )}
+
+          {/* Total Weight, Pieces, Per Piece - Transparent Boxes */}
+          {(product.showTotalWeight || product.showTotalPieces || product.showPerPiece) && (
+            <div className="flex flex-nowrap gap-2 mb-4">
+              {product.showTotalWeight && product.totalWeight && (
+                <div className="flex-1 min-w-[80px] border border-white/30 rounded-md px-2 py-1.5 bg-transparent text-center">
+                  <div className="text-[10px] text-gray-300 uppercase tracking-wide mb-0.5">Total Weight</div><div className="text-sm font-bold text-white">{product.totalWeight}</div>
+                </div>
+              )}
+              {product.showTotalPieces && product.totalPieces && (
+                <div className="flex-1 min-w-[80px] border border-white/30 rounded-md px-2 py-1.5 bg-transparent text-center">
+                  <div className="text-[10px] text-gray-300 uppercase tracking-wide mb-0.5">Pieces</div><div className="text-sm font-bold text-white">{product.totalPieces}</div>
+                </div>
+              )}
+              {product.showPerPiece && product.perPiece && (
+                <div className="flex-1 min-w-[80px] border border-white/30 rounded-md px-2 py-1.5 bg-transparent text-center">
+                  <div className="text-[10px] text-gray-300 uppercase tracking-wide mb-0.5">Per Piece</div><div className="text-sm font-bold text-white">{product.perPiece}</div>
+                </div>
+              )}
             </div>
           )}
 
@@ -1972,188 +2076,116 @@ return (
             })}
           </div>
 
-          {/* Variants/Flavors or Simple Price */}
+          {/* NEW: Dropdown + Quantity + Add to Cart for ALL products */}
           <div className="mt-4">
-            <div className="flex flex-wrap items-center gap-3">
-              {/* Check if product has VARIANTS */}
-              {product.hasVariants && product.variants && product.variants.length > 0 && (
-                <>
-                  {product.variants.map((variant) => {
-                    const cartItem = cart.find((i) => {
-                      const isSameProduct = (i.id || i._id) === product._id;
-                      const isSameVariant = i.selectedVariant?._id === variant._id;
-                      return isSameProduct && isSameVariant;
-                    });
-
-                    const isInCart = cartItem && cartItem.quantity > 0;
-                    const variantStock = Number(variant.stock || 0);
-                    const isOutOfStock = variantStock <= 0;
-
-                    return (
-                      <div
-                        key={variant._id}
-                        className="relative px-4 py-3 min-w-[110px]"
-                        style={{
-                          background: 'transparent',
-                          border: '1.26px solid rgba(134, 209, 248, 0.6)',
-                          borderRadius: '14.7px'
+            {/* Check if product has variants or flavors */}
+            {((product.hasVariants && product.variants?.length > 0) || (product.flavors?.length > 0 && product.flavors.some(f => f.isActive))) ? (
+              // Dropdown UI for products with variants/flavors
+              (() => {
+                const selection = selectedOptions[product._id];
+                const selectedItem = selection?.selectedItem;
+                const quantity = selection?.quantity || 1;
+                const currentPrice = selectedItem?.price || product.price;
+                const currentStock = Number(selectedItem?.stock || 0);
+                const isOutOfStock = currentStock <= 0 || quantity >= currentStock;
+                const options = product.hasVariants ? product.variants : (product.flavors?.filter(f => f.isActive) || []);
+                
+                return (
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-3">
+                      <select
+                        value={selectedItem?._id || ''}
+                        onChange={(e) => {
+                          const item = options.find(opt => opt._id === e.target.value);
+                          if (item) handleOptionChange(product._id, item);
                         }}
                         onClick={(e) => e.stopPropagation()}
+                        className="flex-1 bg-transparent border border-white/30 rounded-md px-3 py-2 text-white text-sm focus:outline-none focus:border-cyan-400"
+                        style={{ minWidth: '120px' }}
                       >
-                        <div className="absolute -top-2 -right-2">
-                          {isInCart ? (
-                            <div className="flex items-center border-2 border-gray-900 rounded-full bg-white">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  updateCartItemQuantity(product._id, cartItem.quantity - 1, variant);
-                                }}
-                                className="p-1 hover:bg-gray-50 rounded-l-full transition-colors"
-                              >
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                                  <path d="M5 12h14" />
-                                </svg>
-                              </button>
-                              <span className="px-2 text-xs font-bold">{cartItem.quantity}</span>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (cartItem.quantity < variantStock) {
-                                    updateCartItemQuantity(product._id, cartItem.quantity + 1, variant);
-                                  } else {
-                                    toast.error(`Only ${variantStock} available`);
-                                  }
-                                }}
-                                disabled={cartItem.quantity >= variantStock}
-                                className="p-1 hover:bg-gray-50 rounded-r-full transition-colors disabled:opacity-50"
-                              >
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                                  <path d="M12 5v14M5 12h14" />
-                                </svg>
-                              </button>
-                            </div>
-                          ) : (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (!isOutOfStock) {
-                                  addToCart({ ...product, selectedVariant: variant }, 1);
-                                  toast.success(`${product.name} (${variant.size.value}${variant.size.unit}) added!`);
-                                }
-                              }}
-                              disabled={isOutOfStock}
-                              className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-md ${
-                                isOutOfStock ? 'bg-gray-600/50 cursor-not-allowed' : 'bg-white hover:bg-gray-100'
-                              }`}
-                            >
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3">
-                                <path d="M12 5v14M5 12h14" />
-                              </svg>
-                            </button>
-                          )}
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-sm font-bold text-white">
-                            {variant.size.value}{variant.size.unit === 'grams' ? 'G' : variant.size.unit === 'pieces' ? ' pcs' : variant.size.unit.toUpperCase()}
-                          </span>
-                          <span className="text-base font-bold text-white">${variant.price}</span>
-                        </div>
+                        {options.map((item) => {
+                          const stock = Number(item.stock || 0);
+                          const label = product.hasVariants 
+                            ? `${item.size.value}${item.size.unit} - $${item.price}${stock <= 0 ? ' (Out of Stock)' : ''}`
+                            : `${item.name} - $${item.price}${stock <= 0 ? ' (Out of Stock)' : ''}`;
+                          return (
+                            <option key={item._id} value={item._id} disabled={stock <= 0} style={{ backgroundColor: 'rgba(20, 30, 50, 0.95)', color: 'white' }}>
+                              {label}
+                            </option>
+                          );
+                        })}
+                      </select>
+                      <div className="flex items-center border border-white/30 rounded-md overflow-hidden">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleQuantityChangeNew(product._id, -1);
+                          }}
+                          className="px-3 py-2 text-white hover:bg-white/10 transition-colors"
+                        >
+                          −
+                        </button>
+                        <span className="px-4 py-2 text-white font-medium min-w-[40px] text-center">
+                          {quantity}
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleQuantityChangeNew(product._id, 1);
+                          }}
+                          disabled={quantity >= currentStock}
+                          className="px-3 py-2 text-white hover:bg-white/10 transition-colors disabled:opacity-50"
+                        >
+                          +
+                        </button>
                       </div>
-                    );
-                  })}
-                </>
-              )}
-
-              {/* Check if product has FLAVORS */}
-              {product.flavors && product.flavors.length > 0 && product.flavors.some(f => f.isActive) && (
-                <>
-                  {product.flavors.filter(f => f.isActive).map((flavor) => {
-                    const cartItem = cart.find((i) => {
-                      const isSameProduct = (i.id || i._id) === product._id;
-                      const isSameFlavor = i.selectedFlavor?._id === flavor._id;
-                      return isSameProduct && isSameFlavor;
-                    });
-
-                    const isInCart = cartItem && cartItem.quantity > 0;
-                    const flavorStock = Number(flavor.stock || 0);
-                    const isOutOfStock = !product.hasStock || flavorStock <= 0;
-
-                    return (
-                      <div
-                        key={flavor._id}
-                        className="relative px-4 py-3 min-w-[110px]"
-                        style={{
-                          background: 'transparent',
-                          border: '1.26px solid rgba(134, 209, 248, 0.6)',
-                          borderRadius: '14.7px'
+                      <div className="text-2xl font-bold text-white">
+                        ${currentPrice}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={(e) => handleAddToCartNew(product, e)}
+                        disabled={isOutOfStock}
+                        className="px-6 py-3 rounded-md font-medium text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed" style={{ width: '70%', background: isOutOfStock 
+                            ? 'rgba(100, 100, 100, 0.5)'
+                            : 'linear-gradient(90deg, rgba(70, 113, 209, 0.4) 0%, rgba(62, 102, 190, 0.4) 50%, rgba(34, 55, 102, 0.4) 100%)',
+                          
+                          border: '1px solid #88AAE4',
                         }}
-                        onClick={(e) => e.stopPropagation()}
                       >
-                        <div className="absolute -top-2 -right-2">
-                          {isInCart ? (
-                            <div className="flex items-center border-2 border-gray-900 rounded-full bg-white">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  updateCartItemQuantity(product._id, cartItem.quantity - 1, null, flavor);
-                                }}
-                                className="p-1 hover:bg-gray-50 rounded-l-full transition-colors"
-                              >
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                                  <path d="M5 12h14" />
-                                </svg>
-                              </button>
-                              <span className="px-2 text-xs font-bold">{cartItem.quantity}</span>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (cartItem.quantity < flavorStock) {
-                                    updateCartItemQuantity(product._id, cartItem.quantity + 1, null, flavor);
-                                  } else {
-                                    toast.error(`Only ${flavorStock} available`);
-                                  }
-                                }}
-                                disabled={cartItem.quantity >= flavorStock}
-                                className="p-1 hover:bg-gray-50 rounded-r-full transition-colors disabled:opacity-50"
-                              >
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                                  <path d="M12 5v14M5 12h14" />
-                                </svg>
-                              </button>
-                            </div>
-                          ) : (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (!isOutOfStock) {
-                                  addToCart({ ...product, selectedFlavor: flavor }, 1);
-                                  toast.success(`${product.name} (${flavor.name}) added!`);
-                                }
-                              }}
-                              disabled={isOutOfStock}
-                              className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-md ${
-                                isOutOfStock ? 'bg-gray-600/50 cursor-not-allowed' : 'bg-white hover:bg-gray-100'
-                              }`}
-                            >
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3">
-                                <path d="M12 5v14M5 12h14" />
-                              </svg>
-                            </button>
-                          )}
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-sm font-bold text-white">{flavor.name}</span>
-                          <span className="text-base font-bold text-white">${flavor.price}</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </>
-              )}
-
-              {/* Simple product - show only if NO variants AND NO flavors */}
-              {(!product.hasVariants || !product.variants || product.variants.length === 0) && 
-               (!product.flavors || product.flavors.length === 0 || !product.flavors.some(f => f.isActive)) && (
+                        {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!isLoggedIn) {
+                            toast.error('Please login to manage your wishlist');
+                            return;
+                          }
+                          const wasInWishlist = isInWishlist(product._id);
+                          toggle(product);
+                          toast.success(wasInWishlist ? 'Removed from wishlist' : 'Added to wishlist!');
+                        }}
+                        className="px-4 py-3 text-white hover:text-red-500 transition-colors"
+                      >
+                        <svg
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill={isInWishlist(product._id) ? 'currentColor' : 'none'}
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                        </svg><span className="text-xs"></span></button>
+                    </div>
+                  </div>
+                );
+              })()
+            ) : (
+              // Simple product without variants/flavors - keep old UI
+              <div className="flex flex-wrap items-center gap-3">
                 <div 
                   className="relative px-4 py-3 min-w-[120px]" 
                   style={{
@@ -2182,8 +2214,7 @@ return (
                             >
                               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                                 <path d="M5 12h14" />
-                              </svg>
-                            </button>
+                              </svg><span className="text-xs"></span></button>
                             <span className="px-2 text-xs font-bold">{cartItem.quantity}</span>
                             <button
                               onClick={(e) => {
@@ -2199,8 +2230,7 @@ return (
                             >
                               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                                 <path d="M12 5v14M5 12h14" />
-                              </svg>
-                            </button>
+                              </svg><span className="text-xs"></span></button>
                           </div>
                         );
                       } else {
@@ -2221,8 +2251,7 @@ return (
                           >
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3">
                               <path d="M12 5v14M5 12h14" />
-                            </svg>
-                          </button>
+                            </svg><span className="text-xs">Add to Wishlist</span></button>
                         );
                       }
                     })()}
@@ -2231,35 +2260,35 @@ return (
                     <span className="text-base font-bold text-gray-100">${product.price}</span>
                   </div>
                 </div>
-              )}
 
-              {/* Wishlist Button */}
-              <div
-                className="flex text-white items-center space-x-2 cursor-pointer hover:text-red-500 transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (!isLoggedIn) {
-                    toast.error('Please login to manage your wishlist');
-                    return;
-                  }
-                  const wasInWishlist = isInWishlist(product._id);
-                  toggle(product);
-                  toast.success(wasInWishlist ? 'Removed from wishlist' : 'Added to wishlist!');
-                }}
-              >
-                <span className="text-sm text-gray-100 font-medium">Wishlist</span>
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill={isInWishlist(product._id) ? 'currentColor' : 'none'}
-                  stroke="currentColor"
-                  strokeWidth="2"
+                {/* Wishlist Button */}
+                <div
+                  className="flex text-white items-center space-x-2 cursor-pointer hover:text-red-500 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!isLoggedIn) {
+                      toast.error('Please login to manage your wishlist');
+                      return;
+                    }
+                    const wasInWishlist = isInWishlist(product._id);
+                    toggle(product);
+                    toast.success(wasInWishlist ? 'Removed from wishlist' : 'Added to wishlist!');
+                  }}
                 >
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                </svg>
+                  <span className="text-sm text-gray-100 font-medium">Wishlist</span>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill={isInWishlist(product._id) ? 'currentColor' : 'none'}
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                  </svg>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -2300,6 +2329,42 @@ return (
 };
 
 export default Menu;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

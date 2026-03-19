@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { Heart } from 'lucide-react';
@@ -308,7 +308,65 @@ export default function WishlistPage() {
 
   return (
     <div className="min-h-screen relative" style={{ background: 'transparent' }}>
-     
+      {/* Animated stars background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="stars-container">
+          {[...Array(60)].map((_, i) => (
+            <div
+              key={`star-${i}`}
+              className="star"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${2 + Math.random() * 3}s`
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* CSS for Stars Animation */}
+      <style jsx>{`
+        .stars-container {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+        }
+        
+        .star {
+          position: absolute;
+          width: 2px;
+          height: 2px;
+          background: white;
+          border-radius: 50%;
+          animation: twinkle linear infinite;
+          box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
+        }
+        
+        @keyframes twinkle {
+          0%, 100% {
+            opacity: 0.2;
+            transform: scale(0.8);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.2);
+          }
+        }
+        
+        .star:nth-child(3n) {
+          width: 3px;
+          height: 3px;
+          box-shadow: 0 0 6px rgba(124, 198, 255, 0.7);
+        }
+        
+        .star:nth-child(5n) {
+          width: 4px;
+          height: 4px;
+          box-shadow: 0 0 8px rgba(47, 128, 255, 0.8);
+        }
+      `}</style>
 
       <div className="max-w-7xl mx-auto px-4 py-8 relative z-10">
         <div className="flex items-center justify-between mb-6">
@@ -346,14 +404,10 @@ export default function WishlistPage() {
               const isDried = isDriedProduct(product);
               const isEdibles = isEdiblesProduct(product);
               const showDriedLayout = isDried && product.hasVariants && product.variants && product.variants.length > 0;
-              // Show EDIBLES layout if product has active flavors (regardless of category)
-              const showEdiblesLayout = product.flavors && product.flavors.length > 0 && product.flavors.some(f => f.isActive);
+              const showEdiblesLayout = isEdibles && product.flavors && product.flavors.length > 0 && product.flavors.some(f => f.isActive);
 
-              // DRIED Product Layout - Menu Style with Dropdown
+              // DRIED Product Layout
               if (showDriedLayout) {
-                // Initialize selection for this product
-                initializeProductSelection(product);
-                
                 return (
                   <div key={product._id} className="w-full">
                     <div
@@ -401,7 +455,9 @@ export default function WishlistPage() {
                           {product.intensity && (
                             <div className="mb-4">
                               <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity - {product.intensity}/10</span><span className="text-sm font-bold text-white">10/10
+                                <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity</span>
+                                <span className="text-sm font-bold text-cyan-400">
+                                  {product.intensity}/10
                                 </span>
                               </div>
                               <div className="w-full bg-gray-700/30 rounded-full h-2">
@@ -416,36 +472,13 @@ export default function WishlistPage() {
                               </div>
                             </div>
                           )}
-
-                          {/* Transparent Boxes for Weight/Pieces */}
-                          {(product.showTotalWeight || product.showTotalPieces || product.showPerPiece) && (
-                            <div className="flex flex-nowrap gap-2 mb-4">
-                              {product.showTotalWeight && product.totalWeight && (
-                                <div className="flex-1 min-w-[90px] border border-white/20 rounded-lg px-4 py-1.5 text-center">
-                                  <div className="text-[10px] text-gray-300 uppercase tracking-wide mb-0.5">Total Weight</div>
-                                  <div className="text-sm font-bold text-white">{product.totalWeight}</div>
-                                </div>
-                              )}
-                              {product.showTotalPieces && product.totalPieces && (
-                                <div className="flex-1 min-w-[120px] border border-white/20 rounded-lg px-4 py-3 text-center">
-                                  <div className="text-[10px] text-gray-300 uppercase tracking-wide mb-0.5">Pieces</div>
-                                  <div className="text-sm font-bold text-white">{product.totalPieces}</div>
-                                </div>
-                              )}
-                              {product.showPerPiece && product.perPiece && (
-                                <div className="flex-1 min-w-[120px] border border-white/20 rounded-lg px-4 py-3 text-center">
-                                  <div className="text-[10px] text-gray-300 uppercase tracking-wide mb-0.5">Per Piece</div>
-                                  <div className="text-sm font-bold text-white">{product.perPiece}</div>
-                                </div>
-                              )}
-                            </div>
-                          )}
                           
                           {/* Review Tags */}
                           <div className="flex flex-wrap gap-2 mb-4">
                             {(product.reviewTags || []).slice(0, 4).map((tagId, idx) => {
                               const tagName = getTagName(tagId);
                               if (!tagName) return null;
+                              // Remove emojis from tag name
                               const labelWithoutEmoji = tagName.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
                               return (
                                 <span 
@@ -459,106 +492,111 @@ export default function WishlistPage() {
                             })}
                           </div>
                           
-                          {/* NEW: Dropdown + Quantity + Add to Cart (Menu Style) */}
+                          {/* Variants with pricing */}
                           <div className="mt-4">
-                            {(() => {
-                              const selection = selectedOptions[product._id];
-                              const selectedItem = selection?.selectedItem;
-                              const quantity = selection?.quantity || 1;
-                              const currentPrice = selectedItem?.price || product.price;
-                              const currentStock = Number(selectedItem?.stock || 0);
-                              const isOutOfStock = currentStock <= 0 || quantity >= currentStock;
-                              const options = product.variants;
-                              
-                              return (
-                                <div className="flex flex-col gap-3">
-                                  {/* Dropdown + Quantity + Price */}
-                                  <div className="flex items-center gap-3">
-                                    <select
-                                      value={selectedItem?._id || ''}
-                                      onChange={(e) => {
-                                        const item = options.find(opt => opt._id === e.target.value);
-                                        if (item) handleOptionChange(product._id, item);
-                                      }}
-                                      onClick={(e) => e.stopPropagation()}
-                                      className="flex-1 bg-transparent border border-white/30 rounded-md px-3 py-2 text-white text-sm focus:outline-none focus:border-cyan-400"
-                                      style={{ minWidth: '120px' }}
-                                    >
-                                      {options.map((item) => {
-                                        const stock = Number(item.stock || 0);
-                                        const label = `${item.size.value}${item.size.unit} - $${item.price}${stock <= 0 ? ' (Out of Stock)' : ''}`;
-                                        return (
-                                          <option key={item._id} value={item._id} disabled={stock <= 0} style={{ backgroundColor: 'rgba(20, 30, 50, 0.95)', color: 'white' }}>
-                                            {label}
-                                          </option>
-                                        );
-                                      })}
-                                    </select>
+                            <div className="flex flex-wrap items-center gap-3">
+                              {product.variants.map((variant) => {
+                                const cartItem = cart.find((i) => {
+                                  const isSameProduct = (i.id || i._id) === product._id;
+                                  const isSameVariant = i.selectedVariant?._id === variant._id;
+                                  return isSameProduct && isSameVariant;
+                                });
+                                
+                                const isInCart = cartItem && cartItem.quantity > 0;
+                                const variantStock = Number(variant.stock || 0);
+                                const isOutOfStock = variantStock <= 0;
+                                
+                                return (
+                                  <div 
+                                    key={variant._id} 
+                                    className="relative px-4 py-3 min-w-[110px]"
+                                    style={{
+                                      background: 'transparent',
+                                      border: '1.26px solid rgba(134, 209, 248, 0.6)',
+                                      borderRadius: '14.7px'
+                                    }}
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    {/* Add to Cart Button - Top Right */}
+                                    <div className="absolute -top-2 -right-2">
+                                      {isInCart ? (
+                                        <div className="flex items-center border-2 border-gray-700/50 rounded-full bg-white">
+                                          <button 
+                                            onClick={(e) => handleQuantityChange(product, cartItem.quantity - 1, variant, null, e)}
+                                            className="p-1 hover:bg-gray-100 rounded-l-full transition-colors"
+                                          >
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3">
+                                              <path d="M5 12h14"/>
+                                            </svg>
+                                          </button>
+                                          <span className="px-2 text-xs font-bold text-black">
+                                            {cartItem.quantity}
+                                          </span>
+                                          <button 
+                                            onClick={(e) => {
+                                              if (cartItem.quantity < variantStock) {
+                                                handleQuantityChange(product, cartItem.quantity + 1, variant, null, e);
+                                              } else {
+                                                toast.error(`Only ${variantStock} available`);
+                                              }
+                                            }}
+                                            disabled={cartItem.quantity >= variantStock}
+                                            className="p-1 hover:bg-gray-100 rounded-r-full transition-colors disabled:opacity-50"
+                                          >
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3">
+                                              <path d="M12 5v14M5 12h14"/>
+                                            </svg>
+                                          </button>
+                                        </div>
+                                      ) : (
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (!isOutOfStock) {
+                                              addToCart({ ...product, selectedVariant: variant }, 1);
+                                              toast.success(`${product.name} (${variant.size.value}${variant.size.unit}) added!`);
+                                            }
+                                          }}
+                                          disabled={isOutOfStock}
+                                          className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-md ${
+                                            isOutOfStock 
+                                              ? 'bg-gray-300 cursor-not-allowed' 
+                                              : 'bg-white hover:bg-gray-100'
+                                          }`}
+                                        >
+                                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3">
+                                            <path d="M12 5v14M5 12h14"/>
+                                          </svg>
+                                        </button>
+                                      )}
+                                    </div>
                                     
-                                    {/* Quantity Controls */}
-                                    <div className="flex items-center border border-white/30 rounded-md overflow-hidden">
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleQuantityChangeNew(product._id, -1);
-                                        }}
-                                        className="px-3 py-2 text-white hover:bg-white/10 transition-colors"
-                                      >
-                                        -
-                                      </button>
-                                      <span className="px-4 py-2 text-white font-medium min-w-[40px] text-center">
-                                        {quantity}
+                                    {/* Size and Price */}
+                                    <div className="flex flex-col">
+                                      <span className="text-sm font-bold text-white">
+                                        {variant.size.value}{variant.size.unit === 'grams' ? 'G' : variant.size.unit}
                                       </span>
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleQuantityChangeNew(product._id, 1);
-                                        }}
-                                        disabled={quantity >= currentStock}
-                                        className="px-3 py-2 text-white hover:bg-white/10 transition-colors disabled:opacity-50"
-                                      >
-                                        +
-                                      </button>
-                                    </div>
-                                    
-                                    {/* Price Display */}
-                                    <div className="text-2xl font-bold text-white">
-                                      ${currentPrice}
+                                      <span className="text-base font-bold text-white">
+                                        ${variant.price}
+                                      </span>
                                     </div>
                                   </div>
-                                  
-                                  {/* Add to Cart + Remove from Wishlist */}
-                                  <div className="flex items-center gap-3 mt-1">
-                                    <button
-                                      onClick={(e) => handleAddToCartNew(product, e)}
-                                      disabled={isOutOfStock}
-                                      className="px-6 py-3 rounded-md font-medium text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                                      style={{ 
-                                        width: '70%',
-                                        background: isOutOfStock 
-                                          ? 'rgba(100, 100, 100, 0.5)'
-                                          : 'linear-gradient(90deg, rgba(70, 113, 209, 0.4) 0%, rgba(62, 102, 190, 0.4) 50%, rgba(34, 55, 102, 0.4) 100%)',
-                                        border: '1px solid #88AAE4',
-                                      }}
-                                    >
-                                      {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
-                                    </button>
-                                    
-                                    {/* Remove from Wishlist Button */}
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        remove(product._id);
-                                        toast.success('Removed from wishlist');
-                                      }}
-                                      className="px-4 py-3 text-white hover:text-red-500 transition-colors"
-                                    >
-                                      <Heart className="w-6 h-6" fill="currentColor" />
-                                    </button>
-                                  </div>
-                                </div>
-                              );
-                            })()}
+                                );
+                              })}
+                              
+                              {/* Remove from Wishlist Button */}
+                              <div 
+                                className="flex items-center space-x-2 cursor-pointer hover:text-red-500 transition-colors"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  remove(product._id);
+                                  toast.success('Removed from wishlist');
+                                }}
+                              >
+                                <span className="text-sm text-white font-medium">Remove</span>
+                                <Heart className="w-5 h-5 text-white" fill="currentColor" />
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -567,11 +605,8 @@ export default function WishlistPage() {
                 );
               }
 
-              // EDIBLES Product Layout - Menu Style with Dropdown
+              // EDIBLES Product Layout
               if (showEdiblesLayout) {
-                // Initialize selection for this product
-                initializeProductSelection(product);
-                
                 return (
                   <div key={product._id} className="w-full">
                     <div
@@ -620,7 +655,9 @@ export default function WishlistPage() {
                           {product.intensity && (
                             <div className="mb-4">
                               <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity - {product.intensity}/10</span><span className="text-sm font-bold text-white">10/10
+                                <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity</span>
+                                <span className="text-sm font-bold text-cyan-400">
+                                  {product.intensity}/10
                                 </span>
                               </div>
                               <div className="w-full bg-gray-700/30 rounded-full h-2">
@@ -635,36 +672,13 @@ export default function WishlistPage() {
                               </div>
                             </div>
                           )}
-
-                          {/* Transparent Boxes for Weight/Pieces */}
-                          {(product.showTotalWeight || product.showTotalPieces || product.showPerPiece) && (
-                            <div className="flex flex-nowrap gap-2 mb-4">
-                              {product.showTotalWeight && product.totalWeight && (
-                                <div className="flex-1 min-w-[90px] border border-white/20 rounded-lg px-4 py-1.5 text-center">
-                                  <div className="text-[10px] text-gray-300 uppercase tracking-wide mb-0.5">Total Weight</div>
-                                  <div className="text-sm font-bold text-white">{product.totalWeight}</div>
-                                </div>
-                              )}
-                              {product.showTotalPieces && product.totalPieces && (
-                                <div className="flex-1 min-w-[120px] border border-white/20 rounded-lg px-4 py-3 text-center">
-                                  <div className="text-[10px] text-gray-300 uppercase tracking-wide mb-0.5">Pieces</div>
-                                  <div className="text-sm font-bold text-white">{product.totalPieces}</div>
-                                </div>
-                              )}
-                              {product.showPerPiece && product.perPiece && (
-                                <div className="flex-1 min-w-[120px] border border-white/20 rounded-lg px-4 py-3 text-center">
-                                  <div className="text-[10px] text-gray-300 uppercase tracking-wide mb-0.5">Per Piece</div>
-                                  <div className="text-sm font-bold text-white">{product.perPiece}</div>
-                                </div>
-                              )}
-                            </div>
-                          )}
                           
                           {/* Review Tags */}
                           <div className="flex flex-wrap gap-2 mb-4">
                             {(product.reviewTags || []).slice(0, 4).map((tagId, idx) => {
                               const tagName = getTagName(tagId);
                               if (!tagName) return null;
+                              // Remove emojis from tag name
                               const labelWithoutEmoji = tagName.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
                               return (
                                 <span 
@@ -678,106 +692,111 @@ export default function WishlistPage() {
                             })}
                           </div>
                           
-                          {/* NEW: Dropdown + Quantity + Add to Cart (Menu Style) */}
+                          {/* Flavors with pricing */}
                           <div className="mt-4">
-                            {(() => {
-                              const selection = selectedOptions[product._id];
-                              const selectedItem = selection?.selectedItem;
-                              const quantity = selection?.quantity || 1;
-                              const currentPrice = selectedItem?.price || product.price;
-                              const currentStock = Number(selectedItem?.stock || 0);
-                              const isOutOfStock = currentStock <= 0 || quantity >= currentStock;
-                              const options = product.flavors.filter(f => f.isActive);
-                              
-                              return (
-                                <div className="flex flex-col gap-3">
-                                  {/* Dropdown + Quantity + Price */}
-                                  <div className="flex items-center gap-3">
-                                    <select
-                                      value={selectedItem?._id || ''}
-                                      onChange={(e) => {
-                                        const item = options.find(opt => opt._id === e.target.value);
-                                        if (item) handleOptionChange(product._id, item);
-                                      }}
-                                      onClick={(e) => e.stopPropagation()}
-                                      className="flex-1 bg-transparent border border-white/30 rounded-md px-3 py-2 text-white text-sm focus:outline-none focus:border-cyan-400"
-                                      style={{ minWidth: '120px' }}
-                                    >
-                                      {options.map((item) => {
-                                        const stock = Number(item.stock || 0);
-                                        const label = `${item.name} - $${item.price}${stock <= 0 ? ' (Out of Stock)' : ''}`;
-                                        return (
-                                          <option key={item._id} value={item._id} disabled={stock <= 0} style={{ backgroundColor: 'rgba(20, 30, 50, 0.95)', color: 'white' }}>
-                                            {label}
-                                          </option>
-                                        );
-                                      })}
-                                    </select>
+                            <div className="flex flex-wrap items-center gap-3">
+                              {product.flavors.filter(f => f.isActive).map((flavor) => {
+                                const cartItem = cart.find((i) => {
+                                  const isSameProduct = (i.id || i._id) === product._id;
+                                  const isSameFlavor = i.selectedFlavor?._id === flavor._id;
+                                  return isSameProduct && isSameFlavor;
+                                });
+                                
+                                const isInCart = cartItem && cartItem.quantity > 0;
+                                const flavorStock = Number(flavor.stock || 0);
+                                const isOutOfStock = flavorStock <= 0;
+                                
+                                return (
+                                  <div 
+                                    key={flavor._id} 
+                                    className="relative px-4 py-3 min-w-[110px]"
+                                    style={{
+                                      background: 'transparent',
+                                      border: '1.26px solid rgba(134, 209, 248, 0.6)',
+                                      borderRadius: '14.7px'
+                                    }}
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    {/* Add to Cart Button - Top Right */}
+                                    <div className="absolute -top-2 -right-2">
+                                      {isInCart ? (
+                                        <div className="flex items-center border-2 border-gray-700/50 rounded-full bg-white">
+                                          <button 
+                                            onClick={(e) => handleQuantityChange(product, cartItem.quantity - 1, null, flavor, e)}
+                                            className="p-1 hover:bg-gray-100 rounded-l-full transition-colors"
+                                          >
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3">
+                                              <path d="M5 12h14"/>
+                                            </svg>
+                                          </button>
+                                          <span className="px-2 text-xs font-bold text-black">
+                                            {cartItem.quantity}
+                                          </span>
+                                          <button 
+                                            onClick={(e) => {
+                                              if (cartItem.quantity < flavorStock) {
+                                                handleQuantityChange(product, cartItem.quantity + 1, null, flavor, e);
+                                              } else {
+                                                toast.error(`Only ${flavorStock} available`);
+                                              }
+                                            }}
+                                            disabled={cartItem.quantity >= flavorStock}
+                                            className="p-1 hover:bg-gray-100 rounded-r-full transition-colors disabled:opacity-50"
+                                          >
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3">
+                                              <path d="M12 5v14M5 12h14"/>
+                                            </svg>
+                                          </button>
+                                        </div>
+                                      ) : (
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (!isOutOfStock) {
+                                              addToCart({ ...product, selectedFlavor: flavor }, 1);
+                                              toast.success(`${product.name} (${flavor.name}) added!`);
+                                            }
+                                          }}
+                                          disabled={isOutOfStock}
+                                          className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-md ${
+                                            isOutOfStock 
+                                              ? 'bg-gray-300 cursor-not-allowed' 
+                                              : 'bg-white hover:bg-gray-100'
+                                          }`}
+                                        >
+                                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3">
+                                            <path d="M12 5v14M5 12h14"/>
+                                          </svg>
+                                        </button>
+                                      )}
+                                    </div>
                                     
-                                    {/* Quantity Controls */}
-                                    <div className="flex items-center border border-white/30 rounded-md overflow-hidden">
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleQuantityChangeNew(product._id, -1);
-                                        }}
-                                        className="px-3 py-2 text-white hover:bg-white/10 transition-colors"
-                                      >
-                                        -
-                                      </button>
-                                      <span className="px-4 py-2 text-white font-medium min-w-[40px] text-center">
-                                        {quantity}
+                                    {/* Flavor Name and Price */}
+                                    <div className="flex flex-col">
+                                      <span className="text-sm font-bold text-white">
+                                        {flavor.name}
                                       </span>
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleQuantityChangeNew(product._id, 1);
-                                        }}
-                                        disabled={quantity >= currentStock}
-                                        className="px-3 py-2 text-white hover:bg-white/10 transition-colors disabled:opacity-50"
-                                      >
-                                        +
-                                      </button>
-                                    </div>
-                                    
-                                    {/* Price Display */}
-                                    <div className="text-2xl font-bold text-white">
-                                      ${currentPrice}
+                                      <span className="text-base font-bold text-white">
+                                        ${flavor.price}
+                                      </span>
                                     </div>
                                   </div>
-                                  
-                                  {/* Add to Cart + Remove from Wishlist */}
-                                  <div className="flex items-center gap-3 mt-1">
-                                    <button
-                                      onClick={(e) => handleAddToCartNew(product, e)}
-                                      disabled={isOutOfStock}
-                                      className="px-6 py-3 rounded-md font-medium text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                                      style={{ 
-                                        width: '70%',
-                                        background: isOutOfStock 
-                                          ? 'rgba(100, 100, 100, 0.5)'
-                                          : 'linear-gradient(90deg, rgba(70, 113, 209, 0.4) 0%, rgba(62, 102, 190, 0.4) 50%, rgba(34, 55, 102, 0.4) 100%)',
-                                        border: '1px solid #88AAE4',
-                                      }}
-                                    >
-                                      {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
-                                    </button>
-                                    
-                                    {/* Remove from Wishlist Button */}
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        remove(product._id);
-                                        toast.success('Removed from wishlist');
-                                      }}
-                                      className="px-4 py-3 text-white hover:text-red-500 transition-colors"
-                                    >
-                                      <Heart className="w-6 h-6" fill="currentColor" />
-                                    </button>
-                                  </div>
-                                </div>
-                              );
-                            })()}
+                                );
+                              })}
+                              
+                              {/* Remove from Wishlist Button */}
+                              <div 
+                                className="flex items-center space-x-2 cursor-pointer hover:text-red-500 transition-colors"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  remove(product._id);
+                                  toast.success('Removed from wishlist');
+                                }}
+                              >
+                                <span className="text-sm text-white font-medium">Remove</span>
+                                <Heart className="w-5 h-5 text-white" fill="currentColor" />
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -786,7 +805,7 @@ export default function WishlistPage() {
                 );
               }
 
-              // Normal Product Card (non-DRIED, non-EDIBLES) - Menu Style
+              // Normal Product Card (non-DRIED, non-EDIBLES)
               const stock = Number(product.stock || 0);
               const isOutOfStock = !product.hasStock || stock <= 0;
               const cartItem = cart.find((i) => (i.id || i._id) === (product._id || product.id));
@@ -801,20 +820,18 @@ export default function WishlistPage() {
                   }}
                   onClick={() => router.push(`/productdetails?id=${product._id || product.id}`)}
                 >
-                  <div className="flex flex-col lg:flex-row">
-                    {/* Left side - Product Image */}
-                    <div className="w-full lg:w-2/5 h-64 lg:h-80 bg-gray-800 relative">
+                  <div className="flex flex-col md:flex-row">
+                    {/* Image Section */}
+                    <div className="md:w-1/3 bg-gray-800/20 overflow-hidden relative">
                       {product.images && product.images.length > 0 ? (
                         <img
                           src={product.images[0].startsWith('http') ? product.images[0] : `http://localhost:5000${product.images[0]}`}
                           alt={product.name}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover aspect-square"
                         />
                       ) : (
-                        <div className="w-full h-full bg-gray-200"></div>
+                        <div className="w-full h-full bg-gray-800/20 aspect-square"></div>
                       )}
-                      
-                      {/* Stock Status Overlay */}
                       {isOutOfStock ? (
                         <div className="absolute inset-0 flex items-center justify-center z-10">
                           <div className="text-2xl font-bold text-red-500 rotate-12 select-none text-center bg-white/90 px-4 py-2 rounded-lg">
@@ -830,112 +847,82 @@ export default function WishlistPage() {
                       ) : null}
                     </div>
 
-                    {/* Right side - Product Details */}
-                    <div className="w-full md:w-3/5 p-6">
-                      <h3 className="text-2xl font-bold text-gray-100 mb-2">{product.name}</h3>
-                      
-                      {/* Intensity Bar */}
-                      {product.intensity && (
-                        <div className="mb-4">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity - {product.intensity}/10</span><span className="text-sm font-bold text-white">10/10
-                            </span>
-                          </div>
-                          <div className="w-full bg-gray-700/30 rounded-full h-2">
-                            <div 
-                              className="h-2 rounded-full transition-all duration-300"
-                              style={{ 
-                                width: `${(product.intensity / 10) * 100}%`,
-                                background: 'linear-gradient(90deg, #1D5BC7 0%, #86D1F8 82%, #97E2F8 94.12%, #CAF7FF 100%)',
-                                boxShadow: '0px 1px 17px 0px #86D1F8'
-                              }}
-                            ></div>
-                          </div>
+                    {/* Content Section */}
+                    <div className="md:w-2/3 p-6">
+                      <div className="flex items-start justify-between gap-3 mb-4">
+                        <div>
+                          <h3 className="text-xl font-semibold text-white mb-2">{product.name}</h3>
+                          <p className="text-cyan-400 font-bold text-lg">$ {product.price}</p>
                         </div>
-                      )}
+                        <button
+                          onClick={(e) => { e.stopPropagation(); remove(product._id || product.id); toast.success('Removed from wishlist'); }}
+                          className="p-2 rounded-full border border-gray-700/50 hover:bg-white/10"
+                          title="Remove from wishlist"
+                        >
+                          <Heart className="w-5 h-5" style={{ color: '#80A6F7' }} fill="#80A6F7" />
+                        </button>
+                      </div>
 
-                      {/* Transparent Boxes for Weight/Pieces */}
-                      {(product.showTotalWeight || product.showTotalPieces || product.showPerPiece) && (
-                        <div className="flex flex-nowrap gap-2 mb-4">
-                          {product.showTotalWeight && product.totalWeight && (
-                            <div className="flex-1 min-w-[90px] border border-white/20 rounded-lg px-4 py-1.5 text-center">
-                              <div className="text-[10px] text-gray-300 uppercase tracking-wide mb-0.5">Total Weight</div>
-                              <div className="text-sm font-bold text-white">{product.totalWeight}</div>
-                            </div>
-                          )}
-                          {product.showTotalPieces && product.totalPieces && (
-                            <div className="flex-1 min-w-[120px] border border-white/20 rounded-lg px-4 py-3 text-center">
-                              <div className="text-[10px] text-gray-300 uppercase tracking-wide mb-0.5">Pieces</div>
-                              <div className="text-sm font-bold text-white">{product.totalPieces}</div>
-                            </div>
-                          )}
-                          {product.showPerPiece && product.perPiece && (
-                            <div className="flex-1 min-w-[120px] border border-white/20 rounded-lg px-4 py-3 text-center">
-                              <div className="text-[10px] text-gray-300 uppercase tracking-wide mb-0.5">Per Piece</div>
-                              <div className="text-sm font-bold text-white">{product.perPiece}</div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                      
-                      {/* Review Tags */}
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {(product.reviewTags || []).slice(0, 4).map((tagId, idx) => {
-                          const tagName = getTagName(tagId);
-                          if (!tagName) return null;
-                          const labelWithoutEmoji = tagName.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
-                          return (
-                            <span 
-                              key={tagId}
-                              className="px-3 py-1.5 text-sm rounded-full font-medium bg-white/5 backdrop-blur-sm border border-blue-400/40 hover:border-2 hover:border-blue-400 transition-all text-white flex items-center gap-2"
+                      {/* Cart controls */}
+                      <div className="flex justify-center mt-4">
+                      {cartItem ? (
+                        <div className="flex items-center space-x-3" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center border border-gray-700/50 rounded-full bg-white/10 backdrop-blur-sm">
+                            <button 
+                              onClick={(e) => handleQuantityChange(product, (cartItem.quantity || 0) - 1, null, null, e)}
+                              className="p-2 hover:bg-white/20 rounded-l-full transition-colors"
                             >
-                              <img src="/images/dots.png" alt="" className="w-4 h-4" />
-                              {labelWithoutEmoji}
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="w-4 h-4 text-gray-300 hover:text-white" stroke="currentColor" strokeWidth="2">
+                                <path d="M5 12h14"/>
+                              </svg>
+                            </button>
+                            <span className="px-3 py-1 text-sm text-white font-medium min-w-[2rem] text-center">
+                              {cartItem.quantity}
                             </span>
-                          );
-                        })}
-                      </div>
-
-                      {/* Price and Add to Cart */}
-                      <div className="mt-4">
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="text-2xl font-bold text-white">
-                            ${product.price}
+                            <button 
+                              onClick={(e) => handleQuantityChange(product, (cartItem.quantity || 0) + 1, null, null, e)}
+                              disabled={isOutOfStock || (stock > 0 && (cartItem.quantity || 0) >= stock)}
+                              className={`p-2 rounded-r-full transition-colors ${
+                                isOutOfStock || (stock > 0 && (cartItem.quantity || 0) >= stock)
+                                  ? 'opacity-50 cursor-not-allowed' 
+                                  : 'hover:bg-white/20'
+                              }`}
+                            >
+                              <svg width="16" height="16" viewBox="0 0 24 24" className={`w-4 h-4 ${
+                                isOutOfStock || (stock > 0 && (cartItem.quantity || 0) >= stock)
+                                  ? 'text-gray-500' 
+                                  : 'text-gray-300 hover:text-white'
+                              }`} fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M12 5v14M5 12h14"/>
+                              </svg>
+                            </button>
                           </div>
                         </div>
-                        
-                        <div className="flex items-center gap-3">
-                          <button
-                            onClick={(e) => handleAddToCart(product, e)}
-                            disabled={isOutOfStock}
-                            className="px-6 py-3 rounded-md font-medium text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                            style={{ 
-                              width: '70%',
-                              background: isOutOfStock 
-                                ? 'rgba(100, 100, 100, 0.5)'
-                                : 'linear-gradient(90deg, rgba(70, 113, 209, 0.4) 0%, rgba(62, 102, 190, 0.4) 50%, rgba(34, 55, 102, 0.4) 100%)',
-                              border: '1px solid #88AAE4',
-                            }}
-                          >
-                            {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
-                          </button>
-                          
-                          {/* Remove from Wishlist Button */}
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              remove(product._id || product.id);
-                              toast.success('Removed from wishlist');
-                            }}
-                            className="px-4 py-3 text-white hover:text-red-500 transition-colors"
-                          >
-                            <Heart className="w-6 h-6" fill="currentColor" />
-                          </button>
-                        </div>
-                      </div>
+                      ) : isOutOfStock ? (
+                        <button
+                          className="w-[40%] py-2 px-4 rounded-4xl text-sm font-medium bg-gray-400 text-white cursor-not-allowed"
+                          disabled={true}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          Out of Stock
+                        </button>
+                      ) : (
+                        <button
+                          onClick={(e) => handleAddToCart(product, e)}
+                          className="px-6 py-3 rounded-md font-medium text-white transition-all"
+                          style={{ 
+                            width: '70%',
+                            background: 'linear-gradient(90deg, rgba(70, 113, 209, 0.4) 0%, rgba(62, 102, 190, 0.4) 50%, rgba(34, 55, 102, 0.4) 100%)',
+                            border: '1px solid #88AAE4',
+                          }}
+                        >
+                          Add to Cart
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
+              </div>
               );
             })}
           </div>
@@ -944,6 +931,3 @@ export default function WishlistPage() {
     </div>
   );
 }
-
-
-

@@ -119,65 +119,9 @@ const Cart = () => {
   if (cart.length === 0) {
     return (
       <div className="min-h-screen relative pt-20 p-4" style={{ background: 'transparent' }}>
-        {/* Animated stars background */}
-        <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-          <div className="stars-container">
-            {[...Array(60)].map((_, i) => (
-              <div
-                key={`star-${i}`}
-                className="star"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                  animationDelay: `${Math.random() * 3}s`,
-                  animationDuration: `${2 + Math.random() * 3}s`
-                }}
-              />
-            ))}
-          </div>
-        </div>
+      
 
-        <style jsx>{`
-          .stars-container {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-          }
-          
-          .star {
-            position: absolute;
-            width: 2px;
-            height: 2px;
-            background: white;
-            border-radius: 50%;
-            animation: twinkle linear infinite;
-            box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
-          }
-          
-          @keyframes twinkle {
-            0%, 100% {
-              opacity: 0.2;
-              transform: scale(0.8);
-            }
-            50% {
-              opacity: 1;
-              transform: scale(1.2);
-            }
-          }
-          
-          .star:nth-child(3n) {
-            width: 3px;
-            height: 3px;
-            box-shadow: 0 0 6px rgba(124, 198, 255, 0.7);
-          }
-          
-          .star:nth-child(5n) {
-            width: 4px;
-            height: 4px;
-            box-shadow: 0 0 8px rgba(47, 128, 255, 0.8);
-          }
-        `}</style>
-
+     
         <div className="max-w-6xl mx-auto relative z-10">
           <div className="text-center py-16">
             <div className="mb-6">
@@ -199,64 +143,7 @@ const Cart = () => {
   
   return (
     <div className="min-h-screen relative pt-20 p-4" style={{ background: 'transparent' }}>
-      {/* Animated stars background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="stars-container">
-          {[...Array(60)].map((_, i) => (
-            <div
-              key={`star-${i}`}
-              className="star"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 3}s`,
-                animationDuration: `${2 + Math.random() * 3}s`
-              }}
-            />
-          ))}
-        </div>
-      </div>
-
-      <style jsx>{`
-        .stars-container {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-        }
-        
-        .star {
-          position: absolute;
-          width: 2px;
-          height: 2px;
-          background: white;
-          border-radius: 50%;
-          animation: twinkle linear infinite;
-          box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
-        }
-        
-        @keyframes twinkle {
-          0%, 100% {
-            opacity: 0.2;
-            transform: scale(0.8);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(1.2);
-          }
-        }
-        
-        .star:nth-child(3n) {
-          width: 3px;
-          height: 3px;
-          box-shadow: 0 0 6px rgba(124, 198, 255, 0.7);
-        }
-        
-        .star:nth-child(5n) {
-          width: 4px;
-          height: 4px;
-          box-shadow: 0 0 8px rgba(47, 128, 255, 0.8);
-        }
-      `}</style>
+    
 
       <div className="max-w-6xl mx-auto relative z-10">
         <div className="flex flex-col lg:flex-row gap-8">
