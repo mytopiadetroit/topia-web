@@ -1385,7 +1385,7 @@ if (isLoggedIn && user?.status === 'suspend') {
                             {product.intensity && (
                               <div className="mb-4">
                                 <div className="flex items-center justify-between mb-2">
-                                  <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity - {product.intensity}/10</span><span className="text-sm font-bold text-white">10/10
+                                  <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity</span><span className="text-sm font-bold text-white">{product.intensity}/10
                                   </span>
                                 </div>
                                 <div className="w-full bg-gray-700/30 rounded-full h-2">
@@ -1674,7 +1674,7 @@ if (isLoggedIn && user?.status === 'suspend') {
                             {product.intensity && (
                               <div className="mb-4">
                                 <div className="flex items-center justify-between mb-2">
-                                  <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity - {product.intensity}/10</span><span className="text-sm font-bold text-white">10/10
+                                  <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity</span><span className="text-sm font-bold text-white">{product.intensity}/10
                                   </span>
                                 </div>
                                 <div className="w-full bg-gray-700/30 rounded-full h-2">
@@ -1965,8 +1965,8 @@ if (isLoggedIn && user?.status === 'suspend') {
                             {product.intensity && (
                               <div className="mb-4">
                                 <div className="flex items-center justify-between mb-2">
-                                  <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity - {product.intensity}/10</span>
-                                  <span className="text-sm font-bold text-white">10/10</span>
+                                  <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity</span>
+                                  <span className="text-sm font-bold text-white">{product.intensity}/10</span>
                                 </div>
                                 <div className="w-full bg-gray-700/30 rounded-full h-2">
                                   <div
@@ -2283,7 +2283,7 @@ return (
           {product.intensity && (
             <div className="mb-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity - {product.intensity}/10</span><span className="text-sm font-bold text-white">10/10
+                <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity</span><span className="text-sm font-bold text-white">{product.intensity}/10
                 </span>
               </div>
               <div className="w-full bg-gray-700/30 rounded-full h-2">

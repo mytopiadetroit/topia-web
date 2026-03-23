@@ -519,7 +519,7 @@ export default function ProductDetails() {
               <div className="mt-4">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity</span>
-                  <span className="text-sm font-bold text-cyan-400">
+                  <span className="text-sm font-bold text-white">
                     {product.intensity}/10
                   </span>
                 </div>
