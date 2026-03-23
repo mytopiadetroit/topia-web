@@ -8,6 +8,7 @@ import { useUser } from '../context/UserContext';
 import { useApp } from '../context/AppContext';
 import { useRouter } from 'next/router';
 import { Api } from '../service/service';
+import GoogleReviews from '../components/GoogleReviews';
 
 export default function Home() {
   const [isVisible, setIsVisible] = useState(false);
@@ -264,6 +265,21 @@ export default function Home() {
         </button>
       </div>
     </div>
+  </div>
+</section>
+
+{/* Google Reviews Section */}
+<GoogleReviews />
+
+{/* Yelp Reviews Button Section */}
+<section className="py-8 px-4" style={{ background: 'transparent' }}>
+  <div className="max-w-7xl mx-auto text-center">
+    <button 
+      onClick={() => window.open('https://m.yelp.com/biz/shroomtopia-detroit', '_blank')}
+      className="bg-transparent text-white border-2 border-white/30 hover:border-white/50 px-8 py-4 rounded-full text-sm md:text-base font-semibold transition-all duration-300 transform hover:scale-105 uppercase tracking-wider hover:shadow-[0_8px_30px_rgba(77,163,255,0.8)]"
+    >
+      View All Reviews on Yelp
+    </button>
   </div>
 </section>
 

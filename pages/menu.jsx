@@ -49,6 +49,7 @@ const Menu = () => {
   const ITEMS_PER_PAGE = 15;
   const [openTooltipId, setOpenTooltipId] = useState(null);
   const [selectedOptions, setSelectedOptions] = useState({}); // {productId: {selectedItem, quantity}}
+  const [hasUserSelected, setHasUserSelected] = useState({}); // Track if user has made a selection
 
   
 
@@ -552,27 +553,22 @@ const Menu = () => {
   const initializeProductSelection = (product) => {
     if (selectedOptions[product._id]) return;
     
-    let defaultSelection = null;
-    if (product.hasVariants && product.variants?.length > 0) {
-      const inStockVariant = product.variants.find(v => Number(v.stock || 0) > 0);
-      defaultSelection = inStockVariant || product.variants[0];
-    } else if (product.flavors?.length > 0) {
-      const inStockFlavor = product.flavors.find(f => f.isActive && Number(f.stock || 0) > 0);
-      defaultSelection = inStockFlavor || product.flavors.find(f => f.isActive);
-    }
-    
-    if (defaultSelection) {
-      setSelectedOptions(prev => ({
-        ...prev,
-        [product._id]: { selectedItem: defaultSelection, quantity: 1 }
-      }));
-    }
+    // Don't auto-select - user must choose
+    setSelectedOptions(prev => ({
+      ...prev,
+      [product._id]: { selectedItem: null, quantity: 1 }
+    }));
   };
 
   const handleOptionChange = (productId, item) => {
     setSelectedOptions(prev => ({
       ...prev,
       [productId]: { selectedItem: item, quantity: prev[productId]?.quantity || 1 }
+    }));
+    // Mark that user has made a selection
+    setHasUserSelected(prev => ({
+      ...prev,
+      [productId]: true
     }));
   };
 
@@ -616,6 +612,8 @@ const Menu = () => {
         return isSameProduct && i.selectedVariant?._id === selectedItem._id;
       } else if (product.flavors) {
         return isSameProduct && i.selectedFlavor?._id === selectedItem._id;
+      } else if (product.strains) {
+        return isSameProduct && i.selectedStrain?._id === selectedItem._id;
       }
       return false;
     });
@@ -634,6 +632,9 @@ const Menu = () => {
       toast.success(`${product.name} (${selectedItem.size.value}${selectedItem.size.unit}) added!`);
     } else if (product.flavors) {
       addToCart({ ...product, selectedFlavor: selectedItem }, quantity);
+      toast.success(`${product.name} (${selectedItem.name}) added!`);
+    } else if (product.strains) {
+      addToCart({ ...product, selectedStrain: selectedItem }, quantity);
       toast.success(`${product.name} (${selectedItem.name}) added!`);
     }
     
@@ -1263,6 +1264,10 @@ if (isLoggedIn && user?.status === 'suspend') {
                   product.flavors &&
                   product.flavors.length > 0 &&
                   product.flavors.some(f => f.isActive);
+                // Strains layout for products with strains
+                const showStrainsLayout = product.strains &&
+                  product.strains.length > 0 &&
+                  product.strains.some(s => s.isActive);
                 // DRIED products ke liye special UI - FULL WIDTH
                 if (showDriedLayout) {
                   return (
@@ -1471,7 +1476,7 @@ if (isLoggedIn && user?.status === 'suspend') {
                                 const selection = selectedOptions[product._id];
                                 const selectedItem = selection?.selectedItem;
                                 const quantity = selection?.quantity || 1;
-                                const currentPrice = selectedItem?.price || product.price;
+                                const currentPrice = selectedItem?.price || 0;
                                 const currentStock = Number(selectedItem?.stock || 0);
                                 
                                 // Check if quantity equals or exceeds stock
@@ -1495,11 +1500,11 @@ if (isLoggedIn && user?.status === 'suspend') {
                                         className="flex-1 bg-transparent border border-white/30 rounded-md px-3 py-2 text-white text-sm focus:outline-none focus:border-cyan-400"
                                         style={{ minWidth: '120px' }}
                                       >
-                                        {options.map((item) => {
+                                        <option value="" disabled style={{ backgroundColor: 'rgba(20, 30, 50, 0.95)', color: '#888' }}>{product.hasVariants ? 'Select Size' : product.flavors?.length > 0 ? 'Select Flavor' : 'Select Strain'}</option>{options.map((item) => {
                                           const stock = Number(item.stock || 0);
                                           const label = product.hasVariants 
-                                            ? `${item.size.value}${item.size.unit} - $${item.price}${stock <= 0 ? ' (Out of Stock)' : ''}`
-                                            : `${item.name} - $${item.price}${stock <= 0 ? ' (Out of Stock)' : ''}`;
+                                            ? `${item.size.value}${item.size.unit}${stock <= 0 ? ' (Out of Stock)' : ''}`
+                                            : `${item.name}${stock <= 0 ? ' (Out of Stock)' : ''}`;
                                           return (
                                             <option key={item._id} value={item._id} disabled={stock <= 0} style={{ backgroundColor: 'rgba(20, 30, 50, 0.95)', color: 'white' }}>
                                               {label}
@@ -1533,26 +1538,27 @@ if (isLoggedIn && user?.status === 'suspend') {
                                           +
                                         </button>
                                       </div>
-                                      
-                                      {/* Price Display */}
-                                      <div className="text-2xl font-bold text-white">
-                                        ${currentPrice}
-                                      </div>
+                                      {/* Price Display - Only show when item is selected */}
+                                      {selectedItem && currentPrice > 0 && (
+                                        <div className="text-2xl font-bold text-white">
+                                          ${(currentPrice * quantity).toFixed(2)}
+                                        </div>
+                                      )}
                                     </div>
                                     
                                     {/* Add to Cart + Wishlist Buttons */}
                                     <div className="flex items-center gap-3 mt-1">{/* Add to Cart Button with Gradient */}
                                       <button
                                         onClick={(e) => handleAddToCartNew(product, e)}
-                                        disabled={isOutOfStock}
-                                        className="px-6 py-3 rounded-md font-medium text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed" style={{ width: '70%', background: isOutOfStock 
+                                        disabled={isOutOfStock || !selectedItem}
+                                        className="px-6 py-3 rounded-md font-medium text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed" style={{ width: '70%', background: (isOutOfStock || !selectedItem) 
                                             ? 'rgba(100, 100, 100, 0.5)'
                                             : 'linear-gradient(90deg, rgba(70, 113, 209, 0.4) 0%, rgba(62, 102, 190, 0.4) 50%, rgba(34, 55, 102, 0.4) 100%)',
                                           
                                           border: '1px solid #88AAE4',
                                         }}
                                       >
-                                        {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+                                        {!selectedItem ? (product.hasVariants ? 'Select Size First' : product.flavors?.length > 0 ? 'Select Flavor First' : 'Select Strain First') : isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
                                       </button>
                                       
                                       {/* Wishlist Button */}
@@ -1753,19 +1759,19 @@ if (isLoggedIn && user?.status === 'suspend') {
                               })}
                             </div>
 
-                            {/* NEW: Dropdown + Quantity + Add to Cart for Flavors */}
+                          
                             <div className="mt-4">
                               {(() => {
                                 const selection = selectedOptions[product._id];
                                 const selectedItem = selection?.selectedItem;
                                 const quantity = selection?.quantity || 1;
-                                const currentPrice = selectedItem?.price || product.price;
+                                const currentPrice = selectedItem?.price || 0;
                                 const currentStock = Number(selectedItem?.stock || 0);
                                 
-                                // Check if quantity equals or exceeds stock
+                               
                                 const isOutOfStock = currentStock <= 0 || quantity >= currentStock;
                                 
-                                // Get all flavors
+                           
                                 const options = product.flavors || [];
                                 
                                 return (
@@ -1783,6 +1789,7 @@ if (isLoggedIn && user?.status === 'suspend') {
                                         className="flex-1 bg-transparent border border-white/30 rounded-md px-3 py-2 text-white text-sm focus:outline-none focus:border-cyan-400"
                                         style={{ minWidth: '120px' }}
                                       >
+                                        <option value="" disabled style={{ backgroundColor: 'rgba(20, 30, 50, 0.95)', color: '#888' }}>Select Flavor</option>
                                         {options.filter(f => f.isActive).map((item) => {
                                           const stock = Number(item.stock || 0);
                                           const label = `${item.name} - $${item.price}${stock <= 0 ? ' (Out of Stock)' : ''}`;
@@ -1819,26 +1826,27 @@ if (isLoggedIn && user?.status === 'suspend') {
                                           +
                                         </button>
                                       </div>
-                                      
-                                      {/* Price Display */}
-                                      <div className="text-2xl font-bold text-white">
-                                        ${currentPrice}
-                                      </div>
+                                      {/* Price Display - Only show when item is selected */}
+                                      {selectedItem && currentPrice > 0 && (
+                                        <div className="text-2xl font-bold text-white">
+                                          ${(currentPrice * quantity).toFixed(2)}
+                                        </div>
+                                      )}
                                     </div>
                                     
                                     {/* Add to Cart + Wishlist Buttons */}
                                     <div className="flex items-center gap-3 mt-1">{/* Add to Cart Button with Gradient */}
                                       <button
                                         onClick={(e) => handleAddToCartNew(product, e)}
-                                        disabled={isOutOfStock}
-                                        className="px-6 py-3 rounded-md font-medium text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed" style={{ width: '70%', background: isOutOfStock 
+                                        disabled={isOutOfStock || !selectedItem}
+                                        className="px-6 py-3 rounded-md font-medium text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed" style={{ width: '70%', background: (isOutOfStock || !selectedItem) 
                                             ? 'rgba(100, 100, 100, 0.5)'
                                             : 'linear-gradient(90deg, rgba(70, 113, 209, 0.4) 0%, rgba(62, 102, 190, 0.4) 50%, rgba(34, 55, 102, 0.4) 100%)',
                                           
                                           border: '1px solid #88AAE4',
                                         }}
                                       >
-                                        {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+                                        {!selectedItem ? (product.hasVariants ? 'Select Size First' : product.flavors?.length > 0 ? 'Select Flavor First' : 'Select Strain First') : isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
                                       </button>
                                       
                                       {/* Wishlist Button */}
@@ -1865,6 +1873,290 @@ if (isLoggedIn && user?.status === 'suspend') {
                                         >
                                           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                                         </svg><span className="text-xs"></span></button>
+                                    </div>
+                                  </div>
+                                );
+                              })()}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
+                // STRAINS Product Layout - Menu Style with Dropdown
+                if (showStrainsLayout) {
+                  // Initialize selection for this product
+                  initializeProductSelection(product);
+                  
+                  return (
+                    <div 
+                      key={product._id} 
+                      className="col-span-full"
+                      onMouseEnter={() => setHoveredProductId(product._id)}
+                      onMouseLeave={() => setHoveredProductId(null)}
+                    >
+                      <div
+                        className="relative rounded-3xl overflow-visible w-full max-w-4xl mx-auto"
+                        style={{
+                          background: 'rgba(20, 20, 20, 0.4)',
+                          border: '1.2px solid rgba(134, 209, 248, 0.2)'
+                        }}
+                        onClick={() => handleProductClick(product)}
+                      >
+                        <div className="flex flex-col lg:flex-row">
+                          {/* Left side - Product Image */}
+                          <div className="w-full lg:w-2/5 h-64 lg:h-80 bg-gray-100 relative">
+                            {product.images && product.images.length > 0 ? (
+                              <>
+                                <img
+                                  src={product.images[0].startsWith('http') ? product.images[0] : `http://localhost:5000${product.images[0]}`}
+                                  alt={product.name}
+                                  className="w-full h-full object-cover"
+                                />
+                                {/* Allergen Icons */}
+                                {product.allergenInfo?.hasAllergens && product.allergenInfo.allergenImages?.length > 0 && (
+                                  <div className="absolute bottom-2 left-2 right-2 flex flex-wrap gap-1 justify-center z-20">
+                                    {product.allergenInfo.allergenImages.map((img, idx) => (
+                                      <div key={idx} className="relative">
+                                        <img
+                                          src={img.startsWith('http') ? img : `http://localhost:5000${img}`}
+                                          alt="Allergen"
+                                          className="w-6 h-6 object-cover rounded-full border border-white shadow-sm"
+                                        />
+                                      </div>
+                                    ))}
+                                    {hoveredProductId === product._id && product.allergenInfo.tooltipText && (
+                                      <div className="absolute -top-8 left-2/3 transform -translate-x-1/2 z-30 bg-gray-900 text-white text-xs rounded py-1 px-2 whitespace-nowrap shadow-lg">
+                                        {product.allergenInfo.tooltipText}
+                                        <div className="absolute w-2 h-2 bg-gray-900 transform rotate-45 -bottom-1 left-1/2 -translate-x-1/2"></div>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </>
+                            ) : (
+                              <div className="w-full h-full bg-gray-200"></div>
+                            )}
+
+                            {/* Stock Status Overlay */}
+                            {(() => {
+                              const activeStrains = product.strains.filter(s => s.isActive);
+                              const allStrainsOutOfStock = activeStrains.length > 0 && activeStrains.every(s => Number(s.stock || 0) <= 0);
+                              if (allStrainsOutOfStock) {
+                                return (
+                                  <div className="absolute inset-0 flex items-center justify-center z-10">
+                                    <div className="text-2xl font-bold text-red-500 rotate-12 select-none text-center bg-white/90 px-4 py-2 rounded-lg">
+                                      Out of<br />Stock
+                                    </div>
+                                  </div>
+                                );
+                              }
+                              return null;
+                            })()}
+                          </div>
+
+                          {/* Right side - Product Details */}
+                          <div className="w-full md:w-3/5 p-6">
+                            <h3 className="text-2xl font-bold text-gray-100 mb-2">{product.name}</h3>
+                            
+                            {/* Intensity Bar */}
+                            {product.intensity && (
+                              <div className="mb-4">
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity - {product.intensity}/10</span>
+                                  <span className="text-sm font-bold text-white">10/10</span>
+                                </div>
+                                <div className="w-full bg-gray-700/30 rounded-full h-2">
+                                  <div
+                                    className="h-2 rounded-full transition-all duration-300"
+                                    style={{
+                                      width: `${(product.intensity / 10) * 100}%`,
+                                      background: 'linear-gradient(90deg, #1D5BC7 0%, #86D1F8 82%, #97E2F8 94.12%, #CAF7FF 100%)',
+                                      boxShadow: '0px 1px 17px 0px #86D1F8'
+                                    }}
+                                  ></div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Total Weight, Pieces, Per Piece */}
+                            {(product.showTotalWeight || product.showTotalPieces || product.showPerPiece) && (
+                              <div className="flex flex-nowrap gap-2 mb-4">
+                                {product.showTotalWeight && product.totalWeight && (
+                                  <div className="flex-1 min-w-[80px] border border-white/30 rounded-md px-2 py-1.5 bg-transparent text-center">
+                                    <div className="text-[10px] text-gray-300 uppercase tracking-wide mb-0.5">Total Weight</div>
+                                    <div className="text-sm font-bold text-white">{product.totalWeight}</div>
+                                  </div>
+                                )}
+                                {product.showTotalPieces && product.totalPieces && (
+                                  <div className="flex-1 min-w-[80px] border border-white/30 rounded-md px-2 py-1.5 bg-transparent text-center">
+                                    <div className="text-[10px] text-gray-300 uppercase tracking-wide mb-0.5">Pieces</div>
+                                    <div className="text-sm font-bold text-white">{product.totalPieces}</div>
+                                  </div>
+                                )}
+                                {product.showPerPiece && product.perPiece && (
+                                  <div className="flex-1 min-w-[80px] border border-white/30 rounded-md px-2 py-1.5 bg-transparent text-center">
+                                    <div className="text-[10px] text-gray-300 uppercase tracking-wide mb-0.5">Per Piece</div>
+                                    <div className="text-sm font-bold text-white">{product.perPiece}</div>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Review Tags */}
+                            <div className="flex flex-wrap gap-2 mb-4">
+                              {(product.reviewTags || []).slice(0, 4).map((tag, idx) => { 
+                                const labelWithoutEmoji = tag.label.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
+                                const tooltipId = `${product._id}-${tag._id}`;
+                                const isTooltipOpen = openTooltipId === tooltipId;
+                                const shouldFlip = true;
+                                return (
+                                  <div key={tag._id} className="relative group">
+                                    <span
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setOpenTooltipId(isTooltipOpen ? null : tooltipId);
+                                      }}
+                                      className="px-3 py-1.5 text-sm rounded-full font-medium bg-white/5 backdrop-blur-sm border border-blue-400/40 hover:border-2 hover:border-blue-400 transition-all text-white flex items-center gap-2 cursor-pointer"
+                                    >
+                                      <img src="/images/dots.png" alt="" className="w-4 h-4" />
+                                      {labelWithoutEmoji}
+                                    </span>
+                                    {tag.tooltip && (
+                                      <div className={`absolute left-0 top-full mt-2 transition-opacity duration-200 z-[9999] ${(idx === 2 || idx === 5 || idx === 8) ? "tooltip-container-special" : ""} ${isTooltipOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 group-hover:opacity-100 pointer-events-none'}`}>
+                                        <div 
+                                          className={`relative rounded-xl shadow-2xl pt-9 px-5 pb-5 tooltip-bg-${(idx === 2 || idx === 5 || idx === 8) ? "special" : "normal"}`} 
+                                          style={{ 
+                                            minWidth: '240px',
+                                            maxWidth: '280px',
+                                            minHeight: '120px',
+                                            backgroundSize: '100% 100%',
+                                            backgroundRepeat: 'no-repeat',
+                                            transform: shouldFlip ? 'scaleX(-1)' : 'none'
+                                          }}
+                                        >
+                                          <div style={{ transform: shouldFlip ? 'scaleX(-1)' : 'none' }}>
+                                            <h4 className="text-white font-bold text-base mb-2">{labelWithoutEmoji}</h4>
+                                            <p className="text-white/90 text-sm leading-relaxed">{tag.tooltip}</p>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+
+                            {/* Dropdown + Quantity + Add to Cart */}
+                            <div className="mt-4">
+                              {(() => {
+                                const selection = selectedOptions[product._id];
+                                const selectedItem = selection?.selectedItem;
+                                const quantity = selection?.quantity || 1;
+                                const currentPrice = selectedItem?.price || 0;
+                                const currentStock = Number(selectedItem?.stock || 0);
+                                const isOutOfStock = currentStock <= 0 || quantity >= currentStock;
+                                const options = product.strains.filter(s => s.isActive);
+                                
+                                return (
+                                  <div className="flex flex-col gap-3">
+                                    <div className="flex items-center gap-3">
+                                      <select
+                                        value={selectedItem?._id || ''}
+                                        onChange={(e) => {
+                                          const item = options.find(opt => opt._id === e.target.value);
+                                          if (item) handleOptionChange(product._id, item);
+                                        }}
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="flex-1 bg-transparent border border-white/30 rounded-md px-3 py-2 text-white text-sm focus:outline-none focus:border-cyan-400"
+                                        style={{ minWidth: '120px' }}
+                                      >
+                                        <option value="" disabled style={{ backgroundColor: 'rgba(20, 30, 50, 0.95)', color: '#888' }}>Select Strain</option>
+                                        {options.map((item) => {
+                                          const stock = Number(item.stock || 0);
+                                          const label = `${item.name} - ${item.price}${stock <= 0 ? ' (Out of Stock)' : ''}`;
+                                          return (
+                                            <option key={item._id} value={item._id} disabled={stock <= 0} style={{ backgroundColor: 'rgba(20, 30, 50, 0.95)', color: 'white' }}>
+                                              {label}
+                                            </option>
+                                          );
+                                        })}
+                                      </select>
+                                      
+                                      <div className="flex items-center border border-white/30 rounded-md overflow-hidden">
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleQuantityChangeNew(product._id, -1);
+                                          }}
+                                          className="px-3 py-2 text-white hover:bg-white/10 transition-colors"
+                                        >
+                                          −
+                                        </button>
+                                        <span className="px-4 py-2 text-white font-medium min-w-[40px] text-center">
+                                          {quantity}
+                                        </span>
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleQuantityChangeNew(product._id, 1);
+                                          }}
+                                          disabled={quantity >= currentStock}
+                                          className="px-3 py-2 text-white hover:bg-white/10 transition-colors disabled:opacity-50"
+                                        >
+                                          +
+                                        </button>
+                                      </div>
+                                      
+                                      {selectedItem && currentPrice > 0 && (
+                                        <div className="text-2xl font-bold text-white">
+                                          ${(currentPrice * quantity).toFixed(2)}
+                                        </div>
+                                      )}
+                                    </div>
+                                    
+                                    <div className="flex items-center gap-3 mt-1">
+                                      <button
+                                        onClick={(e) => handleAddToCartNew(product, e)}
+                                        disabled={isOutOfStock || !selectedItem}
+                                        className="px-6 py-3 rounded-md font-medium text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                        style={{ 
+                                          width: '70%',
+                                          background: (isOutOfStock || !selectedItem) 
+                                            ? 'rgba(100, 100, 100, 0.5)'
+                                            : 'linear-gradient(90deg, rgba(70, 113, 209, 0.4) 0%, rgba(62, 102, 190, 0.4) 50%, rgba(34, 55, 102, 0.4) 100%)',
+                                          border: '1px solid #88AAE4',
+                                        }}
+                                      >
+                                        {!selectedItem ? 'Select Strain First' : isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+                                      </button>
+                                      
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          if (!isLoggedIn) {
+                                            toast.error('Please login to manage your wishlist');
+                                            return;
+                                          }
+                                          const wasInWishlist = isInWishlist(product._id);
+                                          toggle(product);
+                                          toast.success(wasInWishlist ? 'Removed from wishlist' : 'Added to wishlist!');
+                                        }}
+                                        className="px-4 py-3 text-white hover:text-red-500 transition-colors"
+                                      >
+                                        <svg
+                                          width="24"
+                                          height="24"
+                                          viewBox="0 0 24 24"
+                                          fill={isInWishlist(product._id) ? 'currentColor' : 'none'}
+                                          stroke="currentColor"
+                                          strokeWidth="2"
+                                        >
+                                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                                        </svg>
+                                      </button>
                                     </div>
                                   </div>
                                 );
@@ -2085,7 +2377,7 @@ return (
                 const selection = selectedOptions[product._id];
                 const selectedItem = selection?.selectedItem;
                 const quantity = selection?.quantity || 1;
-                const currentPrice = selectedItem?.price || product.price;
+                const currentPrice = selectedItem?.price || 0;
                 const currentStock = Number(selectedItem?.stock || 0);
                 const isOutOfStock = currentStock <= 0 || quantity >= currentStock;
                 const options = product.hasVariants ? product.variants : (product.flavors?.filter(f => f.isActive) || []);
@@ -2103,11 +2395,14 @@ return (
                         className="flex-1 bg-transparent border border-white/30 rounded-md px-3 py-2 text-white text-sm focus:outline-none focus:border-cyan-400"
                         style={{ minWidth: '120px' }}
                       >
+                        <option value="" disabled style={{ backgroundColor: 'rgba(20, 30, 50, 0.95)', color: '#888' }}>
+                          {product.hasVariants ? 'Select Size' : product.flavors?.length > 0 ? 'Select Flavor' : 'Select Strain'}
+                        </option>
                         {options.map((item) => {
                           const stock = Number(item.stock || 0);
                           const label = product.hasVariants 
-                            ? `${item.size.value}${item.size.unit} - $${item.price}${stock <= 0 ? ' (Out of Stock)' : ''}`
-                            : `${item.name} - $${item.price}${stock <= 0 ? ' (Out of Stock)' : ''}`;
+                            ? `${item.size.value}${item.size.unit}${stock <= 0 ? ' (Out of Stock)' : ''}`
+                            : `${item.name}${stock <= 0 ? ' (Out of Stock)' : ''}`;
                           return (
                             <option key={item._id} value={item._id} disabled={stock <= 0} style={{ backgroundColor: 'rgba(20, 30, 50, 0.95)', color: 'white' }}>
                               {label}
@@ -2139,22 +2434,25 @@ return (
                           +
                         </button>
                       </div>
-                      <div className="text-2xl font-bold text-white">
-                        ${currentPrice}
-                      </div>
+                      {/* Price Display - Only show when item is selected */}
+                      {selectedItem && currentPrice > 0 && (
+                        <div className="text-2xl font-bold text-white">
+                          ${currentPrice}
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center gap-3">
                       <button
                         onClick={(e) => handleAddToCartNew(product, e)}
-                        disabled={isOutOfStock}
-                        className="px-6 py-3 rounded-md font-medium text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed" style={{ width: '70%', background: isOutOfStock 
+                        disabled={isOutOfStock || !selectedItem}
+                        className="px-6 py-3 rounded-md font-medium text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed" style={{ width: '70%', background: (isOutOfStock || !selectedItem)
                             ? 'rgba(100, 100, 100, 0.5)'
                             : 'linear-gradient(90deg, rgba(70, 113, 209, 0.4) 0%, rgba(62, 102, 190, 0.4) 50%, rgba(34, 55, 102, 0.4) 100%)',
                           
                           border: '1px solid #88AAE4',
                         }}
                       >
-                        {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+                        {!selectedItem ? (product.hasVariants ? 'Select Size First' : product.flavors?.length > 0 ? 'Select Flavor First' : 'Select Strain First') : isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
                       </button>
                       <button
                         onClick={(e) => {
@@ -2184,110 +2482,106 @@ return (
                 );
               })()
             ) : (
-              // Simple product without variants/flavors - keep old UI
-              <div className="flex flex-wrap items-center gap-3">
-                <div 
-                  className="relative px-4 py-3 min-w-[120px]" 
-                  style={{
-                    background: 'transparent',
-                    border: '1.26px solid rgba(134, 209, 248, 0.6)',
-                    borderRadius: '14.7px'
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="absolute -top-2 -right-2">
-                    {(() => {
-                      const stock = Number(product.stock || 0);
-                      const isOutOfStock = !product.hasStock || stock <= 0;
-                      const cartItem = cart.find((i) => (i.id || i._id) === product._id);
-                      const isInCart = cartItem && cartItem.quantity > 0;
-
-                      if (isInCart) {
-                        return (
-                          <div className="flex items-center border-2 border-gray-900 rounded-full bg-white">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                updateCartItemQuantity(product._id, cartItem.quantity - 1);
-                              }}
-                              className="p-1 hover:bg-gray-50 rounded-l-full transition-colors"
-                            >
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                                <path d="M5 12h14" />
-                              </svg><span className="text-xs"></span></button>
-                            <span className="px-2 text-xs font-bold">{cartItem.quantity}</span>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (cartItem.quantity < stock) {
-                                  updateCartItemQuantity(product._id, cartItem.quantity + 1);
-                                } else {
-                                  toast.error(`Only ${stock} available`);
-                                }
-                              }}
-                              disabled={cartItem.quantity >= stock}
-                              className="p-1 hover:bg-gray-50 rounded-r-full transition-colors disabled:opacity-50"
-                            >
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                                <path d="M12 5v14M5 12h14" />
-                              </svg><span className="text-xs"></span></button>
-                          </div>
-                        );
-                      } else {
-                        return (
+              // Simple product without variants/flavors - same UI as others
+              (() => {
+                const stock = Number(product.stock || 0);
+                const isOutOfStock = !product.hasStock || stock <= 0;
+                const cartItem = cart.find((i) => (i.id || i._id) === product._id);
+                const quantity = cartItem?.quantity || 1;
+                
+                return (
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-3">
+                      {/* Price Display - Only show if product has valid price */}
+                      {product.price > 0 && (
+                        <div className="flex-1 text-2xl font-bold text-white">
+                          ${product.price}
+                        </div>
+                      )}
+                      
+                      {/* Quantity Controls - only if in cart */}
+                      {cartItem && (
+                        <div className="flex items-center border border-white/30 rounded-md overflow-hidden">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              if (!isOutOfStock) {
-                                addToCart(product, 1);
-                                toast.success(`${product.name} added!`);
-                                setAddedSet(prev => ({ ...prev, [product._id]: true }));
+                              updateCartItemQuantity(product._id, cartItem.quantity - 1);
+                            }}
+                            className="px-3 py-2 text-white hover:bg-white/10 transition-colors"
+                          >
+                            −
+                          </button>
+                          <span className="px-4 py-2 text-white font-medium min-w-[40px] text-center">
+                            {cartItem.quantity}
+                          </span>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (cartItem.quantity < stock) {
+                                updateCartItemQuantity(product._id, cartItem.quantity + 1);
+                              } else {
+                                toast.error(`Only ${stock} available`);
                               }
                             }}
-                            disabled={isOutOfStock}
-                            className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-md ${
-                              isOutOfStock ? 'bg-gray-600/50 cursor-not-allowed' : 'bg-white hover:bg-gray-100'
-                            }`}
+                            disabled={cartItem.quantity >= stock}
+                            className="px-3 py-2 text-white hover:bg-white/10 transition-colors disabled:opacity-50"
                           >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3">
-                              <path d="M12 5v14M5 12h14" />
-                            </svg><span className="text-xs">Add to Wishlist</span></button>
-                        );
-                      }
-                    })()}
+                            +
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!isOutOfStock) {
+                            addToCart(product, 1);
+                            toast.success(`${product.name} added!`);
+                          }
+                        }}
+                        disabled={isOutOfStock}
+                        className="px-6 py-3 rounded-md font-medium text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{
+                          width: '70%',
+                          background: isOutOfStock
+                            ? 'rgba(100, 100, 100, 0.5)'
+                            : 'linear-gradient(90deg, rgba(70, 113, 209, 0.4) 0%, rgba(62, 102, 190, 0.4) 50%, rgba(34, 55, 102, 0.4) 100%)',
+                          border: '1px solid #88AAE4'
+                        }}
+                      >
+                        {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+                      </button>
+                      
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!isLoggedIn) {
+                            toast.error('Please login to manage your wishlist');
+                            return;
+                          }
+                          const wasInWishlist = isInWishlist(product._id);
+                          toggle(product);
+                          toast.success(wasInWishlist ? 'Removed from wishlist' : 'Added to wishlist!');
+                        }}
+                        className="px-4 py-3 text-white hover:text-red-500 transition-colors"
+                      >
+                        <svg
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill={isInWishlist(product._id) ? 'currentColor' : 'none'}
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex flex-col">
-                    <span className="text-base font-bold text-gray-100">${product.price}</span>
-                  </div>
-                </div>
-
-                {/* Wishlist Button */}
-                <div
-                  className="flex text-white items-center space-x-2 cursor-pointer hover:text-red-500 transition-colors"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (!isLoggedIn) {
-                      toast.error('Please login to manage your wishlist');
-                      return;
-                    }
-                    const wasInWishlist = isInWishlist(product._id);
-                    toggle(product);
-                    toast.success(wasInWishlist ? 'Removed from wishlist' : 'Added to wishlist!');
-                  }}
-                >
-                  <span className="text-sm text-gray-100 font-medium">Wishlist</span>
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill={isInWishlist(product._id) ? 'currentColor' : 'none'}
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                  </svg>
-                </div>
-              </div>
+                );
+              })()
             )}
           </div>
         </div>
@@ -2329,6 +2623,13 @@ return (
 };
 
 export default Menu;
+
+
+
+
+
+
+
 
 
 

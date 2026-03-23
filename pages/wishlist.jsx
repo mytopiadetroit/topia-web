@@ -130,6 +130,8 @@ export default function WishlistPage() {
         return isSameProduct && i.selectedVariant?._id === selectedItem._id;
       } else if (product.flavors) {
         return isSameProduct && i.selectedFlavor?._id === selectedItem._id;
+      } else if (product.strains) {
+        return isSameProduct && i.selectedStrain?._id === selectedItem._id;
       }
       return false;
     });
@@ -148,6 +150,9 @@ export default function WishlistPage() {
       toast.success(`${product.name} (${selectedItem.size.value}${selectedItem.size.unit}) added!`);
     } else if (product.flavors) {
       addToCart({ ...product, selectedFlavor: selectedItem }, quantity);
+      toast.success(`${product.name} (${selectedItem.name}) added!`);
+    } else if (product.strains) {
+      addToCart({ ...product, selectedStrain: selectedItem }, quantity);
       toast.success(`${product.name} (${selectedItem.name}) added!`);
     }
     
@@ -348,6 +353,8 @@ export default function WishlistPage() {
               const showDriedLayout = isDried && product.hasVariants && product.variants && product.variants.length > 0;
               // Show EDIBLES layout if product has active flavors (regardless of category)
               const showEdiblesLayout = product.flavors && product.flavors.length > 0 && product.flavors.some(f => f.isActive);
+              // Show STRAINS layout if product has active strains
+              const showStrainsLayout = product.strains && product.strains.length > 0 && product.strains.some(s => s.isActive);
 
               // DRIED Product Layout - Menu Style with Dropdown
               if (showDriedLayout) {
@@ -484,9 +491,9 @@ export default function WishlistPage() {
                                       className="flex-1 bg-transparent border border-white/30 rounded-md px-3 py-2 text-white text-sm focus:outline-none focus:border-cyan-400"
                                       style={{ minWidth: '120px' }}
                                     >
-                                      {options.map((item) => {
+                                      <option value="" disabled style={{ backgroundColor: 'rgba(20, 30, 50, 0.95)', color: '#888' }}>Select Size</option>{options.map((item) => {
                                         const stock = Number(item.stock || 0);
-                                        const label = `${item.size.value}${item.size.unit} - $${item.price}${stock <= 0 ? ' (Out of Stock)' : ''}`;
+                                        const label = `${item.size.value}${item.size.unit}${stock <= 0 ? ' (Out of Stock)' : ''}`;
                                         return (
                                           <option key={item._id} value={item._id} disabled={stock <= 0} style={{ backgroundColor: 'rgba(20, 30, 50, 0.95)', color: 'white' }}>
                                             {label}
@@ -521,10 +528,12 @@ export default function WishlistPage() {
                                       </button>
                                     </div>
                                     
-                                    {/* Price Display */}
-                                    <div className="text-2xl font-bold text-white">
-                                      ${currentPrice}
-                                    </div>
+                                    {/* Price Display - Only show when item is selected */}
+                                    {selectedItem && currentPrice > 0 && (
+                                      <div className="text-2xl font-bold text-white">
+                                        ${currentPrice}
+                                      </div>
+                                    )}
                                   </div>
                                   
                                   {/* Add to Cart + Remove from Wishlist */}
@@ -703,9 +712,7 @@ export default function WishlistPage() {
                                       className="flex-1 bg-transparent border border-white/30 rounded-md px-3 py-2 text-white text-sm focus:outline-none focus:border-cyan-400"
                                       style={{ minWidth: '120px' }}
                                     >
-                                      {options.map((item) => {
-                                        const stock = Number(item.stock || 0);
-                                        const label = `${item.name} - $${item.price}${stock <= 0 ? ' (Out of Stock)' : ''}`;
+                                      <option value="" disabled style={{ backgroundColor: 'rgba(20, 30, 50, 0.95)', color: '#888' }}>Select Flavor</option>{options.map((item) => { const stock = Number(item.stock || 0); const label = `${item.name}${stock <= 0 ? ' (Out of Stock)' : ''}`;
                                         return (
                                           <option key={item._id} value={item._id} disabled={stock <= 0} style={{ backgroundColor: 'rgba(20, 30, 50, 0.95)', color: 'white' }}>
                                             {label}
@@ -740,10 +747,234 @@ export default function WishlistPage() {
                                       </button>
                                     </div>
                                     
-                                    {/* Price Display */}
-                                    <div className="text-2xl font-bold text-white">
-                                      ${currentPrice}
+                                    {/* Price Display - Only show when item is selected */}
+                                    {selectedItem && currentPrice > 0 && (
+                                      <div className="text-2xl font-bold text-white">
+                                        ${currentPrice}
+                                      </div>
+                                    )}
+                                  </div>
+                                  
+                                  {/* Add to Cart + Remove from Wishlist */}
+                                  <div className="flex items-center gap-3 mt-1">
+                                    <button
+                                      onClick={(e) => handleAddToCartNew(product, e)}
+                                      disabled={isOutOfStock}
+                                      className="px-6 py-3 rounded-md font-medium text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                      style={{ 
+                                        width: '70%',
+                                        background: isOutOfStock 
+                                          ? 'rgba(100, 100, 100, 0.5)'
+                                          : 'linear-gradient(90deg, rgba(70, 113, 209, 0.4) 0%, rgba(62, 102, 190, 0.4) 50%, rgba(34, 55, 102, 0.4) 100%)',
+                                        border: '1px solid #88AAE4',
+                                      }}
+                                    >
+                                      {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+                                    </button>
+                                    
+                                    {/* Remove from Wishlist Button */}
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        remove(product._id);
+                                        toast.success('Removed from wishlist');
+                                      }}
+                                      className="px-4 py-3 text-white hover:text-red-500 transition-colors"
+                                    >
+                                      <Heart className="w-6 h-6" fill="currentColor" />
+                                    </button>
+                                  </div>
+                                </div>
+                              );
+                            })()}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
+              // STRAINS Product Layout - Menu Style with Dropdown
+              if (showStrainsLayout) {
+                // Initialize selection for this product
+                initializeProductSelection(product);
+                
+                return (
+                  <div key={product._id} className="w-full">
+                    <div
+                      className="relative rounded-3xl overflow-hidden w-full max-w-4xl mx-auto cursor-pointer"
+                      style={{
+                        background: 'rgba(20, 20, 20, 0.4)',
+                        border: '1.2px solid rgba(134, 209, 248, 0.2)'
+                      }}
+                      onClick={() => router.push(`/productdetails?id=${product._id}`)}
+                    >
+                      <div className="flex flex-col lg:flex-row">
+                        {/* Left side - Product Image */}
+                        <div className="w-full lg:w-2/5 h-64 lg:h-80 bg-gray-800 relative">
+                          {product.images && product.images.length > 0 ? (
+                            <img
+                              src={product.images[0].startsWith('http') ? product.images[0] : `http://localhost:5000${product.images[0]}`}
+                              alt={product.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gray-200"></div>
+                          )}
+                          
+                          {/* Stock Status Overlay */}
+                          {(() => {
+                            const activeStrains = product.strains.filter(s => s.isActive);
+                            const allStrainsOutOfStock = activeStrains.length > 0 && activeStrains.every(s => Number(s.stock || 0) <= 0);
+                            if (allStrainsOutOfStock) {
+                              return (
+                                <div className="absolute inset-0 flex items-center justify-center z-10">
+                                  <div className="text-2xl font-bold text-red-500 rotate-12 select-none text-center bg-white/90 px-4 py-2 rounded-lg">
+                                    Out of<br />Stock
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return null;
+                          })()}
+                        </div>
+                        
+                        {/* Right side - Product Details */}
+                        <div className="w-full md:w-3/5 p-6">
+                          <h3 className="text-2xl font-bold text-gray-100 mb-2">{product.name}</h3>
+                          
+                          {/* Intensity Bar */}
+                          {product.intensity && (
+                            <div className="mb-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity - {product.intensity}/10</span>
+                                <span className="text-sm font-bold text-white">10/10</span>
+                              </div>
+                              <div className="w-full bg-gray-700/30 rounded-full h-2">
+                                <div 
+                                  className="h-2 rounded-full transition-all duration-300"
+                                  style={{ 
+                                    width: `${(product.intensity / 10) * 100}%`,
+                                    background: 'linear-gradient(90deg, #1D5BC7 0%, #86D1F8 82%, #97E2F8 94.12%, #CAF7FF 100%)',
+                                    boxShadow: '0px 1px 17px 0px #86D1F8'
+                                  }}
+                                ></div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Transparent Boxes for Weight/Pieces */}
+                          {(product.showTotalWeight || product.showTotalPieces || product.showPerPiece) && (
+                            <div className="flex flex-nowrap gap-2 mb-4">
+                              {product.showTotalWeight && product.totalWeight && (
+                                <div className="flex-1 min-w-[90px] border border-white/20 rounded-lg px-4 py-1.5 text-center">
+                                  <div className="text-[10px] text-gray-300 uppercase tracking-wide mb-0.5">Total Weight</div>
+                                  <div className="text-sm font-bold text-white">{product.totalWeight}</div>
+                                </div>
+                              )}
+                              {product.showTotalPieces && product.totalPieces && (
+                                <div className="flex-1 min-w-[120px] border border-white/20 rounded-lg px-4 py-3 text-center">
+                                  <div className="text-[10px] text-gray-300 uppercase tracking-wide mb-0.5">Pieces</div>
+                                  <div className="text-sm font-bold text-white">{product.totalPieces}</div>
+                                </div>
+                              )}
+                              {product.showPerPiece && product.perPiece && (
+                                <div className="flex-1 min-w-[120px] border border-white/20 rounded-lg px-4 py-3 text-center">
+                                  <div className="text-[10px] text-gray-300 uppercase tracking-wide mb-0.5">Per Piece</div>
+                                  <div className="text-sm font-bold text-white">{product.perPiece}</div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          
+                          {/* Review Tags */}
+                          <div className="flex flex-wrap gap-2 mb-4">
+                            {(product.reviewTags || []).slice(0, 4).map((tagId, idx) => {
+                              const tagName = getTagName(tagId);
+                              if (!tagName) return null;
+                              const labelWithoutEmoji = tagName.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
+                              return (
+                                <span 
+                                  key={tagId}
+                                  className="px-3 py-1.5 text-sm rounded-full font-medium bg-white/5 backdrop-blur-sm border border-blue-400/40 hover:border-2 hover:border-blue-400 transition-all text-white flex items-center gap-2"
+                                >
+                                  <img src="/images/dots.png" alt="" className="w-4 h-4" />
+                                  {labelWithoutEmoji}
+                                </span>
+                              );
+                            })}
+                          </div>
+                          
+                          {/* Dropdown + Quantity + Add to Cart */}
+                          <div className="mt-4">
+                            {(() => {
+                              const selection = selectedOptions[product._id];
+                              const selectedItem = selection?.selectedItem;
+                              const quantity = selection?.quantity || 1;
+                              const currentPrice = selectedItem?.price || product.price;
+                              const currentStock = Number(selectedItem?.stock || 0);
+                              const isOutOfStock = currentStock <= 0 || quantity >= currentStock;
+                              const options = product.strains.filter(s => s.isActive);
+                              
+                              return (
+                                <div className="flex flex-col gap-3">
+                                  {/* Dropdown + Quantity + Price */}
+                                  <div className="flex items-center gap-3">
+                                    <select
+                                      value={selectedItem?._id || ''}
+                                      onChange={(e) => {
+                                        const item = options.find(opt => opt._id === e.target.value);
+                                        if (item) handleOptionChange(product._id, item);
+                                      }}
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="flex-1 bg-transparent border border-white/30 rounded-md px-3 py-2 text-white text-sm focus:outline-none focus:border-cyan-400"
+                                      style={{ minWidth: '120px' }}
+                                    >
+                                      <option value="" disabled style={{ backgroundColor: 'rgba(20, 30, 50, 0.95)', color: '#888' }}>Select Strain</option>
+                                      {options.map((item) => {
+                                        const stock = Number(item.stock || 0);
+                                        const label = `${item.name}${stock <= 0 ? ' (Out of Stock)' : ''}`;
+                                        return (
+                                          <option key={item._id} value={item._id} disabled={stock <= 0} style={{ backgroundColor: 'rgba(20, 30, 50, 0.95)', color: 'white' }}>
+                                            {label}
+                                          </option>
+                                        );
+                                      })}
+                                    </select>
+                                    
+                                    {/* Quantity Controls */}
+                                    <div className="flex items-center border border-white/30 rounded-md overflow-hidden">
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleQuantityChangeNew(product._id, -1);
+                                        }}
+                                        className="px-3 py-2 text-white hover:bg-white/10 transition-colors"
+                                      >
+                                        -
+                                      </button>
+                                      <span className="px-4 py-2 text-white font-medium min-w-[40px] text-center">
+                                        {quantity}
+                                      </span>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleQuantityChangeNew(product._id, 1);
+                                        }}
+                                        disabled={quantity >= currentStock}
+                                        className="px-3 py-2 text-white hover:bg-white/10 transition-colors disabled:opacity-50"
+                                      >
+                                        +
+                                      </button>
                                     </div>
+                                    
+                                    {/* Price Display - Only show when item is selected */}
+                                    {selectedItem && currentPrice > 0 && (
+                                      <div className="text-2xl font-bold text-white">
+                                        ${currentPrice}
+                                      </div>
+                                    )}
                                   </div>
                                   
                                   {/* Add to Cart + Remove from Wishlist */}
