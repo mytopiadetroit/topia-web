@@ -369,7 +369,7 @@ const GoogleReviews = () => {
         {/* View All Reviews Button */}
         <div className="text-center mt-8 md:mt-12">
           <a
-            href="https://www.google.com/maps/place/SHROOMTOPIA+DETROIT/@42.4455298,-83.1537416,17z"
+            href="https://www.google.com/maps/search/?api=1&query=SHROOMTOPIA+DETROIT&query_place_id=ChIJi8kMdhvPJIgRMjwSMeT0pCw"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block px-6 md:px-8 py-3 rounded-full text-xs md:text-sm font-semibold uppercase tracking-wider transition-all duration-300 transform hover:scale-105"
