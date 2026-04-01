@@ -272,7 +272,7 @@ export default function Home() {
 <GoogleReviews />
 
 {/* Yelp Reviews Button Section */}
-<section className="py-8 px-4" style={{ background: 'transparent' }}>
+{/* <section className="py-8 px-4" style={{ background: 'transparent' }}>
   <div className="max-w-7xl mx-auto text-center">
     <button 
       onClick={() => window.open('https://m.yelp.com/biz/shroomtopia-detroit', '_blank')}
@@ -281,7 +281,7 @@ export default function Home() {
       View All Reviews on Yelp
     </button>
   </div>
-</section>
+</section> */}
 
      {/* Content Section - DISCOVER SHROOMTOPIA - COMMENTED OUT */}
      {/*

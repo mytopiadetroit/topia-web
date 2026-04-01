@@ -410,10 +410,10 @@ export default function ProductDetails() {
 
         {/* Product Section */}
         <div className="flex flex-col md:flex-row gap-8">
-          {/* Left Column - Images */}
-          <div className="md:w-1/2">
+          {/* Left Column - Images - HIDDEN ON MOBILE */}
+          <div className="hidden md:block md:w-1/2">
             {/* Main Image with Carousel */}
-            <div className="bg-transparent rounded-2xl overflow-hidden mb-4 border-2 border-gray-800/40 shadow-lg p-4">
+            <div className="bg-transparent rounded-2xl overflow-hidden mb-4 border-2 border-gray-800/40 shadow-lg md:p-4">
               <div className="bg-transparent rounded-xl overflow-hidden relative group">
                 <img
                   src={product.images && product.images.length > 0
@@ -488,6 +488,503 @@ export default function ProductDetails() {
 
           {/* Right Column - Product Info */}
           <div className="md:w-1/2">
+            {/* Mobile Card Design - Same as menu.jsx with Image on Top */}
+            <div className="md:hidden">
+              <div
+                className="relative rounded-3xl overflow-hidden"
+                style={{
+                  background: 'rgba(20, 20, 20, 0.4)',
+                  border: '1.2px solid rgba(134, 209, 248, 0.2)'
+                }}
+              >
+                {/* Product Image - Top of Card */}
+                <div className="w-full h-64 bg-gray-800 relative">
+                  {product.images && product.images.length > 0 ? (
+                    <>
+                      <img
+                        src={product.images[selectedImageIndex].startsWith('http') 
+                          ? product.images[selectedImageIndex] 
+                          : `http://localhost:5000${product.images[selectedImageIndex]}`}
+                        alt={`${product.name} - Image ${selectedImageIndex + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      
+                      {/* Carousel Navigation - Only if multiple images */}
+                      {product.images.length > 1 && (
+                        <>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedImageIndex(prev => 
+                                prev === 0 ? product.images.length - 1 : prev - 1
+                              );
+                            }}
+                            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg"
+                          >
+                            <svg className="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                          </button>
+                          
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedImageIndex(prev => 
+                                prev === product.images.length - 1 ? 0 : prev + 1
+                              );
+                            }}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg"
+                          >
+                            <svg className="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </button>
+
+                          {/* Image Counter */}
+                          <div className="absolute bottom-2 right-2 bg-black/60 text-white px-2 py-1 rounded-full text-xs">
+                            {selectedImageIndex + 1} / {product.images.length}
+                          </div>
+                        </>
+                      )}
+
+                      {/* Allergen Icons */}
+                      {product.allergenInfo?.hasAllergens && product.allergenInfo.allergenImages?.length > 0 && (
+                        <div className="absolute bottom-2 left-2 flex flex-wrap gap-1 z-20">
+                          {product.allergenInfo.allergenImages.map((img, idx) => (
+                            <img
+                              key={idx}
+                              src={img.startsWith('http') ? img : `http://localhost:5000${img}`}
+                              alt="Allergen"
+                              className="w-6 h-6 object-cover rounded-full border border-white shadow-sm"
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="w-full h-full bg-gray-700 flex items-center justify-center">
+                      <span className="text-gray-400">No image</span>
+                    </div>
+                  )}
+
+                  {/* Stock Status Overlay */}
+                  {(() => {
+                    if (product.hasVariants && product.variants && product.variants.length > 0) {
+                      const allVariantsOutOfStock = product.variants.every(variant => {
+                        const variantStock = Number(variant.stock || 0);
+                        return variantStock <= 0;
+                      });
+
+                      if (allVariantsOutOfStock) {
+                        return (
+                          <div className="absolute inset-0 flex items-center justify-center z-10">
+                            <div className="text-2xl font-bold text-red-500 rotate-12 select-none text-center bg-white/90 px-4 py-2 rounded-lg">
+                              Out of<br />Stock
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }
+
+                    if (product.flavors && product.flavors.length > 0) {
+                      const allFlavorsOutOfStock = product.flavors.every(flavor => {
+                        const flavorStock = Number(flavor.stock || 0);
+                        return flavorStock <= 0;
+                      });
+
+                      if (allFlavorsOutOfStock) {
+                        return (
+                          <div className="absolute inset-0 flex items-center justify-center z-10">
+                            <div className="text-2xl font-bold text-red-500 rotate-12 select-none text-center bg-white/90 px-4 py-2 rounded-lg">
+                              Out of<br />Stock
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }
+
+                    const stock = Number(product.stock || 0);
+                    const isOutOfStock = !product.hasStock || stock <= 0;
+
+                    if (isOutOfStock) {
+                      return (
+                        <div className="absolute inset-0 flex items-center justify-center z-10">
+                          <div className="text-2xl font-bold text-red-500 rotate-12 select-none text-center bg-white/90 px-4 py-2 rounded-lg">
+                            Out of<br />Stock
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
+                </div>
+
+                {/* Product Details - Below Image */}
+                <div className="p-5">
+                <h1 className="text-2xl font-bold text-white mb-3">{product.name}</h1>
+                
+                {/* Intensity Bar */}
+                {product.intensity && (
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-gray-300 uppercase tracking-wide">Intensity</span>
+                      <span className="text-sm font-bold text-white">{product.intensity}/10</span>
+                    </div>
+                    <div className="w-full bg-gray-700/30 rounded-full h-2">
+                      <div
+                        className="h-2 rounded-full transition-all duration-300"
+                        style={{
+                          width: `${(product.intensity / 10) * 100}%`,
+                          background: 'linear-gradient(90deg, #1D5BC7 0%, #86D1F8 82%, #97E2F8 94.12%, #CAF7FF 100%)',
+                          boxShadow: '0px 1px 17px 0px #86D1F8'
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Total Weight, Pieces, Per Piece */}
+                {(product.showTotalWeight || product.showTotalPieces || product.showPerPiece) && (
+                  <div className="flex flex-nowrap gap-2 mb-4">
+                    {product.showTotalWeight && product.totalWeight && (
+                      <div className="flex-1 min-w-[90px] border border-white/20 rounded-lg px-4 py-1.5 text-center">
+                        <div className="text-[10px] text-gray-300 uppercase tracking-wide mb-0.5">Total Weight</div>
+                        <div className="text-sm font-bold text-white">{product.totalWeight}</div>
+                      </div>
+                    )}
+                    {product.showTotalPieces && product.totalPieces && (
+                      <div className="flex-1 min-w-[120px] border border-white/20 rounded-lg px-4 py-1.5 text-center">
+                        <div className="text-[10px] text-gray-300 uppercase tracking-wide mb-0.5">Pieces</div>
+                        <div className="text-sm font-bold text-white">{product.totalPieces}</div>
+                      </div>
+                    )}
+                    {product.showPerPiece && product.perPiece && (
+                      <div className="flex-1 min-w-[120px] border border-white/20 rounded-lg px-4 py-1.5 text-center">
+                        <div className="text-[10px] text-gray-300 uppercase tracking-wide mb-0.5">Per Piece</div>
+                        <div className="text-sm font-bold text-white">{product.perPiece}</div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Review Tags */}
+                {product.reviewTags && product.reviewTags.length > 0 && (
+                  <div className="mb-4">
+                    <div className="flex flex-wrap gap-2">
+                      {product.reviewTags.map((tag, idx) => {
+                        const label = tag.label || '';
+                        const match = label.match(/^[\p{Emoji}\p{Extended_Pictographic}]/u);
+                        const text = label.replace(/^[\p{Emoji}\p{Extended_Pictographic}]\s*/u, '');
+                        const labelWithoutEmoji = label.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
+                        const tooltipId = `mobile-${product._id}-${tag._id}`;
+                        const isTooltipOpen = openTooltipId === tooltipId;
+
+                        return (
+                          <div key={tag._id} className="relative group">
+                            <span
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setOpenTooltipId(isTooltipOpen ? null : tooltipId);
+                              }}
+                              className="px-3 py-1.5 text-sm rounded-full font-medium bg-white/5 backdrop-blur-sm border border-blue-400/40 hover:border-2 hover:border-blue-400 transition-all text-white flex items-center gap-1 cursor-pointer"
+                            >
+                              <img src="/images/dots.png" alt="" className="w-4 h-4" />
+                              {text}
+                            </span>
+                            {tag.tooltip && (
+                              <div className={`absolute left-0 top-full mt-2 transition-opacity duration-200 z-[9999] ${isTooltipOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 group-hover:opacity-100 pointer-events-none'}`}>
+                                <div 
+                                  className="relative rounded-xl shadow-2xl pt-9 px-5 pb-5" 
+                                  style={{ 
+                                    minWidth: '240px',
+                                    maxWidth: '280px',
+                                    minHeight: '120px',
+                                    backgroundImage: 'url(/rightone.png)',
+                                    backgroundSize: '100% 100%',
+                                    backgroundRepeat: 'no-repeat'
+                                  }}
+                                >
+                                  <h4 className="text-white font-bold text-base mb-2">{labelWithoutEmoji}</h4>
+                                  <p className="text-white/90 text-sm leading-relaxed">{tag.tooltip}</p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Size Variant Selection + Quantity - Side by Side like Menu */}
+                {product.hasVariants && product.variants && product.variants.length > 0 && (
+                  <div className="flex gap-3 mb-4">
+                    <div className="flex-1">
+                      <select
+                        value={selectedVariant?._id || ''}
+                        onChange={(e) => {
+                          const variant = product.variants.find(v => v._id === e.target.value);
+                          if (variant) {
+                            setSelectedVariant(variant);
+                            setSelectedFlavor(null);
+                            setSelectedStrain(null);
+                            setQuantity(1);
+                          }
+                        }}
+                        className="w-full bg-transparent border border-white/30 rounded-md px-3 py-3 text-white text-sm focus:outline-none focus:border-cyan-400"
+                      >
+                        <option value="" disabled style={{ backgroundColor: 'rgba(20, 30, 50, 0.95)', color: '#888' }}>
+                          Select Size
+                        </option>
+                        {product.variants.map((variant) => {
+                          const stock = Number(variant.stock || 0);
+                          const label = `${variant.size.value}${variant.size.unit === 'grams' ? 'G' : variant.size.unit === 'pieces' ? ' pcs' : variant.size.unit.toUpperCase()}${stock <= 0 ? ' (Out of Stock)' : ''}`;
+                          return (
+                            <option 
+                              key={variant._id} 
+                              value={variant._id} 
+                              disabled={stock <= 0} 
+                              style={{ backgroundColor: 'rgba(20, 30, 50, 0.95)', color: 'white' }}
+                            >
+                              {label}
+                            </option>
+                          );
+                        })}
+                      </select>
+                    </div>
+                    
+                    {/* Quantity Controls */}
+                    <div className="flex items-center border border-white/30 rounded-md overflow-hidden">
+                      <button
+                        onClick={decreaseQuantity}
+                        disabled={quantity <= 1}
+                        className="px-3 py-3 text-white hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        -
+                      </button>
+                      <span className="px-3 py-3 text-white font-medium min-w-[40px] text-center">{quantity}</span>
+                      <button
+                        onClick={increaseQuantity}
+                        disabled={
+                          getAvailableStock() <= 0 ||
+                          quantity >= getAvailableStock() ||
+                          !selectedVariant
+                        }
+                        className="px-3 py-3 text-white hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Flavor Selection + Quantity - Side by Side */}
+                {product.flavors && product.flavors.length > 0 && (
+                  <div className="flex gap-3 mb-4">
+                    <div className="flex-1">
+                      <select
+                        value={selectedFlavor?._id || ''}
+                        onChange={(e) => {
+                          const flavor = product.flavors.find(f => f._id === e.target.value);
+                          if (flavor) {
+                            setSelectedFlavor({
+                              ...flavor,
+                              price: Number(flavor.price)
+                            });
+                            setSelectedStrain(null);
+                            setQuantity(1);
+                          }
+                        }}
+                        className="w-full bg-transparent border border-white/30 rounded-md px-3 py-3 text-white text-sm focus:outline-none focus:border-cyan-400"
+                      >
+                        <option value="" disabled style={{ backgroundColor: 'rgba(20, 30, 50, 0.95)', color: '#888' }}>
+                          Select Flavor
+                        </option>
+                        {product.flavors.map((flavor) => {
+                          const stock = Number(flavor.stock || 0);
+                          const label = `${flavor.name}${stock <= 0 ? ' (Out of Stock)' : ''}`;
+                          return (
+                            <option 
+                              key={flavor._id} 
+                              value={flavor._id} 
+                              disabled={stock <= 0} 
+                              style={{ backgroundColor: 'rgba(20, 30, 50, 0.95)', color: 'white' }}
+                            >
+                              {label}
+                            </option>
+                          );
+                        })}
+                      </select>
+                    </div>
+                    
+                    {/* Quantity Controls */}
+                    <div className="flex items-center border border-white/30 rounded-md overflow-hidden">
+                      <button
+                        onClick={decreaseQuantity}
+                        disabled={quantity <= 1}
+                        className="px-3 py-3 text-white hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        -
+                      </button>
+                      <span className="px-3 py-3 text-white font-medium min-w-[40px] text-center">{quantity}</span>
+                      <button
+                        onClick={increaseQuantity}
+                        disabled={
+                          getAvailableStock() <= 0 ||
+                          quantity >= getAvailableStock() ||
+                          !selectedFlavor
+                        }
+                        className="px-3 py-3 text-white hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Strain Selection + Quantity - Side by Side */}
+                {product.strains && product.strains.length > 0 && (
+                  <div className="flex gap-3 mb-4">
+                    <div className="flex-1">
+                      <select
+                        value={selectedStrain?._id || ''}
+                        onChange={(e) => {
+                          const strain = product.strains.find(s => s._id === e.target.value);
+                          if (strain) {
+                            setSelectedStrain({
+                              ...strain,
+                              price: Number(strain.price)
+                            });
+                            setSelectedFlavor(null);
+                            setQuantity(1);
+                          }
+                        }}
+                        className="w-full bg-transparent border border-white/30 rounded-md px-3 py-3 text-white text-sm focus:outline-none focus:border-cyan-400"
+                      >
+                        <option value="" disabled style={{ backgroundColor: 'rgba(20, 30, 50, 0.95)', color: '#888' }}>
+                          Select Strain
+                        </option>
+                        {product.strains.filter(strain => strain.isActive !== false).map((strain) => {
+                          const stock = Number(strain.stock || 0);
+                          const label = `🧬 ${strain.name}${stock <= 0 ? ' (Out of Stock)' : ''}`;
+                          return (
+                            <option 
+                              key={strain._id} 
+                              value={strain._id} 
+                              disabled={stock <= 0} 
+                              style={{ backgroundColor: 'rgba(20, 30, 50, 0.95)', color: 'white' }}
+                            >
+                              {label}
+                            </option>
+                          );
+                        })}
+                      </select>
+                    </div>
+                    
+                    {/* Quantity Controls */}
+                    <div className="flex items-center border border-white/30 rounded-md overflow-hidden">
+                      <button
+                        onClick={decreaseQuantity}
+                        disabled={quantity <= 1}
+                        className="px-3 py-3 text-white hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        -
+                      </button>
+                      <span className="px-3 py-3 text-white font-medium min-w-[40px] text-center">{quantity}</span>
+                      <button
+                        onClick={increaseQuantity}
+                        disabled={
+                          getAvailableStock() <= 0 ||
+                          quantity >= getAvailableStock() ||
+                          !selectedStrain
+                        }
+                        className="px-3 py-3 text-white hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Price - Mobile */}
+                {(() => {
+                  const needsVariant = product.hasVariants && product.variants && product.variants.length > 0;
+                  const needsFlavor = product.flavors && product.flavors.length > 0;
+                  const needsStrain = product.strains && product.strains.length > 0;
+                  
+                  const hasRequiredSelections = 
+                    (!needsVariant || selectedVariant) &&
+                    (!needsFlavor || selectedFlavor) &&
+                    (!needsStrain || selectedStrain);
+                  
+                  const shouldShowPrice = hasRequiredSelections || (!needsVariant && !needsFlavor && !needsStrain);
+                  
+                  if (!shouldShowPrice) return null;
+                  
+                  return (
+                    <div className="mb-4">
+                      <div className="flex items-baseline gap-2">
+                        <p className="text-2xl font-bold text-gray-200">$ {displayPrice}</p>
+                      </div>
+                      {product?.allergenInfo?.tooltipText && (
+                        <div className="text-xs text-gray-300 mt-1">
+                          Allergen: {product.allergenInfo.tooltipText}
+                        </div>
+                      )}
+                      {getAvailableStock() <= 0 ? (
+                        <p className="mt-2 text-sm text-red-400">Out of stock</p>
+                      ) : getAvailableStock() < 5 ? (
+                        <p className="mt-2 text-sm text-gray-400">Only {getAvailableStock()} left</p>
+                      ) : null}
+                    </div>
+                  );
+                })()}
+
+                {/* Add to Cart Button - Mobile */}
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handleAddToCart}
+                    disabled={
+                      getAvailableStock() <= 0 ||
+                      (product?.flavors && product.flavors.length > 0 && !selectedFlavor) ||
+                      (product?.strains && product.strains.length > 0 && !selectedStrain) ||
+                      (product?.hasVariants && product.variants && product.variants.length > 0 && !selectedVariant)
+                    }
+                    className="px-6 py-3 rounded-md font-medium text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed flex-1"
+                    style={{ 
+                      background: (getAvailableStock() <= 0 ||
+                        (product?.flavors && product.flavors.length > 0 && !selectedFlavor) ||
+                        (product?.strains && product.strains.length > 0 && !selectedStrain) ||
+                        (product?.hasVariants && product.variants && product.variants.length > 0 && !selectedVariant))
+                        ? 'rgba(100, 100, 100, 0.5)'
+                        : 'linear-gradient(90deg, rgba(70, 113, 209, 0.4) 0%, rgba(62, 102, 190, 0.4) 50%, rgba(34, 55, 102, 0.4) 100%)',
+                      border: '1px solid #88AAE4',
+                    }}
+                  >
+                    {getAvailableStock() <= 0 
+                      ? 'Out of Stock' 
+                      : (product?.hasVariants && product.variants && product.variants.length > 0 && !selectedVariant)
+                        ? 'Select Size'
+                        : (product?.flavors && product.flavors.length > 0 && !selectedFlavor)
+                          ? 'Select Flavor'
+                          : (product?.strains && product.strains.length > 0 && !selectedStrain)
+                            ? 'Select Strain'
+                            : 'Add to Cart'
+                    }
+                  </button>
+
+                  <button onClick={handleToggleWishlist} className="px-4 py-3 text-white hover:text-red-500 transition-colors">
+                    <Heart className="w-6 h-6" fill={isWishlisted ? 'currentColor' : 'none'} />
+                  </button>
+                </div>
+              </div>
+              </div>
+            </div>
+
+            {/* Desktop Layout - Original */}
+            <div className="hidden md:block">
             <h1 className="text-4xl font-bold text-white mb-4">{product.name}</h1>
             {/* {product?.short_description && <p className="text-gray-300 -mt-3  mb-4">{product.short_description}</p>} */}
             
@@ -589,7 +1086,7 @@ export default function ProductDetails() {
             )}
             {/* Size Variant Selection */}
             {product.hasVariants && product.variants && product.variants.length > 0 && (
-              <div className="mb-6">
+              <div className="mb-6 mt-6">
                 <h3 className="text-sm font-medium text-white mb-3">Select Size</h3>
                 <select
                   value={selectedVariant?._id || ''}
@@ -626,7 +1123,7 @@ export default function ProductDetails() {
             )}
             {/* Flavor Selection */}
             {product.flavors && product.flavors.length > 0 && (
-              <div className="mt-4">
+              <div className="mt-4 mb-6">
                 <h3 className="text-sm text-white font-semibold mb-2">Select Flavor</h3>
                 <select
                   value={selectedFlavor?._id || ''}
@@ -666,7 +1163,7 @@ export default function ProductDetails() {
 
             {/* Strain Selection */}
             {product.strains && product.strains.length > 0 && (
-              <div className="mt-4">
+              <div className="mt-4 mb-6">
                 <h3 className="text-sm text-white font-semibold mb-2">Select Strain</h3>
                 <select
                   value={selectedStrain?._id || ''}
@@ -843,6 +1340,30 @@ export default function ProductDetails() {
                 )}
               </div>
             </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Description Outside Card - Mobile Only */}
+        <div className="md:hidden mt-6 px-4">
+          <h2 className="text-lg text-white font-semibold mb-3">Description</h2>
+          <div className="relative">
+            <div 
+              className={`text-gray-300 mb-4 overflow-hidden transition-all duration-300 ${!showFullDescription && 'max-h-20'}`}
+            >
+              {product.description?.main || 'No description available'}
+              {product.description?.details && (
+                <p className="mt-2">{product.description.details}</p>
+              )}
+            </div>
+            {isDescriptionLong && (
+              <button 
+                onClick={() => setShowFullDescription(!showFullDescription)}
+                className="text-gray-200 underline text-sm font-medium hover:underline focus:outline-none"
+              >
+                {showFullDescription ? 'Show Less' : 'Read More'}
+              </button>
+            )}
           </div>
         </div>
 
